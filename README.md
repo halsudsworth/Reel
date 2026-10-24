@@ -1,4 +1,4 @@
-# R.E.E.L. — Remove Everything Except Line
+# R.E.E.L.: Remove Everything Except Line
 
 Every fishing addon gives you a lure button and a catch log. R.E.E.L. gives you those, plus the thing none of them do: it gets out of the way. Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need.
 

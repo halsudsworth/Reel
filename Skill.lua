@@ -67,11 +67,13 @@ ns.On("UNIT_INVENTORY_CHANGED", function(unit)
     if unit == "player" then gearChecked = 0 end
 end)
 
+-- "Fishing 148/150 +100": base skill, the cap your training allows, and the
+-- bonus from gear and food on top. Only the base counts toward the cap.
 ns.RegisterBarSegment({ key = "skill", label = "Fishing skill", order = 10, text = function()
-    local rank, bonus = ns.FishingSkill()
+    local rank, bonus, maxRank = ns.FishingSkill()
     if not rank then return "Fishing ?" end
-    if bonus > 0 then
-        return string.format("Fishing %d |cff40ff40(+%d)|r", rank, bonus)
-    end
-    return "Fishing " .. rank
+    local t = "Fishing " .. rank
+    if maxRank and maxRank > 0 then t = t .. "/" .. maxRank end
+    if bonus > 0 then t = t .. string.format(" |cff40ff40+%d|r", bonus) end
+    return t
 end })

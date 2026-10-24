@@ -24,6 +24,7 @@ ns.RegisterDefaults({
     bar = true,
     barLocked = false,
     barLayout = "horizontal", -- or "vertical": one item per line
+    barScale = 100,  -- percent
     barPoint = nil,  -- { point, relativePoint, x, y }
     barHidden = {},  -- segment key -> true when turned off
 })
@@ -126,6 +127,7 @@ ns.On("REEL_READY", function()
     text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetJustifyH("LEFT")
     text:SetSpacing(3)
+    bar:SetScale(s.barScale / 100)
     Restore()
     bar:Hide()
     ns.bar = bar
@@ -161,10 +163,15 @@ ns.RegisterPage({
            function(v) s.barLayout = v; ns.UpdateBar() end)
         layout:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 60, -40)
 
+        local scale = W.Slider(panel, "Size", 70, 150, 5, "%",
+            function() return s.barScale end,
+            function(v) s.barScale = v; if ns.bar then ns.bar:SetScale(v / 100) end end)
+        scale:SetPoint("LEFT", layout, "RIGHT", 60, 0)
+
         local header = W.Label(panel, "Show on bar", "GameFontNormal")
         header:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 0, -76)
 
-        controls[1], controls[2], controls[3] = shown, locked, layout
+        controls[1], controls[2], controls[3], controls[4] = shown, locked, layout, scale
         local subOptions = {} -- { checkbox, segment key }
         local Refresh
 

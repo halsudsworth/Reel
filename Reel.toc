@@ -6,6 +6,7 @@
 ## X-Website: https://github.com/halsudsworth/Reel
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1764126
+## X-Wago-ID: b6XyZjKp
 ## IconTexture: Interface\AddOns\Reel\Textures\icon.tga
 ## SavedVariables: ReelDB
 

@@ -1,5 +1,10 @@
 <Bindings>
-    <Binding name="REEL_TOGGLE_CLEAN_VIEW" header="REEL" category="ADDONS">
+    <Binding name="CLICK ReelFishButton:LeftButton" header="REEL" category="ADDONS"/>
+    <Binding name="CLICK ReelLureButton:LeftButton" category="ADDONS"/>
+    <Binding name="REEL_TOGGLE_WINDOW" category="ADDONS">
+        ReelToggleWindow()
+    </Binding>
+    <Binding name="REEL_TOGGLE_CLEAN_VIEW" category="ADDONS">
         ReelToggleCleanView()
     </Binding>
 </Bindings>

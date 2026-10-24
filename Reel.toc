@@ -26,6 +26,7 @@ Casting.lua
 Sound.lua
 Skill.lua
 Lure.lua
+OneKey.lua
 Buffs.lua
 Luremaster.lua
 Camp.lua

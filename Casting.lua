@@ -116,6 +116,11 @@ ns.RegisterPage({
         local speedNote = W.Note(panel, "Longest gap allowed between the two clicks.", ns.CONTENT_WIDTH - 4)
         speedNote:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", 0, -40)
 
-        return Refresh
+        local oneKeyLure = ns.BuildOneKeyOptions(panel, speedNote)
+
+        return function()
+            Refresh()
+            oneKeyLure.Refresh()
+        end
     end,
 })

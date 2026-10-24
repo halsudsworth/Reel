@@ -53,6 +53,8 @@ local function ChosenLure()
     end
 end
 
+ns.ChosenLure = ChosenLure
+
 -- Choices for the Bar page dropdown.
 function ns.LureOptions()
     local list = { { value = "best", text = "Best I have" } }

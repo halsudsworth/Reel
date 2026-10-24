@@ -1,0 +1,33 @@
+## Interface: 16001
+## Title: R.E.E.L.
+## Notes: Remove Everything Except Line. Immersive fishing for WoW Forever: the interface fades, the water stays.
+## Version: @project-version@
+## Author: HalSudsworth
+## X-Website: https://github.com/halsudsworth/Reel
+## X-License: All Rights Reserved
+## SavedVariables: ReelDB
+
+# Framework
+Core.lua
+Widgets.lua
+Window.lua
+Minimap.lua
+Bar.lua
+
+# Features (each registers its own defaults, CVars, bar segments, and page)
+FishData.lua
+Log.lua
+Stats.lua
+Cooking.lua
+Casting.lua
+Sound.lua
+Skill.lua
+Lure.lua
+Buffs.lua
+Luremaster.lua
+Camp.lua
+Derby.lua
+CleanView.lua
+Immersion.lua
+General.lua
+Debug.lua

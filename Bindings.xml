@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="REEL_TOGGLE_CLEAN_VIEW" header="REEL" category="ADDONS">
+        ReelToggleCleanView()
+    </Binding>
+</Bindings>

@@ -1,0 +1,5 @@
+package-as: Reel
+manual-changelog: CHANGELOG.md
+ignore:
+  - README.md
+  - .github

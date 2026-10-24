@@ -192,7 +192,7 @@ ns.RegisterPage({
 
         Header("Hide while fishing")
         Box("Floating names and nameplates", "hideNames")
-        Box("Loot window (auto-loot while fishing)", "fishingAutoLoot",
+        Box("Auto-loot while fishing", "fishingAutoLoot",
             "Catches go straight to your bags and show on the bar.")
         Box("Combat text and error messages", "hideCombatText",
             "Damage numbers and the red \"You can't do that yet\" text. Error text comes back if you enter combat.")

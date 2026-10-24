@@ -5,6 +5,7 @@
 ## Author: HalSudsworth
 ## X-Website: https://github.com/halsudsworth/Reel
 ## X-License: All Rights Reserved
+## IconTexture: Interface\AddOns\Reel\Textures\icon.tga
 ## SavedVariables: ReelDB
 
 # Framework

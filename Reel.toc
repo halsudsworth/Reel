@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: R.E.E.L.
-## Notes: Remove Everything Except Line. Immersive fishing for WoW Forever: the interface fades, the water stays.
+## Notes: A fishing addon.
 ## Version: @project-version@
 ## Author: HalSudsworth
 ## X-Website: https://github.com/halsudsworth/Reel

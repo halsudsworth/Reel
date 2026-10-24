@@ -2,7 +2,7 @@
 
 # R.E.E.L.: A Fishing Addon
 
-Every fishing addon gives you a lure button and a catch log. R.E.E.L. gives you those, plus the thing none of them do: it gets out of the way. Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need. We removed everything. Except your fishing line, you'll want that.
+Every fishing addon gives you a lure button and a catch log. R.E.E.L. gives you those, then clears everything else off your screen. Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need. We removed everything. Except your fishing line, you'll want that.
 
 For World of Warcraft: Forever only.
 

@@ -80,7 +80,14 @@ ns.On("UPDATE_BINDINGS", function()
     if reeling and not InCombatLockdown() then reeling = false; SetReeling(true) end
 end)
 
-ns.On("REEL_CAST", function() SetReeling(true) end)
+-- The cast event can arrive while the Fish key is still held from the press
+-- that cast; switching the binding under a held key could make the release
+-- reel in at once. A bite takes seconds, so wait for the key to come up.
+ns.On("REEL_CAST", function()
+    C_Timer.After(0.5, function()
+        if ns.Channeling() then SetReeling(true) end
+    end)
+end)
 ns.On("UNIT_SPELLCAST_CHANNEL_STOP", function(unit)
     if unit == "player" then SetReeling(false) end
 end)

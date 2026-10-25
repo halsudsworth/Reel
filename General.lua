@@ -23,6 +23,7 @@ local function ApplyPreset(preset)
     local s = ReelDB.settings
     for key, value in pairs(preset.set) do s[key] = value end
     if not s.cleanView then ns.ExitCleanView() end
+    ns.RefreshKeep() -- keepBar/keepLoot may have changed while Clean View is active
     ns.ApplySettings()
     ns.RefreshImmersion()
     ns.UpdateLetterbox()

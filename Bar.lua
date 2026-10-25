@@ -178,7 +178,11 @@ ns.RegisterPage({
 
         local scale = W.Slider(panel, "Size", 70, 150, 5, "%",
             function() return s.barScale end,
-            function(v) s.barScale = v; if ns.bar then ns.bar:SetScale(v / 100) end end)
+            function(v)
+                s.barScale = v
+                -- The bar holds a secure button, so it can't be rescaled in combat.
+                ns.WhenOutOfCombat(function() if ns.bar then ns.bar:SetScale(s.barScale / 100) end end)
+            end)
         scale:SetPoint("LEFT", layout, "RIGHT", 60, 0)
 
         local header = W.Label(panel, "Show on bar", "GameFontNormal")

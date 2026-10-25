@@ -169,7 +169,7 @@ ns.NOTABLE = {
         { id = 19808, name = "Rockhide Strongfish",             note = "A fished mace" },
     } },
     { group = "New in Forever", items = {
-        { id = 251524, name = "Whimsyfin",              note = "Redridge rivers, near the murlocs" },
+        { id = 251524, name = "Whimsyfin",              note = "Redridge rivers, near the murlocs. The Alliance-side Deviate Fish" },
         { id = 285094, name = "Ravaged Fishing Pole",   note = "Source still unknown" },
     } },
 }

@@ -99,7 +99,7 @@ end
 local function View()
     wipe(charOf)
     local scope = Scope()
-    if scope ~= "all" then return ReelDB.chars[scope] end
+    if scope ~= "all" then return ns.InitData(ReelDB.chars[scope]) end
     local v = { zones = {}, fish = {}, sessions = {}, records = {} }
     for key, d in pairs(ReelDB.chars) do
         ns.InitData(d) -- an older character's table may lack a field
@@ -521,7 +521,7 @@ function recordsTab.Rows(view)
         end
     end
     for _, s in ipairs(view.sessions) do
-        if s.catches > bestSession then bestSession = s.catches end
+        if (s.catches or 0) > bestSession then bestSession = s.catches end
     end
     local complete = {} -- zones where every fish in FishData has been caught there
     for zone, want in pairs(ns.ZoneFish()) do

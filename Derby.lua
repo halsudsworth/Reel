@@ -34,11 +34,13 @@ end
 
 -- Lifetime derby coins, per character: every rise in the coin count is
 -- "earned", every fall is "spent". The count the last time we looked is kept
--- so a relog doesn't count the coins you already had.
+-- so a relog doesn't count the coins you already had. Bank included, so
+-- moving coins to the bank isn't "spent". Only runs from bag events, never
+-- at login, where an empty bag cache would read as spending everything.
 local function TrackCoins()
     local data = ns.Data()
     if not data then return end
-    local count = GetItemCountCompat(COIN)
+    local count = GetItemCountCompat(COIN, true)
     local derby = data.derby
     if not derby then
         derby = { earned = 0, spent = 0, seen = count }
@@ -55,7 +57,6 @@ local function TrackCoins()
     end
 end
 
-ns.On("REEL_READY", TrackCoins)
 ns.On("BAG_UPDATE_DELAYED", TrackCoins)
 
 -- Combined across characters when the Records tab shows all of them.

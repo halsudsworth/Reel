@@ -265,7 +265,10 @@ end)
 ns.On("PLAYER_REGEN_ENABLED", function()
     local list = pendingOutOfCombat
     pendingOutOfCombat = {}
-    for _, fn in ipairs(list) do fn() end
+    for _, fn in ipairs(list) do -- one failure must not skip the rest
+        local ok, err = pcall(fn)
+        if not ok then geterrorhandler()(err) end
+    end
 end)
 
 -- Startup -------------------------------------------------------------------
@@ -290,6 +293,16 @@ ns.On("PLAYER_LOGIN", function()
     if ReelDB.savedSound then -- renamed to savedCVars in 0.3.0
         ReelDB.savedCVars = ReelDB.savedCVars or ReelDB.savedSound
         ReelDB.savedSound = nil
+    end
+    -- savedCVars became per character in 1.0.0; an old flat { cvar = value }
+    -- table left by a crash mid-session belongs to whoever logs in next.
+    if ReelDB.savedCVars then
+        for _, value in pairs(ReelDB.savedCVars) do
+            if type(value) ~= "table" then
+                ReelDB.savedCVars = { [SavedKey()] = ReelDB.savedCVars }
+                break
+            end
+        end
     end
     ns.Restore()
 

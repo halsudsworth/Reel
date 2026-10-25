@@ -1,37 +1,38 @@
 -- Fishing NPCs for the map pins (not drawn yet; see ROADMAP). Coordinates
 -- are Wowhead Forever's first pin for each NPC (rounded to 0.2), read on
 -- 2026-10-24. "full set" vendors sell both poles and all four lures.
--- Faction: "A", "H" or "both".
+-- Faction: "A", "H" or "both". "teaches" is from Wowhead Forever's trainer pages (2026-10-25):
+-- every fishing trainer teaches Apprentice, Journeyman and the Fish Bowl, nothing else.
 
 local _, ns = ...
 
 ns.FISHING_NPCS = {
     -- Trainers
-    { id = 1651,   name = "Lee Brown",            zone = "Elwynn Forest",        x = 47.4, y = 62.2, role = "trainer", faction = "A" },
-    { id = 5493,   name = "Arnold Leland",        zone = "Stormwind City",       x = 45.4, y = 57.4, role = "trainer", faction = "A" },
-    { id = 1700,   name = "Paxton Ganter",        zone = "Dun Morogh",           x = 35.4, y = 40.2, role = "trainer", faction = "A" },
-    { id = 5161,   name = "Grimnur Stonebrand",   zone = "Ironforge",            x = 48.2, y = 6.6,  role = "trainer", faction = "A" },
-    { id = 1683,   name = "Warg Deepwater",       zone = "Loch Modan",           x = 40.4, y = 39.4, role = "trainer", faction = "A" },
-    { id = 3179,   name = "Harold Riggs",         zone = "Wetlands",             x = 8.0,  y = 58.4, role = "trainer", faction = "A" },
-    { id = 1680,   name = "Matthew Hooper",       zone = "Redridge Mountains",   x = 21.2, y = 50.4, role = "trainer", faction = "A" },
-    { id = 7946,   name = "Brannock",             zone = "Feralas",              x = 32.2, y = 41.4, role = "trainer", faction = "A" },
-    { id = 3607,   name = "Androl Oakhand",       zone = "Teldrassil",           x = 55.8, y = 93.4, role = "trainer", faction = "A" },
-    { id = 4156,   name = "Astaia",               zone = "Darnassus",            x = 47.4, y = 56.4, role = "trainer", faction = "A" },
-    { id = 2367,   name = "Donald Rabonne",       zone = "Hillsbrad Foothills",  x = 50.4, y = 61.0, role = "trainer", faction = "A" },
-    { id = 255877, name = "Hunter Moore",         zone = "Hillsbrad Foothills",  x = 54.0, y = 80.2, role = "trainer", faction = "A", forever = true },
-    { id = 5941,   name = "Lau'Tiki",             zone = "Durotar",              x = 53.2, y = 81.4, role = "trainer", faction = "H" },
-    { id = 3332,   name = "Lumak",                zone = "Orgrimmar",            x = 69.4, y = 28.4, role = "trainer", faction = "H" },
-    { id = 5938,   name = "Uthan Stillwater",     zone = "Mulgore",              x = 44.2, y = 63.8, role = "trainer", faction = "H" },
-    { id = 3028,   name = "Kah Mistrunner",       zone = "Thunder Bluff",        x = 55.8, y = 47.6, role = "trainer", faction = "H" },
-    { id = 12032,  name = "Lui'Mala",             zone = "Desolace",             x = 22.6, y = 72.4, role = "trainer", faction = "H" },
-    { id = 12961,  name = "Kil'Hiwana",           zone = "Ashenvale",            x = 10.8, y = 33.4, role = "trainer", faction = "H" },
-    { id = 14740,  name = "Katoom the Angler",    zone = "The Hinterlands",      x = 80.2, y = 81.4, role = "trainer", faction = "H", sells = "full set" },
-    { id = 5690,   name = "Clyde Kellen",         zone = "Tirisfal Glades",      x = 67.2, y = 51.0, role = "trainer", faction = "H" },
-    { id = 4573,   name = "Armand Cromwell",      zone = "Undercity",            x = 80.4, y = 31.2, role = "trainer", faction = "H" },
-    { id = 2834,   name = "Myizz Luckycatch",     zone = "Stranglethorn Vale",   x = 27.4, y = 77.0, role = "trainer", faction = "both" },
-    { id = 260558, name = "Krix",                 zone = "Riverglades",          x = 79.2, y = 54.8, role = "trainer", faction = "both", forever = true },
-    { id = 257008, name = "Baelann Swiftcurrent", zone = "Zephras Isle",         x = 63.2, y = 75.4, role = "trainer", faction = "both", forever = true, sells = "full set" },
-    { id = 251992, name = "Fenn Fairweather",     zone = "Zephras Isle",         x = 45.0, y = 48.4, role = "trainer", faction = "both", forever = true },
+    { id = 1651,   name = "Lee Brown",            zone = "Elwynn Forest",        x = 47.4, y = 62.2, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 5493,   name = "Arnold Leland",        zone = "Stormwind City",       x = 45.4, y = 57.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 1700,   name = "Paxton Ganter",        zone = "Dun Morogh",           x = 35.4, y = 40.2, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 5161,   name = "Grimnur Stonebrand",   zone = "Ironforge",            x = 48.2, y = 6.6,  role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 1683,   name = "Warg Deepwater",       zone = "Loch Modan",           x = 40.4, y = 39.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 3179,   name = "Harold Riggs",         zone = "Wetlands",             x = 8.0,  y = 58.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 1680,   name = "Matthew Hooper",       zone = "Redridge Mountains",   x = 21.2, y = 50.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 7946,   name = "Brannock",             zone = "Feralas",              x = 32.2, y = 41.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 3607,   name = "Androl Oakhand",       zone = "Teldrassil",           x = 55.8, y = 93.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 4156,   name = "Astaia",               zone = "Darnassus",            x = 47.4, y = 56.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 2367,   name = "Donald Rabonne",       zone = "Hillsbrad Foothills",  x = 50.4, y = 61.0, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A" },
+    { id = 255877, name = "Hunter Moore",         zone = "Hillsbrad Foothills",  x = 54.0, y = 80.2, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "A", forever = true },
+    { id = 5941,   name = "Lau'Tiki",             zone = "Durotar",              x = 53.2, y = 81.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 3332,   name = "Lumak",                zone = "Orgrimmar",            x = 69.4, y = 28.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 5938,   name = "Uthan Stillwater",     zone = "Mulgore",              x = 44.2, y = 63.8, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 3028,   name = "Kah Mistrunner",       zone = "Thunder Bluff",        x = 55.8, y = 47.6, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 12032,  name = "Lui'Mala",             zone = "Desolace",             x = 22.6, y = 72.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 12961,  name = "Kil'Hiwana",           zone = "Ashenvale",            x = 10.8, y = 33.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 14740,  name = "Katoom the Angler",    zone = "The Hinterlands",      x = 80.2, y = 81.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H", sells = "full set" },
+    { id = 5690,   name = "Clyde Kellen",         zone = "Tirisfal Glades",      x = 67.2, y = 51.0, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 4573,   name = "Armand Cromwell",      zone = "Undercity",            x = 80.4, y = 31.2, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "H" },
+    { id = 2834,   name = "Myizz Luckycatch",     zone = "Stranglethorn Vale",   x = 27.4, y = 77.0, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "both" },
+    { id = 260558, name = "Krix",                 zone = "Riverglades",          x = 79.2, y = 54.8, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "both", forever = true },
+    { id = 257008, name = "Baelann Swiftcurrent", zone = "Zephras Isle",         x = 63.2, y = 75.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "both", forever = true, sells = "full set" },
+    { id = 251992, name = "Fenn Fairweather",     zone = "Zephras Isle",         x = 45.0, y = 48.4, role = "trainer", teaches = "Apprentice, Journeyman, Fish Bowl", faction = "both", forever = true, sells = "pole" },
 
     -- Vendors (poles and lures)
     { id = 2626,   name = "Old Man Heming",       zone = "Stranglethorn Vale",   x = 27.4, y = 77.0, role = "vendor", faction = "both", sells = "full set, Expert Fishing book" },

@@ -10,12 +10,13 @@ For World of Warcraft: Forever only.
 
 - **Lures:** one-click button that picks your best lure, or the one you choose. Lure timer on the bar, red warning before it runs out.
 - **Buffs:** food and camp buff timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
-- **Casting:** double-click the water to cast. No macros.
-- **Journal:** every catch logged per character. Fish, zones, sessions, records, rare catches, and which fish in this zone you're still missing.
+- **One key:** bind Fish once. It applies a lure if your pole has none, casts, and reels in when the bobber goes. Or double-click the water to cast. Keybinds for the lure and the window too.
+- **Journal:** every catch logged per character. Fish, zones, sessions, records, and which fish in this zone you're still missing.
+- **Records:** the catches worth bragging about, lit up with date and zone when you land them. The 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares, Whimsyfin. Feats for fishing every zone and finishing one. Lifetime derby coins.
 - **Cooking:** recipes on fish tooltips, with the vendor and zone to buy them.
 - **Sound:** splash booster. Music and ambience off, effects up, chatter muted, so the splash is the only thing you hear.
 - **Derby:** a Speckled Tastyfish counter for the Stranglethorn Fishing Extravaganza, shown while the contest runs.
-- **The bar:** skill with bonus, lure, food, camp, zone fish count. One line. Nothing pops up, nothing plays a sound.
+- **The bar:** skill and cap with bonus, lure, food, camp, zone fish count. One line, any size you like. Nothing pops up, nothing plays a sound.
 
 ## The part nobody else does
 
@@ -25,7 +26,7 @@ For World of Warcraft: Forever only.
 
 ## Setup
 
-Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel`. The toolkit is on by default; turn on as much immersion as you like.
+Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel`. The toolkit is on by default; pick a preset on the General page (Just the bar, Clean, Full immersion) and tweak from there.
 
 ## Reporting a bug
 

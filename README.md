@@ -27,6 +27,10 @@ For World of Warcraft: Forever only.
 
 Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel`. The toolkit is on by default; turn on as much immersion as you like.
 
+## Reporting a bug
+
+Open an issue on GitHub. Before you do, type `/reel debug` in game and then `/reload`; that writes what the client reported about your fishing skill, lures and buffs into `WTF\Account\<account>\SavedVariables\Reel.lua`. Attach that file to the issue along with any error text, and say which preset or toggles you had on.
+
 ## License
 
 Copyright (c) 2026 Hal Sudsworth. All rights reserved. See [LICENSE](LICENSE).

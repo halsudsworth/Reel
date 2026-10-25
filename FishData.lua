@@ -135,6 +135,63 @@ ns.FISH_RECIPES = {
 }
 
 -- Rare and special fish for the Records tab, in this order.
+-- Notable catches for the Records tab, grouped. Item IDs from Wowhead's
+-- Forever database (2026-10-24). Everything here arrives through the loot
+-- window, so the journal's per-item first-catch record is enough to light
+-- one up. Old Ironjaw and Old Crafty aren't on Forever.
+ns.NOTABLE = {
+    { group = "Treasures", items = {
+        { id = 8350,  name = "The 1 Ring",                        note = "Open water, anywhere" },
+        { id = 6307,  name = "Message in a Bottle",               note = "Open water, low-level zones" },
+        { id = 6643,  name = "Bloated Brilliant Smallfish",        note = "Has a gem inside" },
+        { id = 6645,  name = "Bloated Mud Snapper",                note = "Has a gem inside" },
+        { id = 6647,  name = "Bloated Bristle Whisker Catfish",    note = "Has a gem inside" },
+        { id = 8366,  name = "Bloated Mithril Head Trout",         note = "Has a gem inside" },
+        { id = 13881, name = "Bloated Redgill",                    note = "Has a gem inside" },
+        { id = 13891, name = "Bloated Whitescale Salmon",          note = "Has a gem inside" },
+        { id = 21243, name = "Bloated Mightfish",                  note = "Azshara" },
+    } },
+    { group = "Pools and wreckage", items = {
+        { id = 20708, name = "Tightly Sealed Trunk",   note = "Floating Debris pools" },
+        { id = 21113, name = "Watertight Trunk",       note = "Schooner Wreckage pools" },
+        { id = 21150, name = "Iron Bound Trunk",       note = "Waterlogged Wreckage pools" },
+        { id = 21228, name = "Mithril Bound Trunk",    note = "Bloodsail Wreckage pools" },
+        { id = 6351,  name = "Dented Crate",           note = "Near Venture Co. camps" },
+        { id = 6352,  name = "Waterlogged Crate",      note = "Near Venture Co. camps" },
+        { id = 6357,  name = "Sealed Crate",           note = "Near Venture Co. camps" },
+        { id = 13874, name = "Heavy Crate",            note = "Near Venture Co. camps" },
+    } },
+    { group = "Stranglethorn Extravaganza", items = {
+        { id = 19807, name = "Speckled Tastyfish",              note = "Sundays 2-4 PM, Booty Bay coast" },
+        { id = 19805, name = "Keefer's Angelfish",              note = "About 1 in 200 during the contest" },
+        { id = 19803, name = "Brownell's Blue Striped Racer",   note = "About 1 in 200 during the contest" },
+        { id = 19806, name = "Dezian Queenfish",                note = "About 1 in 200 during the contest" },
+        { id = 19808, name = "Rockhide Strongfish",             note = "A fished mace" },
+    } },
+    { group = "New in Forever", items = {
+        { id = 251524, name = "Whimsyfin",              note = "Redridge rivers, near the murlocs" },
+        { id = 285094, name = "Ravaged Fishing Pole",   note = "Source still unknown" },
+    } },
+}
+
+-- zone -> set of fish IDs with a real catch rate there (traces under 0.5%
+-- are left out so "every fish in a zone" is something a person can finish).
+local zoneFish
+function ns.ZoneFish()
+    if not zoneFish then
+        zoneFish = {}
+        for id, fish in pairs(ns.FISH) do
+            for zone, rate in pairs(fish.zones) do
+                if rate >= 0.5 then
+                    zoneFish[zone] = zoneFish[zone] or {}
+                    zoneFish[zone][id] = true
+                end
+            end
+        end
+    end
+    return zoneFish
+end
+
 ns.RARE_FISH = {
     { id = 19805, note = "Booty Bay rare fish quest" },  -- Keefer's Angelfish
     { id = 19803, note = "Booty Bay rare fish quest" },  -- Brownell's Blue Striped Racer

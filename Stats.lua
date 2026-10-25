@@ -508,6 +508,62 @@ function recordsTab.Rows(view)
     rows[#rows + 1] = { cells = { "Total casts", casts } }
     rows[#rows + 1] = { cells = { "Total catches", string.format("%d (%s of casts)", catches, Rate(catches, casts)) } }
 
+    -- Feats worked out from the journal
+    local zonesFished, bestSession = 0, 0
+    for _, subs in pairs(view.zones) do
+        for _, entry in pairs(subs) do
+            if entry.catches > 0 then zonesFished = zonesFished + 1; break end
+        end
+    end
+    for _, s in ipairs(view.sessions) do
+        if s.catches > bestSession then bestSession = s.catches end
+    end
+    local complete = {} -- zones where every fish in FishData has been caught there
+    for zone, want in pairs(ns.ZoneFish()) do
+        local caught = {}
+        for _, entry in pairs(view.zones[zone] or {}) do
+            for id in pairs(entry.items) do caught[id] = true end
+        end
+        local missing = 0
+        for id in pairs(want) do if not caught[id] then missing = missing + 1 end end
+        if missing == 0 then complete[#complete + 1] = zone end
+    end
+    table.sort(complete)
+
+    rows[#rows + 1] = { cells = { " " } }
+    rows[#rows + 1] = { cells = { "Feats" }, heading = true }
+    local function feat(done, name, detail, when)
+        if done then
+            rows[#rows + 1] = { cells = { name, detail, when or "" }, indent = 1 }
+        else
+            rows[#rows + 1] = { cells = { GREY .. name .. "|r", GREY .. detail .. "|r", "" }, indent = 1 }
+        end
+    end
+    feat(zonesFished >= 10, "Well travelled", string.format("Fished in %d of 10 zones", math.min(zonesFished, 10)))
+    feat(bestSession >= 100, "Long evening", bestSession >= 100 and (bestSession .. " catches in one session") or string.format("Best session so far: %d of 100 catches", bestSession))
+    feat(#complete > 0, "Completionist", #complete > 0 and ("Every fish in " .. table.concat(complete, ", ")) or "Catch every fish listed for a zone")
+
+    for _, section in ipairs(ns.NOTABLE) do
+        rows[#rows + 1] = { cells = { " " } }
+        rows[#rows + 1] = { cells = { section.group }, heading = true }
+        for _, item in ipairs(section.items) do
+            local f = view.fish[item.id]
+            if f then
+                rows[#rows + 1] = {
+                    cells = { f.link, "Caught " .. f.count, When(f.first, f.firstZone) },
+                    link = f.link,
+                    indent = 1,
+                }
+            else
+                rows[#rows + 1] = {
+                    cells = { GREY .. item.name .. "|r", GREY .. "Not caught yet|r", GREY .. item.note .. "|r" },
+                    link = "item:" .. item.id,
+                    indent = 1,
+                }
+            end
+        end
+    end
+
     rows[#rows + 1] = { cells = { " " } }
     rows[#rows + 1] = { cells = { "Rare fish" }, heading = true }
     for _, rare in ipairs(ns.RARE_FISH) do

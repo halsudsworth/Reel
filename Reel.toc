@@ -19,6 +19,7 @@ Bar.lua
 
 # Features (each registers its own defaults, CVars, bar segments, and page)
 FishData.lua
+MapData.lua
 Log.lua
 Stats.lua
 Cooking.lua

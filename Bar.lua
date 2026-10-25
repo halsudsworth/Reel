@@ -81,7 +81,7 @@ function ns.UpdateBar()
     bar:SetShown(shown)
     local height = math.max(BUTTON_MIN + 2 * BUTTON_PAD, text:GetStringHeight() + 16)
     bar:SetHeight(height)
-    local left = 8
+    local left = 10
     if bar.button and bar.button:IsShown() then
         -- The button fills the bar's height, up to BUTTON_MAX in tall layouts.
         local size = math.min(BUTTON_MAX, height - 2 * BUTTON_PAD)
@@ -90,7 +90,7 @@ function ns.UpdateBar()
     end
     text:ClearAllPoints()
     text:SetPoint("LEFT", left, 0)
-    bar:SetWidth(left + text:GetStringWidth() + 10)
+    bar:SetWidth(left + text:GetStringWidth() + 12)
     bar:EnableMouse(not s.barLocked)
 end
 
@@ -110,7 +110,9 @@ ns.On("REEL_READY", function()
         s.campTimer = nil
     end
 
-    bar = CreateFrame("Frame", "ReelBar", UIParent)
+    -- Blizzard's tooltip backdrop with a gold border, so the one bar that
+    -- stays on screen looks like it came with the game.
+    bar = CreateFrame("Frame", "ReelBar", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
     bar:SetHeight(30)
     bar:SetFrameStrata("MEDIUM")
     bar:SetMovable(true)
@@ -121,9 +123,20 @@ ns.On("REEL_READY", function()
         bar:StopMovingOrSizing()
         SavePosition()
     end)
-    local bg = bar:CreateTexture(nil, "BACKGROUND")
-    bg:SetColorTexture(0, 0, 0, 0.6)
-    bg:SetAllPoints()
+    if bar.SetBackdrop then
+        bar:SetBackdrop({
+            bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 16,
+            insets = { left = 4, right = 4, top = 4, bottom = 4 },
+        })
+        bar:SetBackdropColor(0.09, 0.09, 0.19, 0.92)
+        bar:SetBackdropBorderColor(1, 0.82, 0)
+    else
+        local bg = bar:CreateTexture(nil, "BACKGROUND")
+        bg:SetColorTexture(0, 0, 0, 0.6)
+        bg:SetAllPoints()
+    end
     text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetJustifyH("LEFT")
     text:SetSpacing(3)

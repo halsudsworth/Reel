@@ -35,9 +35,7 @@ function ns.Debug()
     d.FishingSkill = Pack(ns.FishingSkill())
 
     d.buffs = {}
-    for i = 1, 40 do
-        local aura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex and C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-        if not aura then break end
+    for _, aura in ipairs(ns.PlayerBuffs()) do -- the out-of-combat cache; auras are secret in combat
         local desc = C_Spell and C_Spell.GetSpellDescription and C_Spell.GetSpellDescription(aura.spellId)
         d.buffs[#d.buffs + 1] = { name = aura.name, spellId = aura.spellId, description = desc, points = aura.points }
     end

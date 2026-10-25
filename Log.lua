@@ -29,6 +29,7 @@ local function InitData(d)
     d.records = d.records or {}
     return d
 end
+ns.InitData = InitData -- Stats uses it on other characters' tables too
 
 local function NewSession()
     return { start = time(), casts = 0, catches = 0, fish = 0, bonus = 0, items = {}, zones = {} }
@@ -147,8 +148,14 @@ ns.On("REEL_CAST", function()
     ns.Fire("REEL_DATA_CHANGED")
 end)
 
+-- One catch per cast: the loot window can open twice for one bobber
+-- (closed and reopened with a full bag), and that must not count twice.
+local counted = false
+ns.On("REEL_CAST", function() counted = false end)
+
 ns.On("LOOT_OPENED", function()
-    if not IsFishingLoot() then return end
+    if not IsFishingLoot() or counted then return end
+    counted = true
     local now = time()
     local session = ns.session
     local entry, zone = ns.ZoneEntry()

@@ -108,6 +108,11 @@ local function ApplyKeep()
     for frame in pairs(keep) do SetIgnore(frame, true) end
 end
 
+-- For frames created while clean view is already on (the window).
+function ns.RefreshKeep()
+    if active then ApplyKeep() end
+end
+
 local function RestoreKeep()
     for frame, value in pairs(original) do
         frame:SetIgnoreParentAlpha(value)

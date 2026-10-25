@@ -98,15 +98,27 @@ local function HideErrors(hide)
     UIErrorsFrame:SetShown(not hide)
 end
 
+-- ReelDB.cameraMoved remembers a camera left on the fishing view through a
+-- /reload or disconnect, so the next login puts it back instead of saving
+-- the fishing angle as the return view.
 local function MoveCamera(fishing)
     if not (SaveView and SetView) or fishing == cameraMoved then return end
     cameraMoved = fishing
+    ReelDB.cameraMoved = fishing or nil
     if fishing then
         SaveView(RETURN_VIEW)
         SetView(FISHING_VIEW)
     else
         SetView(RETURN_VIEW)
     end
+end
+
+-- Apply the current toggles mid-session (presets, page changes).
+function ns.RefreshImmersion()
+    if not ns.IsFishing() then return end
+    local s = ReelDB.settings
+    HideErrors(s.hideCombatText)
+    MoveCamera(s.cameraView)
 end
 
 -- On every cast, not just the first: combat puts the camera and the error
@@ -130,6 +142,10 @@ ns.On("PLAYER_REGEN_DISABLED", function()
 end)
 
 ns.On("REEL_READY", function()
+    if ReelDB.cameraMoved and SetView then
+        SetView(RETURN_VIEW) -- left on the fishing view by a reload or disconnect
+        ReelDB.cameraMoved = nil
+    end
     -- Object tooltips (the bobber is a game object) are dropped while a
     -- bobber is out. Other objects' tooltips come back between casts.
     if TooltipDataProcessor and Enum and Enum.TooltipDataType and Enum.TooltipDataType.Object then
@@ -156,10 +172,7 @@ ns.RegisterPage({
 
         local function Changed()
             ns.ApplySettings()
-            if ns.IsFishing() then
-                HideErrors(s.hideCombatText)
-                MoveCamera(s.cameraView)
-            end
+            ns.RefreshImmersion()
             ns.UpdateLetterbox()
             Refresh()
         end

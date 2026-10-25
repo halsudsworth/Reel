@@ -18,8 +18,12 @@ function ns.LuremasterCount()
     return ns.session.bonus
 end
 
+local counted = false -- one count per cast, like Log.lua
+ns.On("REEL_CAST", function() counted = false end)
+
 ns.On("LOOT_OPENED", function()
-    if not IsFishingLoot() or not ns.HasLuremaster() or not ns.LureTimeLeft() then return end
+    if not IsFishingLoot() or counted or not ns.HasLuremaster() or not ns.LureTimeLeft() then return end
+    counted = true
     local session, added = ns.session, false
     for slot = 1, GetNumLootItems() do
         if GetLootSlotLink(slot) then

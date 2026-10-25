@@ -84,7 +84,7 @@ local function UpdateButton()
     button:SetShown(lure ~= nil)
 end
 
-ns.On("REEL_READY", function()
+ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
     button = CreateFrame("Button", "ReelLureButton", UIParent, "SecureActionButtonTemplate")
     button:SetAttribute("type", "macro")
     button:RegisterForClicks("AnyUp", "AnyDown")
@@ -105,7 +105,7 @@ ns.On("REEL_READY", function()
     button:Hide()
     ns.SetBarButton(button)
     C_Timer.NewTicker(1, UpdateButton)
-end)
+end) end)
 
 ns.UpdateLureButton = UpdateButton
 

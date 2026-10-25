@@ -102,6 +102,7 @@ local function View()
     if scope ~= "all" then return ReelDB.chars[scope] end
     local v = { zones = {}, fish = {}, sessions = {}, records = {} }
     for key, d in pairs(ReelDB.chars) do
+        ns.InitData(d) -- an older character's table may lack a field
         for zone, subs in pairs(d.zones) do
             v.zones[zone] = v.zones[zone] or {}
             for sub, e in pairs(subs) do

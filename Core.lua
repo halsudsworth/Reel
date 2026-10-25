@@ -68,11 +68,24 @@ function ns.On(event, fn)
     table.insert(handlers[event], fn)
 end
 
+-- Each handler runs on its own, so one erroring feature doesn't stop the
+-- others (and a broken REEL_READY handler can't leave later ones unrun).
 function ns.Fire(event, ...)
     local list = handlers[event]
     if not list then return end
     for _, fn in ipairs(list) do
-        fn(...)
+        local ok, err = pcall(fn, ...)
+        if not ok then geterrorhandler()(err) end
+    end
+end
+
+-- Runs fn now, or after combat if secure frames can't be touched right now.
+local pendingOutOfCombat = {}
+function ns.WhenOutOfCombat(fn)
+    if InCombatLockdown() then
+        pendingOutOfCombat[#pendingOutOfCombat + 1] = fn
+    else
+        fn()
     end
 end
 
@@ -109,20 +122,29 @@ local function Wanted()
     return next(Targets()) ~= nil
 end
 
+-- Saved originals are kept per character: some CVars (auto-loot) are
+-- per-character, so another character logging in must not restore them.
+local function SavedKey()
+    return ns.CharKey and ns.CharKey() or "?"
+end
+
 function ns.Restore()
-    local saved = ReelDB.savedCVars
+    local all = ReelDB.savedCVars
+    local saved = all and all[SavedKey()]
     if not saved then return end
     for cvar, value in pairs(saved) do
         SetCVarValue(cvar, value)
     end
-    ReelDB.savedCVars = nil
+    all[SavedKey()] = nil
+    if next(all) == nil then ReelDB.savedCVars = nil end
 end
 
 -- Saves each CVar's original value the first time it is changed, so settings
 -- can be adjusted mid-session and restore still returns the player's values.
 -- Stored in SavedVariables so a /reload or crash mid-session still restores.
 local function Apply()
-    local saved = ReelDB.savedCVars or {}
+    ReelDB.savedCVars = ReelDB.savedCVars or {}
+    local saved = ReelDB.savedCVars[SavedKey()] or {}
     local targets = Targets()
     for cvar, value in pairs(targets) do
         if saved[cvar] == nil then
@@ -143,12 +165,12 @@ local function Apply()
             saved[cvar] = nil
         end
     end
-    ReelDB.savedCVars = saved
+    ReelDB.savedCVars[SavedKey()] = saved
 end
 
 -- Called by pages after any setting changes.
 function ns.ApplySettings()
-    if not ReelDB.savedCVars then return end
+    if not (ReelDB.savedCVars and ReelDB.savedCVars[SavedKey()]) then return end
     if Wanted() then
         Apply()
     else
@@ -196,9 +218,15 @@ local function EndFishing()
     end
 end
 
+-- Checks again every second after the delay, so a delay changed mid-wait
+-- (or a timer landing a hair early) can't leave fishing mode on for good.
 local function ScheduleEnd()
     C_Timer.After(ReelDB.settings.restoreDelay, function()
-        if not ns.RecentlyFishing() then EndFishing() end
+        if ns.RecentlyFishing() then
+            if not channeling then C_Timer.After(1, function() if not ns.RecentlyFishing() then EndFishing() end end) end
+        else
+            EndFishing()
+        end
     end)
 end
 
@@ -226,6 +254,18 @@ ns.On("UNIT_SPELLCAST_CHANNEL_STOP", function(unit)
     channeling = false
     lastFishing = GetTime()
     ScheduleEnd()
+end)
+
+-- Logging out mid-session: put everything back now rather than on the next
+-- login (which might be another character).
+ns.On("PLAYER_LOGOUT", function()
+    if fishing then EndFishing() end
+end)
+
+ns.On("PLAYER_REGEN_ENABLED", function()
+    local list = pendingOutOfCombat
+    pendingOutOfCombat = {}
+    for _, fn in ipairs(list) do fn() end
 end)
 
 -- Startup -------------------------------------------------------------------

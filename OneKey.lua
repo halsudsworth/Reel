@@ -6,7 +6,7 @@
 -- The key is bound to a secure button whose macro is rewritten out of combat
 -- (lure or cast). While a bobber is out the key is overridden to the game's
 -- INTERACTTARGET binding, then put back when the channel ends. Also adds
--- bindings for the lure button and the window.
+-- bindings for applying a lure and for the window.
 
 local _, ns = ...
 local W = ns.W
@@ -16,7 +16,7 @@ ns.RegisterDefaults({
 })
 
 BINDING_NAME_CLICK_ReelFishButton_LeftButton = "Fish (lure, cast, reel in)"
-BINDING_NAME_CLICK_ReelLureButton_LeftButton = "Apply lure"
+BINDING_NAME_CLICK_ReelLureKeyButton_LeftButton = "Apply lure"
 BINDING_NAME_REEL_TOGGLE_WINDOW = "Toggle the R.E.E.L. window"
 
 function ReelToggleWindow()
@@ -24,17 +24,25 @@ function ReelToggleWindow()
 end
 
 local FISH_BINDING = "CLICK ReelFishButton:LeftButton"
-local fishButton
+local fishButton, lureKeyButton
 local reeling = false -- the key is currently the interact key
+
+local function LureMacro(lure)
+    return "/use item:" .. lure.id .. "\n/use 16"
+end
 
 local function UpdateMacro()
     if not fishButton or InCombatLockdown() or not ns.fishingName then return end
-    local lure = ReelDB.settings.oneKeyLure and not ns.LureTimeLeft() and ns.ChosenLure()
+    local chosen = ns.ChosenLure()
+    local lure = ReelDB.settings.oneKeyLure and not ns.LureTimeLeft() and chosen
     if lure then
-        fishButton:SetAttribute("macrotext", "/use item:" .. lure.id .. "\n/use 16")
+        fishButton:SetAttribute("macrotext", LureMacro(lure))
     else
         fishButton:SetAttribute("macrotext", "/cast " .. ns.fishingName)
     end
+    -- The Apply lure key has its own key-down button; the bar's lure button
+    -- is for the mouse and fires on both down and up.
+    lureKeyButton:SetAttribute("macrotext", chosen and LureMacro(chosen) or "")
 end
 
 -- While a bobber is out, the Fish key reels in instead.
@@ -50,27 +58,40 @@ local function SetReeling(on)
     end
 end
 
-ns.On("REEL_READY", function()
-    fishButton = CreateFrame("Button", "ReelFishButton", UIParent, "SecureActionButtonTemplate")
-    fishButton:SetSize(1, 1)
-    fishButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10, 10) -- offscreen
-    fishButton:SetAttribute("type", "macro")
-    fishButton:RegisterForClicks("AnyDown") -- down only, or a key press would run the macro twice
+local function KeyButton(name)
+    local b = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
+    b:SetSize(1, 1)
+    b:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10, 10) -- offscreen
+    b:SetAttribute("type", "macro")
+    b:RegisterForClicks("AnyDown") -- down only, or a key press would run the macro twice
+    return b
+end
+
+ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
+    fishButton = KeyButton("ReelFishButton")
+    lureKeyButton = KeyButton("ReelLureKeyButton")
     UpdateMacro()
     C_Timer.NewTicker(1, UpdateMacro)
-end)
+end) end)
 
 ns.On("BAG_UPDATE_DELAYED", UpdateMacro)
 ns.On("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateMacro() end end)
-ns.On("UPDATE_BINDINGS", function() if reeling then reeling = false; SetReeling(true) end end)
+ns.On("UPDATE_BINDINGS", function()
+    if reeling and not InCombatLockdown() then reeling = false; SetReeling(true) end
+end)
 
 ns.On("REEL_CAST", function() SetReeling(true) end)
 ns.On("UNIT_SPELLCAST_CHANNEL_STOP", function(unit)
     if unit == "player" then SetReeling(false) end
 end)
 ns.On("PLAYER_REGEN_ENABLED", function()
-    -- combat blocked the switch; settle on whatever is true now
-    if not ns.Channeling() then SetReeling(false) end
+    -- combat may have blocked a switch either way; start clean and settle on
+    -- whatever is true now
+    if fishButton then
+        ClearOverrideBindings(fishButton)
+        reeling = false
+        if ns.Channeling() then SetReeling(true) end
+    end
     UpdateMacro()
 end)
 

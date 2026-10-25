@@ -50,7 +50,7 @@ end
 local function OnWorldMouseDown(_, button)
     local s = ReelDB.settings
     if button ~= s.castMouseButton then return end
-    if not s.doubleClick or not ns.fishingName or InCombatLockdown() then return end
+    if not castButton or not s.doubleClick or not ns.fishingName or InCombatLockdown() then return end
     if s.needPole and not ns.PoleEquipped() then return end
     if UnitExists("mouseover") then return end -- clicking an NPC or player
 
@@ -66,15 +66,21 @@ end
 
 ns.On("REEL_READY", function()
     if not ns.fishingName then return end
-    castButton = CreateFrame("Button", "ReelCastButton", UIParent, "SecureActionButtonTemplate")
-    castButton:SetSize(1, 1)
-    castButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10, 10) -- offscreen
-    castButton:SetAttribute("type", "spell")
-    castButton:SetAttribute("spell", ns.fishingName)
-    castButton:RegisterForClicks("AnyUp", "AnyDown")
-    castButton:SetScript("PostClick", ClearBinding)
+    -- A /reload in combat can't set up a secure button; wait for combat to end.
+    ns.WhenOutOfCombat(function()
+        castButton = CreateFrame("Button", "ReelCastButton", UIParent, "SecureActionButtonTemplate")
+        castButton:SetSize(1, 1)
+        castButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10, 10) -- offscreen
+        castButton:SetAttribute("type", "spell")
+        castButton:SetAttribute("spell", ns.fishingName)
+        castButton:RegisterForClicks("AnyUp", "AnyDown")
+        castButton:SetScript("PostClick", ClearBinding)
+    end)
     WorldFrame:HookScript("OnMouseDown", OnWorldMouseDown)
 end)
+
+-- A binding left behind when combat blocked the clear.
+ns.On("PLAYER_REGEN_ENABLED", function() if castButton then ClearBinding() end end)
 
 ns.RegisterPage({
     name = "Casting",

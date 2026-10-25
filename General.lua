@@ -24,6 +24,7 @@ local function ApplyPreset(preset)
     for key, value in pairs(preset.set) do s[key] = value end
     if not s.cleanView then ns.ExitCleanView() end
     ns.ApplySettings()
+    ns.RefreshImmersion()
     ns.UpdateLetterbox()
     ns.Print("Preset: " .. preset.name)
 end

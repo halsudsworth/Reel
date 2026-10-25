@@ -63,6 +63,7 @@ local function BuildWindow()
     window:SetFrameStrata("MEDIUM")
     window:Hide()
     tinsert(UISpecialFrames, "ReelFrame") -- close with Escape
+    if ns.RefreshKeep then ns.RefreshKeep() end -- built during clean view: don't inherit the fade
 
     local title = window:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     title:SetPoint("TOP", 0, -5)

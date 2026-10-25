@@ -1,6 +1,6 @@
 <Bindings>
     <Binding name="CLICK ReelFishButton:LeftButton" header="REEL" category="ADDONS"/>
-    <Binding name="CLICK ReelLureButton:LeftButton" category="ADDONS"/>
+    <Binding name="CLICK ReelLureKeyButton:LeftButton" category="ADDONS"/>
     <Binding name="REEL_TOGGLE_WINDOW" category="ADDONS">
         ReelToggleWindow()
     </Binding>

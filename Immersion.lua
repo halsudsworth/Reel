@@ -109,7 +109,9 @@ local function MoveCamera(fishing)
     end
 end
 
-ns.On("REEL_FISHING_BEGIN", function()
+-- On every cast, not just the first: combat puts the camera and the error
+-- text back, and the next cast should take them again.
+ns.On("REEL_CAST", function()
     local s = ReelDB.settings
     if s.hideCombatText then HideErrors(true) end
     if s.cameraView then MoveCamera(true) end

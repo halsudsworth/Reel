@@ -507,6 +507,11 @@ function recordsTab.Rows(view)
 
     rows[#rows + 1] = { cells = { "Total casts", casts } }
     rows[#rows + 1] = { cells = { "Total catches", string.format("%d (%s of casts)", catches, Rate(catches, casts)) } }
+    local scope = Scope()
+    local earned, spent, held = ns.DerbyCoins(scope == "all" and ReelDB.chars or { ReelDB.chars[scope] })
+    if earned > 0 or held > 0 then
+        rows[#rows + 1] = { cells = { "Derby coins", string.format("%d earned, %d spent, %d held", earned, spent, held) } }
+    end
 
     -- Feats worked out from the journal
     local zonesFished, bestSession = 0, 0

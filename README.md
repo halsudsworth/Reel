@@ -12,7 +12,7 @@ For World of Warcraft: Forever only.
 - **Buffs:** food and camp buff timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
 - **One key:** bind Fish once. It applies a lure if your pole has none, casts, and reels in when the bobber goes. Or double-click the water to cast. Keybinds for the lure and the window too.
 - **Journal:** every catch logged per character. Fish, zones, sessions, records, and which fish in this zone you're still missing.
-- **Records:** the catches worth bragging about, lit up with date and zone when you land them. The 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares, Whimsyfin. Feats for fishing every zone and finishing one. Lifetime derby coins.
+- **Records:** the catches worth bragging about, lit up with date and zone when you land them. The 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares. Feats for fishing every zone and finishing one. Lifetime derby coins.
 - **Cooking:** recipes on fish tooltips, with the vendor and zone to buy them.
 - **Sound:** splash booster. Music and ambience off, effects up, chatter muted, so the splash is the only thing you hear.
 - **Derby:** a Speckled Tastyfish counter for the Stranglethorn Fishing Extravaganza, shown while the contest runs.

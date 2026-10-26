@@ -6,7 +6,7 @@ Every fishing addon gives you a lure button and a catch log. R.E.E.L. gives you 
 
 For World of Warcraft: Forever only.
 
-## The toolkit
+## What it does
 
 - **Lures:** one-click button that picks your best lure, or the one you choose. Lure timer on the bar, red warning before it runs out.
 - **Buffs:** food and camp buff timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
@@ -26,7 +26,7 @@ For World of Warcraft: Forever only.
 
 ## Setup
 
-Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel`. The toolkit is on by default; pick a preset on the General page (Just the bar, Clean, Full immersion) and tweak from there.
+Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel` to open the settings. The bar, lure button and journal work straight away. Clean View and the immersion options start off: pick a preset on the General page (Just the bar, Clean, Full immersion) to turn them on, then adjust from there.
 
 ## Reporting a bug
 

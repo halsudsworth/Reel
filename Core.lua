@@ -314,6 +314,22 @@ ns.On("PLAYER_LOGIN", function()
     ns.Fire("REEL_READY")
 end)
 
+-- /reel where: the zone and subzone a catch here would be logged under, and the map
+-- position when the client gives one. For checking event spots in game.
+function ns.PrintWhere()
+    local zone = GetZoneText() or "?"
+    local sub = GetSubZoneText()
+    if not sub or sub == "" then sub = "(none, logged as " .. zone .. ")" end
+    local pos = ""
+    if C_Map and C_Map.GetBestMapForUnit then
+        local ok, map = pcall(C_Map.GetBestMapForUnit, "player")
+        local okp, p = false, nil
+        if ok and map then okp, p = pcall(C_Map.GetPlayerMapPosition, map, "player") end
+        if okp and p and p.x then pos = string.format("  %.1f, %.1f", p.x * 100, p.y * 100) end
+    end
+    ns.Print("Zone: " .. zone .. "  Subzone: " .. sub .. pos)
+end
+
 -- Slash command -------------------------------------------------------------
 
 SLASH_REEL1 = "/reel"
@@ -327,6 +343,8 @@ SlashCmdList.REEL = function(msg)
         ns.DebugSound()
     elseif msg == "derby" then
         ns.ToggleDerbyTest()
+    elseif msg == "where" then
+        ns.PrintWhere()
     elseif not ns.ExitCleanView() then
         ns.ToggleWindow()
     end

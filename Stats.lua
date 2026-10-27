@@ -148,12 +148,16 @@ local function SessionZone(session)
     return best
 end
 
--- "Elwynn Forest +5": the zone with the biggest share of catches, and how
--- many other zones have more than a trace.
+-- "Elwynn Forest +5": the zone with the biggest share of catches (or the
+-- data's own pick for your faction, where that share can't be trusted or is
+-- the other side's capital), and how many other zones have more than a trace.
 local function FoundIn(fish)
-    local best, most, others = nil, -1, 0
-    for zone, percent in pairs(fish.zones) do
-        if percent > most then best, most = zone, percent end
+    local best, most, others = fish.best, -1, 0
+    if type(best) == "table" then best = best[UnitFactionGroup("player")] end
+    if not best then
+        for zone, percent in pairs(fish.zones) do
+            if percent > most then best, most = zone, percent end
+        end
     end
     if not best then return "Location unknown" end
     for zone, percent in pairs(fish.zones) do

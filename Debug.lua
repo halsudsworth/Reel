@@ -105,9 +105,29 @@ function ns.Debug()
     d.MuteSoundFile = MuteSoundFile ~= nil
     d.UnmuteSoundFile = UnmuteSoundFile ~= nil
 
+    -- What the client says each fished loot came from (pool object or not); see below.
+    d.lootSources = ReelDB.debugLoot or "none yet: fish a few times, then /reel debug again"
+
     ReelDB.debug = d
     ns.Print("Debug info saved. Type /reload so it's written to disk.")
 end
+
+-- The last 20 fishing loot windows with GetLootSourceInfo for each slot, to learn
+-- whether the client names the pool a catch came out of.
+local LOOT_KEEP = 20
+ns.On("LOOT_OPENED", function()
+    if not IsFishingLoot() then return end
+    local entry = { time = date("%Y-%m-%d %H:%M:%S"), zone = GetZoneText(), sub = GetSubZoneText(), slots = {} }
+    for slot = 1, GetNumLootItems() do
+        entry.slots[#entry.slots + 1] = {
+            item = GetLootSlotLink(slot),
+            source = GetLootSourceInfo and Pack(GetLootSourceInfo(slot)) or "missing",
+        }
+    end
+    ReelDB.debugLoot = ReelDB.debugLoot or {}
+    table.insert(ReelDB.debugLoot, 1, entry)
+    for i = #ReelDB.debugLoot, LOOT_KEEP + 1, -1 do ReelDB.debugLoot[i] = nil end
+end)
 
 -- /reel debug sound: logs in to voice chat, then runs the mic test on
 -- every input device in turn, DEVICE_SECONDS each, counting the sound-level

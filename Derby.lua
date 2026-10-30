@@ -61,8 +61,9 @@ ns.On("BAG_UPDATE_DELAYED", TrackCoins)
 
 -- Master Anglers: Riggle yells each winner to the whole zone ("We have a winner! Shame is
 -- one of our Master Anglers this week!", seen in a Forever beta video). Every one heard is
--- kept with the time and realm, so the site can list each Sunday's winners from anyone's
--- journal. The same name twice within a few hours is one win.
+-- kept with the time, so the site can list each Sunday's winners from anyone's journal. Forever
+-- has no realms; the yell only reaches the hearer's own Ruleset, and the site files it under the
+-- journal's Ruleset. The same name twice within a few hours is one win.
 local WINNER = "^We have a winner! (.-) is one of our Master Anglers this week!"
 
 ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender)
@@ -75,7 +76,7 @@ ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender)
     for _, w in ipairs(data.wins) do
         if w[2] == name and now - w[1] < 6 * 3600 then return end
     end
-    table.insert(data.wins, { now, name, GetRealmName() })
+    table.insert(data.wins, { now, name })
     ns.Fire("REEL_DATA_CHANGED")
 end)
 

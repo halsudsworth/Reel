@@ -72,7 +72,7 @@ ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender)
     local data = ns.Data()
     if not name or not data then return end
     data.wins = data.wins or {}
-    local now = time()
+    local now = ns.Now()
     for _, w in ipairs(data.wins) do
         if w[2] == name and now - w[1] < 6 * 3600 then return end
     end

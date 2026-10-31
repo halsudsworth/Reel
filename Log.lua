@@ -11,6 +11,12 @@
 --                      { start, first, last, seen, casts, catches,
 --                        fish, bonus, items, zones = { zone -> fish } }
 --   records.stack    = { qty, link, time, zone }
+--   catches          = list, oldest first, one row per item per catch:
+--                      { time, zone, subzone, x, y, itemID, qty, skill, level }
+--   id               = 16 random hex characters, made once; the site knows the
+--                      character's pastes by it
+--
+-- Times are the server's clock (ns.Now).
 
 local _, ns = ...
 
@@ -27,12 +33,13 @@ local function InitData(d)
     d.fish = d.fish or {}
     d.sessions = d.sessions or {}
     d.records = d.records or {}
+    d.catches = d.catches or {}
     return d
 end
 ns.InitData = InitData -- Stats uses it on other characters' tables too
 
 local function NewSession()
-    return { start = time(), casts = 0, catches = 0, fish = 0, bonus = 0, items = {}, zones = {} }
+    return { start = ns.Now(), casts = 0, catches = 0, fish = 0, bonus = 0, items = {}, zones = {} }
 end
 
 -- Placeholder until the saved session is picked on PLAYER_ENTERING_WORLD.
@@ -116,6 +123,9 @@ ns.On("REEL_READY", function()
     end
     data = InitData(ReelDB.chars[key] or {})
     ReelDB.chars[key] = data
+    if not data.id then
+        data.id = string.format("%04x%04x%04x%04x", math.random(0, 65535), math.random(0, 65535), math.random(0, 65535), math.random(0, 65535))
+    end
 end)
 
 local picked = false
@@ -125,7 +135,7 @@ ns.On("PLAYER_ENTERING_WORLD", function(isInitialLogin)
     local list = data.sessions
     local current = list[#list]
     local resume = current and (not isInitialLogin
-        or (current.seen and time() - current.seen <= JOIN_SECONDS))
+        or (current.seen and ns.Now() - current.seen <= JOIN_SECONDS))
     if resume then
         ns.session = current
         ns.Fire("REEL_DATA_CHANGED")
@@ -135,14 +145,15 @@ ns.On("PLAYER_ENTERING_WORLD", function(isInitialLogin)
 end)
 
 ns.On("PLAYER_LOGOUT", function()
-    ns.session.seen = time()
+    ns.session.seen = ns.Now()
 end)
 
 ns.On("REEL_CAST", function()
     local session = ns.session
     session.casts = session.casts + 1
-    session.first = session.first or time()
-    session.last = time()
+    local now = ns.Now()
+    session.first = session.first or now
+    session.last = now
     local entry = ns.ZoneEntry()
     entry.casts = entry.casts + 1
     ns.Fire("REEL_DATA_CHANGED")
@@ -156,9 +167,12 @@ ns.On("REEL_CAST", function() counted = false end)
 ns.On("LOOT_OPENED", function()
     if not IsFishingLoot() or counted then return end
     counted = true
-    local now = time()
+    local now = ns.Now()
     local session = ns.session
-    local entry, zone = ns.ZoneEntry()
+    local entry, zone, sub = ns.ZoneEntry()
+    local x, y = ns.MapPosition()
+    local skill = ns.FishingSkill()
+    local level = UnitLevel("player")
     entry.catches = entry.catches + 1
     session.catches = session.catches + 1
     session.last = now
@@ -172,6 +186,7 @@ ns.On("LOOT_OPENED", function()
             AddItem(session.items, id, link, qty, quality)
             session.fish = session.fish + qty
             session.zones[zone] = (session.zones[zone] or 0) + qty
+            table.insert(data.catches, { now, zone, sub, x, y, id, qty, skill, level })
 
             local fish = AddItem(data.fish, id, link, qty, quality)
             if not fish.first then

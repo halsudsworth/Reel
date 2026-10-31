@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- `/reel export`: your journal as one string to copy and paste at halsudsworth.com/paste.
+- Every catch is now logged with the server's time, the zone, subzone and map position, your fishing skill and level.
+
 ## 1.0.0-beta.1
 
 First public build, made on the World of Warcraft: Forever beta.

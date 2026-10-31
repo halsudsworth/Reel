@@ -32,6 +32,12 @@ local function SpellName(id)
 end
 ns.SpellName = SpellName
 
+-- The server's clock in Unix seconds. time() is the player's own computer clock and can be
+-- set to anything, so the journal stamps everything with this.
+function ns.Now()
+    return GetServerTime and GetServerTime() or time()
+end
+
 -- 452 -> "7:32", 4380 -> "1h 13m", 529133 -> "6d 2h"
 function ns.FormatTime(seconds)
     seconds = math.max(0, math.floor(seconds))
@@ -314,19 +320,27 @@ ns.On("PLAYER_LOGIN", function()
     ns.Fire("REEL_READY")
 end)
 
+-- The player's map position as 0 to 100 percent, one decimal, or nil where the client
+-- gives none (instances).
+function ns.MapPosition()
+    if not (C_Map and C_Map.GetBestMapForUnit) then return end
+    local ok, map = pcall(C_Map.GetBestMapForUnit, "player")
+    if not (ok and map) then return end
+    local okp, p = pcall(C_Map.GetPlayerMapPosition, map, "player")
+    if not (okp and p and p.x) then return end
+    local x, y = p.x, p.y
+    if x == 0 and y == 0 then return end
+    return math.floor(x * 1000 + 0.5) / 10, math.floor(y * 1000 + 0.5) / 10
+end
+
 -- /reel where: the zone and subzone a catch here would be logged under, and the map
 -- position when the client gives one. For checking event spots in game.
 function ns.PrintWhere()
     local zone = GetZoneText() or "?"
     local sub = GetSubZoneText()
     if not sub or sub == "" then sub = "(none, logged as " .. zone .. ")" end
-    local pos = ""
-    if C_Map and C_Map.GetBestMapForUnit then
-        local ok, map = pcall(C_Map.GetBestMapForUnit, "player")
-        local okp, p = false, nil
-        if ok and map then okp, p = pcall(C_Map.GetPlayerMapPosition, map, "player") end
-        if okp and p and p.x then pos = string.format("  %.1f, %.1f", p.x * 100, p.y * 100) end
-    end
+    local x, y = ns.MapPosition()
+    local pos = x and string.format("  %.1f, %.1f", x, y) or ""
     ns.Print("Zone: " .. zone .. "  Subzone: " .. sub .. pos)
 end
 
@@ -345,6 +359,8 @@ SlashCmdList.REEL = function(msg)
         ns.ToggleDerbyTest()
     elseif msg == "where" then
         ns.PrintWhere()
+    elseif msg == "export" then
+        ns.ShowExport()
     elseif not ns.ExitCleanView() then
         ns.ToggleWindow()
     end

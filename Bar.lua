@@ -54,13 +54,19 @@ local function Restore()
     end
 end
 
+local barErrors = {} -- each failing bar item reported once
+
 function ns.UpdateBar()
     if not bar then return end
     local s = ReelDB.settings
     local parts, active = {}, false
     for _, seg in ipairs(segments) do
         if not s.barHidden[seg.key] then
-            local segText, segActive = seg.text(s)
+            local ok, segText, segActive = pcall(seg.text, s)
+            if not ok then
+                if not barErrors[seg.key] then barErrors[seg.key] = true; geterrorhandler()(segText) end
+                segText, segActive = nil, false
+            end
             if type(segText) == "table" then
                 for _, t in ipairs(segText) do parts[#parts + 1] = t end
             elseif segText then

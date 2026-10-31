@@ -90,7 +90,7 @@ ns.RegisterPage({
         -- About
         local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
         local version = getMeta and getMeta("Reel", "Version") or "?"
-        local about = W.Note(panel, string.format("R.E.E.L. %s by Hal Sudsworth. Source and bug reports: github.com/halsudsworth/Reel. For a bug, type /reel debug, then /reload, and attach WTF\\Account\\<account>\\SavedVariables\\Reel.lua to the issue.", version), ns.CONTENT_WIDTH - 4)
+        local about = W.Note(panel, string.format("R.E.E.L. %s by Hal Sudsworth. Source and bug reports: github.com/halsudsworth/Reel. For a bug, type /reel debug, then /reload, and paste the debug block from WTF\\Account\\<account>\\SavedVariables\\Reel.lua into the issue.", version), ns.CONTENT_WIDTH - 4)
         about:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 0, 4)
 
         return function()

@@ -89,11 +89,20 @@ function ns.StartSession()
     ns.Fire("REEL_DATA_CHANGED")
 end
 
--- Clears every character's catch data.
+local function NewId()
+    return string.format("%04x%04x%04x%04x", math.random(0, 65535), math.random(0, 65535), math.random(0, 65535), math.random(0, 65535))
+end
+
+-- Clears every character's catch data. Each keeps its id, which is how the site knows its journal:
+-- a new one would be refused under the name the old one claimed.
 function ns.ResetData()
-    ReelDB.chars = {}
-    data = InitData({})
-    ReelDB.chars[ns.CharKey()] = data
+    local kept = {}
+    for k, d in pairs(ReelDB.chars) do kept[k] = { id = d.id } end
+    ReelDB.chars = kept
+    local key = ns.CharKey()
+    data = InitData(ReelDB.chars[key] or {})
+    data.id = data.id or NewId()
+    ReelDB.chars[key] = data
     ns.StartSession()
 end
 
@@ -123,9 +132,7 @@ ns.On("REEL_READY", function()
     end
     data = InitData(ReelDB.chars[key] or {})
     ReelDB.chars[key] = data
-    if not data.id then
-        data.id = string.format("%04x%04x%04x%04x", math.random(0, 65535), math.random(0, 65535), math.random(0, 65535), math.random(0, 65535))
-    end
+    data.id = data.id or NewId()
 end)
 
 local picked = false

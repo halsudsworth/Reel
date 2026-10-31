@@ -15,8 +15,8 @@ ns.RegisterDefaults({
     oneKeyLure = true, -- the Fish key applies a lure first when the pole has none
 })
 
-BINDING_NAME_CLICK_ReelFishButton_LeftButton = "Fish (lure, cast, reel in)"
-BINDING_NAME_CLICK_ReelLureKeyButton_LeftButton = "Apply lure"
+_G["BINDING_NAME_CLICK ReelFishButton:LeftButton"] = "Fish (lure, cast, reel in)"
+_G["BINDING_NAME_CLICK ReelLureKeyButton:LeftButton"] = "Apply lure"
 BINDING_NAME_REEL_TOGGLE_WINDOW = "Toggle the R.E.E.L. window"
 
 function ReelToggleWindow()

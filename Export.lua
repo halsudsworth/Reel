@@ -70,6 +70,7 @@ end
 local function Ruleset()
     local rules = Enum and Enum.GameRule
     if not (C_GameRules and C_GameRules.IsGameRuleActive and rules) then return end
+    if rules.HardcoreRuleset == nil and rules.RPRuleset == nil and rules.PvPRuleset == nil then return end
     local function On(rule) return rule ~= nil and C_GameRules.IsGameRuleActive(rule) end
     if On(rules.HardcoreRuleset) then return "Hardcore" end
     local rp, pvp = On(rules.RPRuleset), On(rules.PvPRuleset)

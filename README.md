@@ -30,7 +30,7 @@ Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOn
 
 ## Reporting a bug
 
-Open an issue on GitHub. Before you do, type `/reel debug` in game and then `/reload`; that writes what the client reported about your fishing skill, lures and buffs into `WTF\Account\<account>\SavedVariables\Reel.lua`. Attach that file to the issue along with any error text, and say which preset or toggles you had on.
+Open an issue on GitHub. Before you do, type `/reel debug` in game and then `/reload`; that writes what the client reported about your fishing skill, lures and buffs into `WTF\Account\<account>\SavedVariables\Reel.lua`. Paste only its `["debug"]` block into the issue, along with any error text, and say which preset or toggles you had on. Don't attach the whole file: it holds your characters' ids, which let anyone replace their journals on the site.
 
 ## License
 

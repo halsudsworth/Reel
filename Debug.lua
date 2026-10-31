@@ -108,6 +108,10 @@ function ns.Debug()
     -- What the client says each fished loot came from (pool object or not); see below.
     d.lootSources = ReelDB.debugLoot or "none yet: fish a few times, then /reel debug again"
 
+    -- Settings an option asked for that this client doesn't have.
+    d.missingCVars = {}
+    for cvar in pairs(ns.missingCVars) do d.missingCVars[#d.missingCVars + 1] = cvar end
+
     ReelDB.debug = d
     ns.Print("Debug info saved. Type /reload so it's written to disk.")
 end

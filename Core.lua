@@ -104,7 +104,9 @@ eventFrame:SetScript("OnEvent", function(_, event, ...) ns.Fire(event, ...) end)
 ns.RegisterDefaults({ restoreDelay = 20 })
 
 local providers = {}
-local missingWarned = {}
+-- Settings this client doesn't have (graphicsPBRLiquidDetail where the card can't do that water,
+-- say). Listed in /reel debug rather than printed to chat, where it read like an error.
+ns.missingCVars = {}
 local lastFishing = 0     -- when the last Fishing channel ended (or started)
 local channeling = false  -- a Fishing bobber is out right now
 local fishing = false     -- between REEL_FISHING_BEGIN and REEL_FISHING_END
@@ -157,10 +159,7 @@ local function Apply()
             saved[cvar] = GetCVarValue(cvar)
         end
         if saved[cvar] == nil then
-            if not missingWarned[cvar] then
-                missingWarned[cvar] = true
-                ns.Print("This client has no " .. cvar .. " setting, so that option does nothing.")
-            end
+            ns.missingCVars[cvar] = true
         else
             SetCVarValue(cvar, value)
         end

@@ -3,7 +3,7 @@
 ## Notes: A fishing addon.
 ## Version: @project-version@
 ## Author: HalSudsworth
-## X-Website: https://github.com/halsudsworth/Reel
+## X-Website: https://halsudsworth.com
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1764126
 ## X-Wago-ID: b6XyZjKp

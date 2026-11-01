@@ -56,10 +56,12 @@ end
 
 -- Returns base rank, bonus, and max rank, or nil if the skill isn't found.
 function ns.FishingSkill()
-    if not GetProfessions then return end
-    local _, _, _, fishing = GetProfessions()
-    if not fishing then return end
-    local _, _, rank, maxRank = GetProfessionInfo(fishing)
+    if not (GetProfessions and GetProfessionInfo) then return end
+    local ok, _, _, _, fishing = pcall(GetProfessions)
+    if not (ok and fishing) then return end
+    -- If the client's answer isn't what's expected, the skill shows as unknown rather than erroring.
+    local okInfo, _, _, rank, maxRank = pcall(GetProfessionInfo, fishing)
+    if not (okInfo and type(rank) == "number") then return end
     return rank, GearBonus() + BuffBonus(), maxRank
 end
 

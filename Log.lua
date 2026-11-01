@@ -89,8 +89,20 @@ function ns.StartSession()
     ns.Fire("REEL_DATA_CHANGED")
 end
 
+-- A character's id: random, mixed with the character's name and the moment it's made, so two
+-- characters can't draw the same one even if the client seeds its random numbers the same way.
+local function Hash16(s)
+    local h = 5381
+    for i = 1, #s do h = (h * 33 + s:byte(i)) % 65536 end
+    return h
+end
+
 local function NewId()
-    return string.format("%04x%04x%04x%04x", math.random(0, 65535), math.random(0, 65535), math.random(0, 65535), math.random(0, 65535))
+    local seed = table.concat({ GetUnitName and GetUnitName("player", true) or "", ns.Now(), GetTime and GetTime() or 0,
+        debugprofilestop and debugprofilestop() or 0, math.random(0, 2147483647) }, "|")
+    local parts = {}
+    for k = 1, 4 do parts[k] = (Hash16(seed .. k) + math.random(0, 65535)) % 65536 end
+    return string.format("%04x%04x%04x%04x", parts[1], parts[2], parts[3], parts[4])
 end
 
 -- Clears every character's catch data. Each keeps its id, which is how the site knows its journal:

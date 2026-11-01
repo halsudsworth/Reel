@@ -34,8 +34,14 @@ ns.SpellName = SpellName
 
 -- The server's clock in Unix seconds. time() is the player's own computer clock and can be
 -- set to anything, so the journal stamps everything with this.
+local warnedClock = false
 function ns.Now()
-    return GetServerTime and GetServerTime() or time()
+    if GetServerTime then return GetServerTime() end
+    if not warnedClock then
+        warnedClock = true
+        ns.Print("This client has no server clock, so catches are timed by your computer's clock. If it's set wrong, so are they.")
+    end
+    return time()
 end
 
 -- 452 -> "7:32", 4380 -> "1h 13m", 529133 -> "6d 2h"

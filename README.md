@@ -26,7 +26,7 @@ For World of Warcraft: Forever only.
 
 ## Setup
 
-Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel` to open the settings. The bar, lure button and journal work straight away. Clean View and the immersion options start off: pick a preset on the General page (Just the bar, Clean, Full immersion) to turn them on, then adjust from there.
+Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel` to open the settings (or `/reelfish`, if another addon such as Reel Deal also uses `/reel`). The bar, lure button and journal work straight away. Clean View and the immersion options start off: pick a preset on the General page (Just the bar, Clean, Full immersion) to turn them on, then adjust from there.
 
 ## Reporting a bug
 

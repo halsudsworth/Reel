@@ -21,7 +21,7 @@ end
 local counted = false -- one count per cast, like Log.lua
 ns.On("REEL_CAST", function() counted = false end)
 
-ns.On("LOOT_OPENED", function()
+local function OnLoot()
     if not IsFishingLoot() or counted or not ns.HasLuremaster() or not ns.LureTimeLeft() then return end
     counted = true
     local session, added = ns.session, false
@@ -35,4 +35,6 @@ ns.On("LOOT_OPENED", function()
         end
     end
     if added then ns.Fire("REEL_DATA_CHANGED") end
-end)
+end
+ns.On("LOOT_READY", OnLoot) -- the only one that fires with auto-loot on
+ns.On("LOOT_OPENED", OnLoot)

@@ -346,6 +346,7 @@ end
 -- Slash command -------------------------------------------------------------
 
 SLASH_REEL1 = "/reel"
+SLASH_REEL2 = "/reelfish" -- Reel Deal also takes /reel
 SlashCmdList.REEL = function(msg)
     msg = strtrim(msg or ""):lower()
     if msg == "reset" then
@@ -364,3 +365,14 @@ SlashCmdList.REEL = function(msg)
         ns.ToggleWindow()
     end
 end
+
+-- Another addon claiming /reel too means one of us loses it; say how to reach this one.
+ns.On("PLAYER_LOGIN", function()
+    for k, v in pairs(_G) do
+        if type(k) == "string" and k:find("^SLASH_") and k ~= "SLASH_REEL1"
+            and type(v) == "string" and v:lower() == "/reel" then
+            ns.Print("Another addon also uses /reel. Type /reelfish to open R.E.E.L.")
+            return
+        end
+    end
+end)

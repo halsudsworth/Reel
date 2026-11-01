@@ -119,9 +119,12 @@ end
 -- The last 20 fishing loot windows with GetLootSourceInfo for each slot, to learn
 -- whether the client names the pool a catch came out of.
 local LOOT_KEEP = 20
-ns.On("LOOT_OPENED", function()
-    if not IsFishingLoot() then return end
-    local entry = { time = date("%Y-%m-%d %H:%M:%S"), zone = GetZoneText(), sub = GetSubZoneText(), slots = {} }
+local logged = false -- one entry per cast, whichever loot event comes first
+ns.On("REEL_CAST", function() logged = false end)
+local function OnLoot(event)
+    if not IsFishingLoot() or logged then return end
+    logged = true
+    local entry = { time = date("%Y-%m-%d %H:%M:%S"), event = event, zone = GetZoneText(), sub = GetSubZoneText(), slots = {} }
     for slot = 1, GetNumLootItems() do
         entry.slots[#entry.slots + 1] = {
             item = GetLootSlotLink(slot),
@@ -131,7 +134,9 @@ ns.On("LOOT_OPENED", function()
     ReelDB.debugLoot = ReelDB.debugLoot or {}
     table.insert(ReelDB.debugLoot, 1, entry)
     for i = #ReelDB.debugLoot, LOOT_KEEP + 1, -1 do ReelDB.debugLoot[i] = nil end
-end)
+end
+ns.On("LOOT_READY", function() OnLoot("LOOT_READY") end)
+ns.On("LOOT_OPENED", function() OnLoot("LOOT_OPENED") end)
 
 -- /reel debug sound: logs in to voice chat, then runs the mic test on
 -- every input device in turn, DEVICE_SECONDS each, counting the sound-level

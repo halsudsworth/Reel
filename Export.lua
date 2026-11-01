@@ -66,6 +66,17 @@ local function Region()
     return GetCurrentRegion and REGIONS[GetCurrentRegion()] or ""
 end
 
+-- The raw region number and the realm number from the player's GUID
+-- ("Player-4618-..."), sent alongside region in case the client names no region.
+local function RegionId()
+    return GetCurrentRegion and GetCurrentRegion() or nil
+end
+
+local function RealmId()
+    local guid = UnitGUID and UnitGUID("player")
+    return guid and tonumber(guid:match("^Player%-(%d+)%-")) or nil
+end
+
 -- Nil where the client has no game rules to ask.
 local function Ruleset()
     local rules = Enum and Enum.GameRule
@@ -156,6 +167,8 @@ function ns.ExportString()
         '"name":' .. Str(name or ""),
         '"secondary":' .. Str(secondary or ""),
         '"region":' .. Str(Region()),
+        '"regionId":' .. Num(RegionId()),
+        '"realmId":' .. Num(RealmId()),
         '"faction":' .. Str(UnitFactionGroup("player") or ""),
         '"class":' .. Str(select(2, UnitClass("player")) or ""),
         '"skill":' .. Num(rank),

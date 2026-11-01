@@ -97,7 +97,7 @@ end
 -- a new one would be refused under the name the old one claimed.
 function ns.ResetData()
     local kept = {}
-    for k, d in pairs(ReelDB.chars) do kept[k] = { id = d.id } end
+    for k, d in pairs(ReelDB.chars) do kept[k] = InitData({ id = d.id }) end
     ReelDB.chars = kept
     local key = ns.CharKey()
     data = InitData(ReelDB.chars[key] or {})
@@ -133,6 +133,8 @@ ns.On("REEL_READY", function()
     data = InitData(ReelDB.chars[key] or {})
     ReelDB.chars[key] = data
     data.id = data.id or NewId()
+    -- 1.0.0-beta.3's reset left other characters as { id } alone; Stats reads every one.
+    for _, d in pairs(ReelDB.chars) do InitData(d) end
 end)
 
 local picked = false
@@ -168,10 +170,12 @@ end)
 
 -- One catch per cast: the loot window can open twice for one bobber
 -- (closed and reopened with a full bag), and that must not count twice.
+-- LOOT_READY comes first and is the one that fires with auto-loot on, when the
+-- window never opens; LOOT_OPENED stays in case a client skips LOOT_READY.
 local counted = false
 ns.On("REEL_CAST", function() counted = false end)
 
-ns.On("LOOT_OPENED", function()
+local function OnLoot()
     if not IsFishingLoot() or counted then return end
     counted = true
     local now = ns.Now()
@@ -208,7 +212,9 @@ ns.On("LOOT_OPENED", function()
         end
     end
     ns.Fire("REEL_DATA_CHANGED")
-end)
+end
+ns.On("LOOT_READY", OnLoot)
+ns.On("LOOT_OPENED", OnLoot)
 
 -- "Caught 42 (+6 bonus)"; the bonus part only with Luremaster.
 ns.RegisterBarSegment({

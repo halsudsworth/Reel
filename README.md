@@ -2,31 +2,47 @@
 
 # R.E.E.L.: A Fishing Addon
 
-Every fishing addon gives you a lure button and a catch log. R.E.E.L. gives you those, then clears everything else off your screen. Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need. We removed everything. Except your fishing line, you'll want that.
+Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need. We removed everything. Except your fishing line, you'll want that.
+
+While you fish, R.E.E.L. writes it all down. Every catch goes in your journal with where and when you caught it, the rare ones light up in Records, and each zone shows the fish you're still missing. If you want to see how you stack up, you can paste it on halsudsworth.com.
 
 For World of Warcraft: Forever only.
 
-## What it does
+## Clean View and immersion
 
-- **Lures:** one-click button that picks your best lure, or the one you choose. Lure timer on the bar, red warning before it runs out.
-- **Buffs:** food and camp buff timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
-- **One key:** bind Fish once. It applies a lure if your pole has none, casts, and reels in when the bobber goes. Or double-click the water to cast. Keybinds for the lure and the window too.
-- **Journal:** every catch logged per character. Fish, zones, sessions, records, and which fish in this zone you're still missing.
-- **Records:** the catches worth bragging about, lit up with date and zone when you land them. The 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares. Feats for fishing every zone and finishing one. Lifetime derby coins.
+- **Clean View:** the whole UI fades while you fish. Keep the bar, loot window, chat or minimap if you want them. It comes back when you walk off, unequip your pole, hit Escape or click Show UI, and instantly if anything attacks you.
+- **Immersion:** hide names, nameplates, combat text, error messages and the bobber tooltip. Auto-loot, so no loot window. Max graphics while you fish, your own settings after.
+- **Sound:** music and ambience down, effects up, chatter muted.
+- **Cinematic:** a fishing camera angle and letterbox bars.
+- These start off. Pick a preset on the General page (Just the bar, Clean, Full immersion).
+
+## At the water
+
+- **Lures:** one-click button for your best lure or the one you choose. Timer on the bar, red before it runs out.
+- **Buffs:** food and camp timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
+- **One key:** bind Fish once. It puts on a lure, casts, and reels in when the bobber goes.
 - **Cooking:** recipes on fish tooltips, with the vendor and zone to buy them.
-- **Sound:** splash booster. Music and ambience off, effects up, chatter muted, so the splash is the only thing you hear.
-- **Derby:** a Speckled Tastyfish counter for the Stranglethorn Fishing Extravaganza, shown while the contest runs.
-- **The bar:** skill and cap with bonus, lure, food, camp, zone fish count. One line, any size you like. Nothing pops up, nothing plays a sound.
 
-## The part nobody else does
+## The journal
 
-- **Clean View:** the whole UI fades while you fish. Keep the bar, loot window, chat or minimap if you want them. Bring it back your way: start walking, unequip your pole, hit Escape, or click the Show UI button. If anything attacks you, it's back instantly.
-- **Immersion:** hide floating names and nameplates, combat text and error messages, the bobber tooltip. Auto-loot so there's no loot window. Max graphics while you fish, back to your settings after.
-- **Cinematic:** an optional fishing camera angle and letterbox bars.
+- **Every catch:** logged per character with time, zone and skill. Fish, zones, sessions and records.
+- **Records:** the 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares. Feats for fishing every zone and finishing one.
+- **Derby:** a Speckled Tastyfish counter during the Extravaganza, and your Master Angler wins kept.
+
+## Leaderboards and events
+
+R.E.E.L. comes with a website, [halsudsworth.com](https://halsudsworth.com), run by Hal Sudsworth, the angler who made it. Type `/reel export`, copy the text and paste it there, and your catches count toward:
+
+- **Events all year:** the First cast tour, the Loch Frenzy race, the Winter Veil feast, Da Big Catch, Man vs. machine, the Feralas cook-off, Hallow's feud and more, each with its own place, fish and rules.
+- **Challenges:** a new daily and weekly challenge.
+- **Leaderboards:** for every zone. Hal reads the top ten himself.
+- **Your character:** a page with its records, trophies and a tier list of every zone you've fished.
+
+No account needed. Nothing leaves your game unless you paste it.
 
 ## Setup
 
-Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. Type `/reel` to open the settings (or `/reelfish`, if another addon such as Reel Deal also uses `/reel`). The bar, lure button and journal work straight away. Clean View and the immersion options start off: pick a preset on the General page (Just the bar, Clean, Full immersion) to turn them on, then adjust from there.
+Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. `/reel` opens the settings (`/reelfish` if another addon uses `/reel`).
 
 ## Reporting a bug
 

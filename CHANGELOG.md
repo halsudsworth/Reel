@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.2
+
+- Catches with auto-loot on are logged in the journal.
+- `/reelfish` opens the settings too, for when another addon also uses `/reel`.
+- The export carries your region and realm IDs, so the site can tell characters with the same name apart.
+- Characters left empty by a reset are repaired.
+- Each zone is logged with its map ID, so the site can read journals from translated clients (German, French and so on).
+- Character ids mix in the name and time, so two characters can't end up with the same one.
+- A warning in chat if the game doesn't report the server's time, and reading your fishing skill can't cause an error.
+- A setting the client doesn't have is listed in `/reel debug` instead of printed to chat.
+- The addon's website is halsudsworth.com.
+
 ## 1.0.0-beta.3
 
 - Reset catch data keeps each character's id, so the site still takes that character's journal afterwards.

@@ -66,11 +66,30 @@ ns.On("BAG_UPDATE_DELAYED", TrackCoins)
 -- journal's Ruleset. The same name twice within a few hours is one win.
 local WINNER = "^We have a winner! (.-) is one of our Master Anglers this week!"
 
-ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender)
-    if sender ~= "Riggle Bassbait" or type(text) ~= "string" then return end
-    local name = text:match(WINNER)
+local RIGGLE = 15077
+
+local function IsRiggle(sender, guid)
+    if sender == "Riggle Bassbait" then return true end
+    local id = type(guid) == "string" and guid:match("^Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+    return tonumber(id) == RIGGLE
+end
+
+ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender, _, _, _, _, _, _, _, _, _, guid)
+    if type(text) ~= "string" or not IsRiggle(sender, guid) then return end
     local data = ns.Data()
-    if not name or not data then return end
+    if not data then return end
+    local name = text:match(WINNER)
+    if not name then
+        -- Not the English winner line: keep it as heard (once a day, at most 30 lines).
+        data.yells = data.yells or {}
+        local now = ns.Now()
+        for _, y in ipairs(data.yells) do
+            if y[2] == text and now - y[1] < 86400 then return end
+        end
+        if #data.yells >= 30 then table.remove(data.yells, 1) end
+        table.insert(data.yells, { now, text })
+        return
+    end
     data.wins = data.wins or {}
     local now = ns.Now()
     for _, w in ipairs(data.wins) do

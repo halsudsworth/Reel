@@ -319,6 +319,14 @@ ns.On("PLAYER_LOGIN", function()
     ns.Fire("REEL_READY")
 end)
 
+-- The map ID under the player, or nil. Zone names come in the client's language; the ID
+-- doesn't, so the site can tell which zone a non-English journal means.
+function ns.MapID()
+    if not (C_Map and C_Map.GetBestMapForUnit) then return end
+    local ok, map = pcall(C_Map.GetBestMapForUnit, "player")
+    if ok and type(map) == "number" then return map end
+end
+
 -- The player's map position as 0 to 100 percent, one decimal, or nil where the client
 -- gives none (instances).
 function ns.MapPosition()

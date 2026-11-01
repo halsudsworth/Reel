@@ -181,6 +181,11 @@ local function OnLoot()
     local now = ns.Now()
     local session = ns.session
     local entry, zone, sub = ns.ZoneEntry()
+    local map = ns.MapID()
+    if map then
+        data.maps = data.maps or {}
+        data.maps[zone] = map
+    end
     local x, y = ns.MapPosition()
     local skill = ns.FishingSkill()
     local level = UnitLevel("player")

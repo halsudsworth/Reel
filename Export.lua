@@ -156,9 +156,11 @@ function ns.ExportString()
 
     local wins = {}
     for _, w in ipairs(data.wins or {}) do wins[#wins + 1] = List({ Num(w[1]), Str(w[2]) }) end
+    local yells = {}
+    for _, y in ipairs(data.yells or {}) do yells[#yells + 1] = List({ Num(y[1]), Str(y[2]) }) end
 
-    local zlist, slist = {}, {}
-    for i, z in ipairs(zl) do zlist[i] = Str(z) end
+    local zlist, zmaps, slist = {}, {}, {}
+    for i, z in ipairs(zl) do zlist[i] = Str(z); zmaps[i] = Num(data.maps and data.maps[z] or 0) end
     for i, s in ipairs(sl) do slist[i] = Str(s) end
 
     local fields = {
@@ -178,11 +180,14 @@ function ns.ExportString()
         '"tz":' .. Num(LocalOffset(now)),
         '"stz":' .. Num(ServerOffset(now)),
         '"zl":' .. List(zlist),
+        '"zm":' .. List(zmaps),
+        '"locale":' .. Str(GetLocale and GetLocale() or ""),
         '"sl":' .. List(slist),
         '"zones":' .. List(zones),
         '"sessions":' .. List(sessions),
         '"catches":' .. List(catches),
         '"wins":' .. List(wins),
+        '"yells":' .. List(yells),
         '"events":[]',
     }
     local ruleset = Ruleset()

@@ -32,6 +32,19 @@ function ns.Debug()
         d.ProfessionInfoBySkillLine356 = "no C_TradeSkillUI"
     end
     d.GetWeaponEnchantInfo = Try(GetWeaponEnchantInfo)
+    d.locale = GetLocale and GetLocale()
+    d.mapHere = ns.MapID()
+    d.maps = {}
+    if C_Map and C_Map.GetMapInfo then
+        for id = 1, 3000 do
+            local ok, info = pcall(C_Map.GetMapInfo, id)
+            if ok and info and info.name and (info.mapType == 3 or info.mapType == 2) then
+                d.maps[#d.maps + 1] = { id = id, name = info.name, type = info.mapType, parent = info.parentMapID }
+            end
+        end
+    else
+        d.maps = "no C_Map.GetMapInfo"
+    end
     d.FishingSkill = Pack(ns.FishingSkill())
 
     d.buffs = {}

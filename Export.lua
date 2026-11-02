@@ -137,7 +137,11 @@ function ns.ExportString()
         for sub, entry in pairs(subs) do
             local counts = {}
             for id, item in pairs(entry.items) do counts[id] = item.count end
-            zones[#zones + 1] = List({ Num(Zone(zone)), Str(sub), Num(entry.casts), Num(entry.catches), Counts(counts) })
+            local skills = {}
+            for total, cell in pairs(entry.skills or {}) do
+                skills[#skills + 1] = List({ Num(total), Num(cell[1]), Num(cell[2]) })
+            end
+            zones[#zones + 1] = List({ Num(Zone(zone)), Str(sub), Num(entry.casts), Num(entry.catches), Counts(counts), List(skills) })
         end
     end
 

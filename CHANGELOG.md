@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The journal counts your casts and catches at each fishing skill in every spot, lure and gear included, so the site can work out the skill each zone needs.
+
 ## 1.0.0-rc.4
 
 - A catch right after a loading screen, when the game hasn't named the zone yet, is logged under Unknown instead of breaking the export.

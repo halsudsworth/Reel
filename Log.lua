@@ -171,6 +171,10 @@ ns.On("PLAYER_LOGOUT", function()
     ns.session.seen = ns.Now()
 end)
 
+-- Casts and catches per skill (base plus lure, gear and buffs) in each spot, so the site can work out
+-- the skill a zone needs and the skill where nothing gets away. skillCell is this cast's { casts, catches }.
+local skillCell
+
 ns.On("REEL_CAST", function()
     local session = ns.session
     session.casts = session.casts + 1
@@ -179,6 +183,15 @@ ns.On("REEL_CAST", function()
     session.last = now
     local entry = ns.ZoneEntry()
     entry.casts = entry.casts + 1
+    skillCell = nil
+    local rank, bonus = ns.FishingSkill()
+    if rank then
+        local total = rank + (bonus or 0)
+        entry.skills = entry.skills or {}
+        skillCell = entry.skills[total] or { 0, 0 }
+        entry.skills[total] = skillCell
+        skillCell[1] = skillCell[1] + 1
+    end
     ns.Fire("REEL_DATA_CHANGED")
 end)
 
@@ -204,6 +217,7 @@ local function OnLoot()
     local skill = ns.FishingSkill()
     local level = UnitLevel("player")
     entry.catches = entry.catches + 1
+    if skillCell then skillCell[2] = skillCell[2] + 1 end
     session.catches = session.catches + 1
     session.last = now
     for slot = 1, GetNumLootItems() do

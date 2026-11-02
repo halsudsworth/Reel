@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.4
+
+- A catch right after a loading screen, when the game hasn't named the zone yet, is logged under Unknown instead of breaking the export.
+- The fishing camera is remembered per character, so logging in on an alt no longer moves its camera.
+- The clear-all warning says what goes: journals, records, derby coins and Riggle's winners, for every character on the account.
+- An event the game client doesn't have is skipped and listed in `/reel debug`, instead of stopping the addon from loading.
+- No errors if the saved data couldn't be loaded.
+
 ## 1.0.0-rc.3
 
 - The fish data is rebuilt. Each fish knows the zones where it's a real catch and where to go for it.

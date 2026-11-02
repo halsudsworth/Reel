@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0-rc.5
 
 - The journal counts your casts and catches at each fishing skill in every spot, lure and gear included, so the site can work out the skill each zone needs.
 

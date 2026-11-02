@@ -46,7 +46,9 @@ end
 ns.session = NewSession()
 
 function ns.ZoneEntry()
-    local zone = GetZoneText() or "Unknown"
+    -- Right after a loading screen the game can report "" for a moment.
+    local zone = GetZoneText()
+    if not zone or zone == "" then zone = "Unknown" end
     local sub = GetSubZoneText()
     if not sub or sub == "" then sub = zone end
     data.zones[zone] = data.zones[zone] or {}
@@ -151,7 +153,7 @@ end)
 
 local picked = false
 ns.On("PLAYER_ENTERING_WORLD", function(isInitialLogin)
-    if picked then return end -- also fires on every loading screen
+    if picked or not data then return end -- also fires on every loading screen
     picked = true
     local list = data.sessions
     local current = list[#list]
@@ -188,7 +190,7 @@ local counted = false
 ns.On("REEL_CAST", function() counted = false end)
 
 local function OnLoot()
-    if not IsFishingLoot() or counted then return end
+    if not data or not IsFishingLoot() or counted then return end
     counted = true
     local now = ns.Now()
     local session = ns.session

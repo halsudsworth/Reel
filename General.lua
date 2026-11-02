@@ -31,7 +31,7 @@ local function ApplyPreset(preset)
 end
 
 StaticPopupDialogs.REEL_RESET = {
-    text = "Clear all R.E.E.L. catch data? This can't be undone.",
+    text = "Clear R.E.E.L.'s catch data for every character on this account? Journals, records, derby coins and Riggle's winners all go. This can't be undone.",
     button1 = YES,
     button2 = NO,
     OnAccept = function()

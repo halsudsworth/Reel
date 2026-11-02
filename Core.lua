@@ -73,8 +73,10 @@ local eventFrame = CreateFrame("Frame")
 function ns.On(event, fn)
     if not handlers[event] then
         handlers[event] = {}
-        if not event:find("^REEL_") then
-            eventFrame:RegisterEvent(event)
+        -- pcall: an event this client doesn't have is skipped, not an error that stops the file loading.
+        if not event:find("^REEL_") and not pcall(eventFrame.RegisterEvent, eventFrame, event) then
+            ns.missingEvents = ns.missingEvents or {}
+            table.insert(ns.missingEvents, event)
         end
     end
     table.insert(handlers[event], fn)

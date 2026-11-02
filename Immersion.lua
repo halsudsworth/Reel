@@ -98,13 +98,15 @@ local function HideErrors(hide)
     UIErrorsFrame:SetShown(not hide)
 end
 
--- ReelDB.cameraMoved remembers a camera left on the fishing view through a
--- /reload or disconnect, so the next login puts it back instead of saving
--- the fishing angle as the return view.
+-- The character's cameraMoved remembers a camera left on the fishing view
+-- through a /reload or disconnect, so that character's next login puts it
+-- back instead of saving the fishing angle as the return view. Per character,
+-- so an alt's camera doesn't jump.
 local function MoveCamera(fishing)
     if not (SaveView and SetView) or fishing == cameraMoved then return end
     cameraMoved = fishing
-    ReelDB.cameraMoved = fishing or nil
+    local d = ns.Data()
+    if d then d.cameraMoved = fishing or nil end
     if fishing then
         SaveView(RETURN_VIEW)
         SetView(FISHING_VIEW)
@@ -142,9 +144,11 @@ ns.On("PLAYER_REGEN_DISABLED", function()
 end)
 
 ns.On("REEL_READY", function()
-    if ReelDB.cameraMoved and SetView then
+    ReelDB.cameraMoved = nil -- the old account-wide flag
+    local d = ns.Data()
+    if d and d.cameraMoved and SetView then
         SetView(RETURN_VIEW) -- left on the fishing view by a reload or disconnect
-        ReelDB.cameraMoved = nil
+        d.cameraMoved = nil
     end
     -- Object tooltips (the bobber is a game object) are dropped while a
     -- bobber is out. Other objects' tooltips come back between casts.

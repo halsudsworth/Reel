@@ -125,6 +125,9 @@ function ns.Debug()
     d.missingCVars = {}
     for cvar in pairs(ns.missingCVars) do d.missingCVars[#d.missingCVars + 1] = cvar end
 
+    -- Events this client doesn't have, skipped at load.
+    d.missingEvents = ns.missingEvents or {}
+
     ReelDB.debug = d
     ns.Print("Debug info saved. Type /reload so it's written to disk.")
 end

@@ -1,62 +1,59 @@
--- Fishing data for WoW Forever, read from Wowhead's Forever database
--- (wowhead.com/forever) on 2026-10-19. Zone numbers are Wowhead's share of
--- catches in that zone, in percent; 0.05 means a trace amount (<0.1%).
--- best: where to send people for that fish, when the biggest percent comes
--- from a zone Wowhead has logged under 10,000 catches in (too few to trust),
--- from a battleground, or from a capital city. A capital is never sent to the
--- other faction, so those fish carry one pick per faction. Read 2026-10-27.
+-- Fishing data for WoW Forever. zones: where each fish is a real catch (not
+-- just a trace). best: where to send people for it; a capital is never sent to
+-- the other faction, so those fish carry one pick per faction. A script writes
+-- both; don't edit them by hand.
 
 local _, ns = ...
 
--- itemID -> { name, zones = { zone -> percent } }
+-- itemID -> { name, best = zone or { Alliance, Horde }, zones = { zone, ... } }
 ns.FISH = {
-    [6291] = { name = "Raw Brilliant Smallfish", zones = { ["Elwynn Forest"] = 58.9, ["Mulgore"] = 59.8, ["Stormwind City"] = 17.1, ["Dun Morogh"] = 59.9, ["Orgrimmar"] = 16.9, ["The Barrens"] = 5.1, ["Thunder Bluff"] = 17.0, ["Tirisfal Glades"] = 45.4, ["Teldrassil"] = 25.5, ["Durotar"] = 22.2, ["Darkshore"] = 2.8, ["Darnassus"] = 17.0, ["Undercity"] = 11.7, ["Loch Modan"] = 8.7, ["Westfall"] = 1.2, ["Silverpine Forest"] = 1.3, ["Duskwood"] = 20.4, ["Tanaris"] = 0.05, ["Azshara"] = 0.05, ["Ashenvale"] = 0.05, ["Moonglade"] = 0.05 } },
-    [6303] = { name = "Raw Slitherskin Mackerel", zones = { ["Darkshore"] = 13.1, ["The Barrens"] = 5.5, ["Durotar"] = 59.7, ["Teldrassil"] = 56.2, ["Westfall"] = 13.9, ["Silverpine Forest"] = 12.4, ["Tirisfal Glades"] = 1.3, ["Dustwallow Marsh"] = 0.05 } },
-    [6289] = { name = "Raw Longjaw Mud Snapper", best = { Alliance = "Stormwind City", Horde = "Thunder Bluff" }, zones = { ["Stormwind City"] = 59.9, ["Orgrimmar"] = 59.8, ["The Barrens"] = 17.9, ["Thunder Bluff"] = 60.0, ["Elwynn Forest"] = 37.1, ["Stonetalon Mountains"] = 27.3, ["Ashenvale"] = 21.3, ["Redridge Mountains"] = 35.2, ["Darkshore"] = 9.9, ["Mulgore"] = 38.2, ["Darnassus"] = 59.9, ["Dun Morogh"] = 38.1, ["Undercity"] = 41.7, ["Hillsbrad Foothills"] = 7.4, ["Loch Modan"] = 30.0, ["Tirisfal Glades"] = 29.0, ["Durotar"] = 15.5, ["Teldrassil"] = 16.2, ["Westfall"] = 4.3, ["Silverpine Forest"] = 5.2, ["Duskwood"] = 30.3, ["Wetlands"] = 1.0, ["Azshara"] = 0.05, ["Arathi Basin"] = 43.9 } },
-    [6317] = { name = "Raw Loch Frenzy", zones = { ["Loch Modan"] = 21.7 } },
-    [6361] = { name = "Raw Rainbow Fin Albacore", zones = { ["Wetlands"] = 48.8, ["Darkshore"] = 19.1, ["The Barrens"] = 8.0, ["Ashenvale"] = 19.3, ["Hillsbrad Foothills"] = 12.3, ["Westfall"] = 20.3, ["Silverpine Forest"] = 18.7, ["Dustwallow Marsh"] = 0.05 } },
-    [6308] = { name = "Raw Bristle Whisker Catfish", zones = { ["Ashenvale"] = 39.2, ["Stonetalon Mountains"] = 48.9, ["Stormwind City"] = 21.9, ["Redridge Mountains"] = 63.9, ["Dustwallow Marsh"] = 12.9, ["Orgrimmar"] = 22.3, ["The Barrens"] = 6.4, ["Hillsbrad Foothills"] = 13.4, ["Desolace"] = 14.4, ["Thunder Bluff"] = 21.9, ["Stranglethorn Vale"] = 1.5, ["Arathi Highlands"] = 25.6, ["Darkshore"] = 3.5, ["Darnassus"] = 22.0, ["Alterac Mountains"] = 12.4, ["Undercity"] = 15.0, ["Loch Modan"] = 11.6, ["Wetlands"] = 1.7, ["Duskwood"] = 47.2, ["Thousand Needles"] = 35.0, ["Swamp of Sorrows"] = 4.0, ["Westfall"] = 1.7, ["Silverpine Forest"] = 1.9, ["Arathi Basin"] = 55.8, ["Azshara"] = 0.05, ["Durotar"] = 0.6, ["Tirisfal Glades"] = 0.8 } },
-    [21071] = { name = "Raw Sagefish", zones = { ["Hillsbrad Foothills"] = 25.0, ["Loch Modan"] = 21.4, ["Ashenvale"] = 5.6, ["Stonetalon Mountains"] = 6.8, ["Silverpine Forest"] = 5.4 } },
-    [6522] = { name = "Deviate Fish", zones = { ["The Barrens"] = 26.6, ["Azshara"] = 0.05, ["Ashenvale"] = 0.05, ["Moonglade"] = 0.05, ["Orgrimmar"] = 0.05, ["Undercity"] = 9.1, ["Dustwallow Marsh"] = 0.05, ["Western Plaguelands"] = 0.05, ["Thousand Needles"] = 0.4, ["Tanaris"] = 0.1, ["Silithus"] = 0.6, ["Blasted Lands"] = 12.1, ["Thunder Bluff"] = 0.05, ["Silverpine Forest"] = 0.05 } },
-    [6299] = { name = "Sickly Looking Fish", best = { Alliance = "Tirisfal Glades", Horde = "Undercity" }, zones = { ["Undercity"] = 15.2, ["Tirisfal Glades"] = 14.8, ["Silverpine Forest"] = 0.9, ["Ashenvale"] = 0.2, ["Darkshore"] = 0.05, ["Stonetalon Mountains"] = 0.05, ["Darnassus"] = 0.1 } },
-    [6458] = { name = "Oil Covered Fish", zones = { ["Stonetalon Mountains"] = 0.2, ["The Barrens"] = 0.05 } },
-    [6362] = { name = "Raw Rockscale Cod", zones = { ["Stranglethorn Vale"] = 18.4, ["Dustwallow Marsh"] = 27.1, ["Tanaris"] = 7.0, ["Azshara"] = 2.3, ["Desolace"] = 17.5, ["Swamp of Sorrows"] = 49.0, ["Feralas"] = 2.2, ["The Hinterlands"] = 5.3, ["Arathi Highlands"] = 8.8, ["The Barrens"] = 0.05, ["Tirisfal Glades"] = 4.8 } },
-    [8365] = { name = "Raw Mithril Head Trout", best = "Arathi Highlands", zones = { ["Dustwallow Marsh"] = 23.6, ["Feralas"] = 6.3, ["Moonglade"] = 10.0, ["Desolace"] = 26.5, ["Western Plaguelands"] = 10.1, ["Stranglethorn Vale"] = 2.8, ["Arathi Highlands"] = 46.2, ["Azshara"] = 0.8, ["The Hinterlands"] = 4.7, ["Alterac Mountains"] = 23.4, ["Felwood"] = 9.9, ["Thousand Needles"] = 62.8, ["Swamp of Sorrows"] = 7.5, ["Un'Goro Crater"] = 10.2, ["Tirisfal Glades"] = 1.2, ["Eastern Plaguelands"] = 0.5, ["Ashenvale"] = 0.2, ["Hillsbrad Foothills"] = 0.05, ["Mulgore"] = 0.05 } },
-    [21153] = { name = "Raw Greater Sagefish", zones = { ["Stranglethorn Vale"] = 5.2, ["Alterac Mountains"] = 50.0 } },
-    [4603] = { name = "Raw Spotted Yellowtail", zones = { ["Azshara"] = 11.1, ["Tanaris"] = 27.4, ["Feralas"] = 9.0, ["Stranglethorn Vale"] = 7.3, ["The Hinterlands"] = 21.5, ["Dustwallow Marsh"] = 10.0, ["Desolace"] = 6.4, ["Swamp of Sorrows"] = 17.5, ["Arathi Highlands"] = 3.2, ["Eastern Plaguelands"] = 3.1, ["The Barrens"] = 0.05 } },
-    [13754] = { name = "Raw Glossy Mightfish", zones = { ["Azshara"] = 2.4, ["Tanaris"] = 6.5, ["Feralas"] = 2.2, ["The Hinterlands"] = 5.6, ["Stranglethorn Vale"] = 0.2 } },
-    [13755] = { name = "Raw Winter Squid", zones = { ["Azshara"] = 13.6, ["Tanaris"] = 5.3, ["Feralas"] = 1.7, ["The Hinterlands"] = 2.9, ["Stranglethorn Vale"] = 0.1 } },
-    [13756] = { name = "Raw Summer Bass", best = "The Hinterlands", zones = { ["Azshara"] = 1.1, ["Tanaris"] = 1.6, ["The Hinterlands"] = 2.0, ["Feralas"] = 0.5, ["Eastern Plaguelands"] = 20.3, ["Stranglethorn Vale"] = 0.05 } },
-    [13758] = { name = "Raw Redgill", zones = { ["Feralas"] = 31.8, ["Moonglade"] = 50.2, ["Western Plaguelands"] = 50.3, ["Azshara"] = 4.1, ["The Hinterlands"] = 24.2, ["Felwood"] = 50.6, ["Un'Goro Crater"] = 49.5, ["Winterspring"] = 5.0, ["Eastern Plaguelands"] = 6.9, ["Alterac Valley"] = 5.0, ["Deadwind Pass"] = 4.8, ["Desolace"] = 1.0, ["Ashenvale"] = 0.8, ["Stranglethorn Vale"] = 0.05, ["Silithus"] = 4.1, ["Swamp of Sorrows"] = 0.1, ["Duskwood"] = 0.7, ["Tanaris"] = 0.05, ["Burning Steppes"] = 2.2, ["Alterac Mountains"] = 0.05 } },
-    [13759] = { name = "Raw Nightfin Snapper", zones = { ["Feralas"] = 12.1, ["Moonglade"] = 21.8, ["Western Plaguelands"] = 20.0, ["The Hinterlands"] = 10.0, ["Azshara"] = 1.4, ["Winterspring"] = 19.8, ["Alterac Valley"] = 15.9, ["Eastern Plaguelands"] = 19.0, ["Felwood"] = 18.7, ["Deadwind Pass"] = 19.0, ["Un'Goro Crater"] = 21.6, ["Stranglethorn Vale"] = 0.2, ["Desolace"] = 0.3, ["Ashenvale"] = 0.2, ["Duskwood"] = 2.2, ["Silithus"] = 6.1, ["Burning Steppes"] = 5.1, ["Swamp of Sorrows"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Stormwind City"] = 0.05, ["Orgrimmar"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Westfall"] = 0.05 } },
-    [13760] = { name = "Raw Sunscale Salmon", best = "Eastern Plaguelands", zones = { ["Feralas"] = 5.7, ["Western Plaguelands"] = 7.7, ["Moonglade"] = 6.2, ["Azshara"] = 0.8, ["The Hinterlands"] = 3.2, ["Winterspring"] = 10.6, ["Alterac Valley"] = 14.0, ["Eastern Plaguelands"] = 10.9, ["Deadwind Pass"] = 10.7, ["Felwood"] = 8.8, ["Un'Goro Crater"] = 6.3, ["Stranglethorn Vale"] = 0.1, ["Silithus"] = 21.9, ["Desolace"] = 0.3, ["Ashenvale"] = 0.2, ["Duskwood"] = 2.1, ["Burning Steppes"] = 7.9, ["Tanaris"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Stormwind City"] = 0.05, ["Orgrimmar"] = 0.05, ["Blasted Lands"] = 3.0, ["Elwynn Forest"] = 0.05, ["Alterac Mountains"] = 0.05, ["Westfall"] = 0.05 } },
-    [13888] = { name = "Darkclaw Lobster", best = "Azshara", zones = { ["Azshara"] = 26.1, ["Eastern Plaguelands"] = 45.2 } },
-    [13889] = { name = "Raw Whitescale Salmon", zones = { ["Winterspring"] = 39.4, ["Alterac Valley"] = 39.4, ["Eastern Plaguelands"] = 37.4, ["Deadwind Pass"] = 40.1, ["Feralas"] = 0.7, ["Stranglethorn Vale"] = 0.4, ["Silithus"] = 37.3, ["Duskwood"] = 5.2, ["Burning Steppes"] = 15.2, ["Stormwind City"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Orgrimmar"] = 0.05, ["Western Plaguelands"] = 0.05, ["Felwood"] = 0.05, ["Elwynn Forest"] = 0.05, ["Westfall"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Undercity"] = 0.05, ["Blasted Lands"] = 3.0 } },
-    [13893] = { name = "Large Raw Mightfish", best = "Azshara", zones = { ["Azshara"] = 5.4, ["Eastern Plaguelands"] = 8.2 } },
-    [13890] = { name = "Raw Plated Armorfish", zones = { ["Winterspring"] = 17.4, ["Alterac Valley"] = 15.1, ["Eastern Plaguelands"] = 16.2, ["Deadwind Pass"] = 16.6, ["Feralas"] = 0.3, ["Stranglethorn Vale"] = 0.2, ["Silithus"] = 11.1, ["Duskwood"] = 2.1, ["Burning Steppes"] = 2.8, ["Western Plaguelands"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Felwood"] = 0.05 } },
-    [6358] = { name = "Oily Blackmouth", zones = { ["Stranglethorn Vale"] = 15.7, ["The Barrens"] = 18.3, ["Feralas"] = 9.3, ["Wetlands"] = 24.4, ["Tanaris"] = 7.7, ["Darkshore"] = 16.3, ["Moonglade"] = 10.0, ["Western Plaguelands"] = 10.0, ["Azshara"] = 1.7, ["Dustwallow Marsh"] = 9.9, ["Hillsbrad Foothills"] = 16.1, ["Westfall"] = 41.1, ["Silverpine Forest"] = 36.4, ["Desolace"] = 11.0, ["The Hinterlands"] = 4.8, ["Ashenvale"] = 7.8, ["Swamp of Sorrows"] = 10.3, ["Felwood"] = 9.6, ["Un'Goro Crater"] = 10.0, ["Arathi Highlands"] = 5.3, ["Eastern Plaguelands"] = 0.5 } },
-    [6359] = { name = "Firefin Snapper", zones = { ["Stranglethorn Vale"] = 17.8, ["Tanaris"] = 14.3, ["Azshara"] = 3.3, ["Feralas"] = 5.3, ["Wetlands"] = 17.0, ["Dustwallow Marsh"] = 10.9, ["Desolace"] = 14.8, ["Hillsbrad Foothills"] = 11.9, ["The Hinterlands"] = 5.3, ["Stonetalon Mountains"] = 8.7, ["Swamp of Sorrows"] = 10.4, ["Ashenvale"] = 3.2, ["The Barrens"] = 0.6, ["Arathi Highlands"] = 6.4 } },
-    [13422] = { name = "Stonescale Eel", zones = { ["Azshara"] = 11.8, ["Tanaris"] = 13.6, ["Feralas"] = 5.0, ["Stranglethorn Vale"] = 4.9, ["The Hinterlands"] = 5.1, ["Eastern Plaguelands"] = 11.3 } },
-    [13757] = { name = "Lightning Eel", best = "Deadwind Pass", zones = { ["Feralas"] = 0.9, ["Alterac Valley"] = 9.5, ["Winterspring"] = 6.8, ["Eastern Plaguelands"] = 7.6, ["Western Plaguelands"] = 0.9, ["Deadwind Pass"] = 7.8, ["Moonglade"] = 0.7, ["Azshara"] = 0.05, ["The Hinterlands"] = 0.4, ["Stranglethorn Vale"] = 0.05, ["Felwood"] = 1.4, ["Un'Goro Crater"] = 0.9, ["Silithus"] = 13.3, ["Duskwood"] = 1.2, ["Ashenvale"] = 0.05, ["Burning Steppes"] = 9.0, ["Desolace"] = 0.05, ["Orgrimmar"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Stormwind City"] = 0.05, ["Undercity"] = 1.5, ["Elwynn Forest"] = 0.05, ["Westfall"] = 0.05, ["Tirisfal Glades"] = 0.05 } },
-    [19975] = { name = "Zulian Mudskunk", zones = {} }, -- Zul'Gurub only: load five into a Mudskunk Lure and fish at Pagle's Point. Wowhead (Forever and Classic alike) logs a scatter of open-world rows for it; dropped.
-    [6643] = { name = "Bloated Brilliant Smallfish", best = "Mulgore", zones = { ["Elwynn Forest"] = 0.1, ["Mulgore"] = 0.1, ["Dun Morogh"] = 0.05, ["Durotar"] = 0.05, ["Teldrassil"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Duskwood"] = 0.1 } },
-    [6645] = { name = "Bloated Mud Snapper", best = { Alliance = "Stormwind City", Horde = "Orgrimmar" }, zones = { ["Stormwind City"] = 0.05, ["Orgrimmar"] = 0.05, ["The Barrens"] = 0.05, ["Thunder Bluff"] = 0.05, ["Darkshore"] = 0.05, ["Undercity"] = 0.05, ["Darnassus"] = 0.05, ["Loch Modan"] = 0.05, ["Silverpine Forest"] = 0.05, ["Westfall"] = 0.05 } },
-    [6647] = { name = "Bloated Bristle Whisker Catfish", zones = { ["Ashenvale"] = 0.05, ["Redridge Mountains"] = 0.05, ["Stonetalon Mountains"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Duskwood"] = 0.05 } },
-    [8366] = { name = "Bloated Mithril Head Trout", zones = { ["Dustwallow Marsh"] = 0.05, ["Desolace"] = 0.05, ["Arathi Highlands"] = 0.05, ["Stranglethorn Vale"] = 0.05, ["Alterac Mountains"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Thousand Needles"] = 0.05 } },
-    [13881] = { name = "Bloated Redgill", zones = { ["Feralas"] = 0.05, ["Moonglade"] = 0.05, ["Western Plaguelands"] = 0.05, ["Azshara"] = 0.05, ["The Hinterlands"] = 0.05, ["Felwood"] = 0.05, ["Un'Goro Crater"] = 0.05, ["Eastern Plaguelands"] = 0.05 } },
-    [13891] = { name = "Bloated Whitescale Salmon", best = "Winterspring", zones = { ["Winterspring"] = 0.05, ["Alterac Valley"] = 0.05, ["Eastern Plaguelands"] = 0.05, ["Feralas"] = 0.05, ["Deadwind Pass"] = 0.05, ["Stranglethorn Vale"] = 0.05 } },
-    [1467] = { name = "Spotted Sunfish", zones = { ["Redridge Mountains"] = 7.1 } },
-    [6717] = { name = "Gaffer Jack", zones = { ["Darkshore"] = 4.0 } },
-    [16967] = { name = "Feralas Ahi", zones = { ["Feralas"] = 0.3 } },
-    [16968] = { name = "Sar'theris Striker", zones = { ["Desolace"] = 2.2 } },
-    [16969] = { name = "Savage Coast Blue Sailfin", zones = { ["Stranglethorn Vale"] = 0.3 } },
-    [16970] = { name = "Misty Reed Mahi Mahi", zones = { ["Swamp of Sorrows"] = 6.7 } },
-    [19803] = { name = "Brownell's Blue Striped Racer", zones = { ["Stranglethorn Vale"] = 0.05 } },
-    [19805] = { name = "Keefer's Angelfish", zones = { ["Stranglethorn Vale"] = 0.05 } },
-    [19806] = { name = "Dezian Queenfish", zones = { ["Stranglethorn Vale"] = 0.05 } },
-    [19807] = { name = "Speckled Tastyfish", zones = { ["Stranglethorn Vale"] = 6.8 } },
-    [19808] = { name = "Rockhide Strongfish", zones = { ["Stranglethorn Vale"] = 0.05 } },
-    [251524] = { name = "Whimsyfin", zones = { ["Redridge Mountains"] = 0 } }, -- Icy Veins; catch rate unknown, so the bar doesn't count it
+    [6291] = { name = "Raw Brilliant Smallfish", best = "Mulgore", zones = { "Mulgore", "Elwynn Forest", "Dun Morogh", "Tirisfal Glades", "Orgrimmar", "Darnassus", "Stormwind City", "Thunder Bluff", "Ironforge", "Teldrassil", "Durotar", "Undercity", "Loch Modan", "The Barrens", "Silverpine Forest", "Duskwood", "Westfall", "Darkshore" } },
+    [6303] = { name = "Raw Slitherskin Mackerel", best = "Durotar", zones = { "Durotar", "Teldrassil", "Westfall", "Darkshore", "Tirisfal Glades", "Silverpine Forest", "The Barrens", "Stormwind City" } },
+    [6289] = { name = "Raw Longjaw Mud Snapper", best = { Alliance = "Darnassus", Horde = "Orgrimmar" }, zones = { "Darnassus", "Orgrimmar", "Ironforge", "Thunder Bluff", "Stormwind City", "Loch Modan", "Undercity", "Dun Morogh", "Mulgore", "Elwynn Forest", "Duskwood", "Arathi Basin", "Redridge Mountains", "Tirisfal Glades", "The Barrens", "Ashenvale", "Silverpine Forest", "Stonetalon Mountains", "Hillsbrad Foothills", "Westfall", "Teldrassil", "Durotar", "Darkshore", "Wetlands" } },
+    [6317] = { name = "Raw Loch Frenzy", best = "Loch Modan", zones = { "Loch Modan" } },
+    [6361] = { name = "Raw Rainbow Fin Albacore", best = "Wetlands", zones = { "Wetlands", "Westfall", "Darkshore", "Ashenvale", "Silverpine Forest", "The Barrens", "Stormwind City" } },
+    [6308] = { name = "Raw Bristle Whisker Catfish", best = "Hillsbrad Foothills", zones = { "Hillsbrad Foothills", "Redridge Mountains", "Arathi Basin", "Duskwood", "Ashenvale", "Stonetalon Mountains", "Thousand Needles", "Arathi Highlands", "Desolace", "Ironforge", "Stormwind City", "Thunder Bluff", "Orgrimmar", "Darnassus", "Alterac Mountains", "Undercity", "Loch Modan", "The Barrens", "Silverpine Forest", "Swamp of Sorrows", "Westfall", "Wetlands", "Darkshore", "Dustwallow Marsh", "Stranglethorn Vale" } },
+    [21071] = { name = "Raw Sagefish", best = "Silverpine Forest", zones = { "Silverpine Forest", "Stonetalon Mountains", "Ashenvale", "Loch Modan" } },
+    [6522] = { name = "Deviate Fish", best = "The Barrens", zones = { "The Barrens" } },
+    [6299] = { name = "Sickly Looking Fish", best = { Alliance = "Tirisfal Glades", Horde = "Undercity" }, zones = { "Undercity", "Tirisfal Glades", "Silverpine Forest" } },
+    [6458] = { name = "Oil Covered Fish", best = "Stonetalon Mountains", zones = { "Stonetalon Mountains" } },
+    [6362] = { name = "Raw Rockscale Cod", best = "Stranglethorn Vale", zones = { "Stranglethorn Vale", "Dustwallow Marsh", "Swamp of Sorrows", "Desolace", "Tanaris", "The Hinterlands", "Azshara", "Feralas", "Arathi Highlands", "Westfall" } },
+    [8365] = { name = "Raw Mithril Head Trout", best = "Thousand Needles", zones = { "Thousand Needles", "Arathi Highlands", "Desolace", "Alterac Mountains", "Swamp of Sorrows", "Moonglade", "Un'Goro Crater", "Western Plaguelands", "Felwood", "Dustwallow Marsh", "Feralas", "Stranglethorn Vale", "The Hinterlands", "Eastern Plaguelands", "Azshara" } },
+    [21153] = { name = "Raw Greater Sagefish", best = "Alterac Mountains", zones = { "Alterac Mountains", "Stranglethorn Vale" } },
+    [4603] = { name = "Raw Spotted Yellowtail", best = "Tanaris", zones = { "Tanaris", "The Hinterlands", "Azshara", "Feralas", "Dustwallow Marsh", "Swamp of Sorrows", "Stranglethorn Vale", "Desolace", "Arathi Highlands" } },
+    [13754] = { name = "Raw Glossy Mightfish", best = "Tanaris", zones = { "Tanaris", "The Hinterlands", "Azshara", "Feralas" } },
+    [13755] = { name = "Raw Winter Squid", best = "Azshara", zones = { "Azshara", "Tanaris", "The Hinterlands", "Feralas" } },
+    [13756] = { name = "Raw Summer Bass", best = "Azshara", zones = { "Azshara", "Tanaris", "The Hinterlands", "Feralas" } },
+    [13758] = { name = "Raw Redgill", best = "Felwood", zones = { "Felwood", "Un'Goro Crater", "Western Plaguelands", "Moonglade", "Feralas", "The Hinterlands", "Eastern Plaguelands", "Burning Steppes", "Winterspring", "Silithus", "Alterac Valley", "Azshara", "Deadwind Pass" } },
+    [13759] = { name = "Raw Nightfin Snapper", best = "Winterspring", zones = { "Alterac Valley", "Winterspring", "Un'Goro Crater", "Eastern Plaguelands", "Silithus", "Moonglade", "Western Plaguelands", "Felwood", "Feralas", "Burning Steppes", "The Hinterlands", "Deadwind Pass" } },
+    [13760] = { name = "Raw Sunscale Salmon", best = "Burning Steppes", zones = { "Burning Steppes", "Eastern Plaguelands", "Winterspring", "Felwood", "Silithus", "Alterac Valley", "Western Plaguelands", "Moonglade", "Un'Goro Crater", "Feralas", "The Hinterlands", "Deadwind Pass" } },
+    [13888] = { name = "Darkclaw Lobster", best = "Azshara", zones = { "Azshara" } },
+    [13889] = { name = "Raw Whitescale Salmon", best = "Deadwind Pass", zones = { "Deadwind Pass", "Silithus", "Winterspring", "Alterac Valley", "Eastern Plaguelands", "Burning Steppes", "Feralas" } },
+    [13893] = { name = "Large Raw Mightfish", best = "Azshara", zones = { "Azshara" } },
+    [13890] = { name = "Raw Plated Armorfish", best = "Silithus", zones = { "Alterac Valley", "Silithus", "Winterspring", "Burning Steppes", "Eastern Plaguelands", "Deadwind Pass" } },
+    [6358] = { name = "Oily Blackmouth", best = "Wetlands", zones = { "Wetlands", "Westfall", "Silverpine Forest", "Dustwallow Marsh", "Darkshore", "Stranglethorn Vale", "Felwood", "Moonglade", "Western Plaguelands", "Un'Goro Crater", "Swamp of Sorrows", "The Barrens", "Feralas", "Ashenvale", "Desolace", "Tanaris", "The Hinterlands", "Azshara", "Arathi Highlands", "Eastern Plaguelands", "Stormwind City" } },
+    [6359] = { name = "Firefin Snapper", best = "Stonetalon Mountains", zones = { "Stonetalon Mountains", "Wetlands", "Dustwallow Marsh", "Tanaris", "Stranglethorn Vale", "Swamp of Sorrows", "Desolace", "The Hinterlands", "Feralas", "Azshara", "Ashenvale", "Arathi Highlands" } },
+    [13422] = { name = "Stonescale Eel", best = "Azshara", zones = { "Azshara", "Tanaris", "Feralas", "The Hinterlands", "Stranglethorn Vale" } },
+    [13757] = { name = "Lightning Eel", best = "Burning Steppes", zones = { "Burning Steppes", "Alterac Valley", "Silithus", "Eastern Plaguelands", "Winterspring", "Deadwind Pass", "Western Plaguelands", "Felwood", "Moonglade", "Un'Goro Crater", "Feralas" } },
+    [19975] = { name = "Zulian Mudskunk", zones = {} }, -- Zul'Gurub only: load five into a Mudskunk Lure and fish at Pagle's Point. Open-world rows for it are left out.
+    [6643] = { name = "Bloated Brilliant Smallfish", best = "Dun Morogh", zones = {} },
+    [6645] = { name = "Bloated Mud Snapper", best = "Silverpine Forest", zones = {} },
+    [6647] = { name = "Bloated Bristle Whisker Catfish", best = "Hillsbrad Foothills", zones = { "Hillsbrad Foothills" } },
+    [8366] = { name = "Bloated Mithril Head Trout", best = "Arathi Highlands", zones = {} },
+    [13881] = { name = "Bloated Redgill", best = "Durotar", zones = {} },
+    [13891] = { name = "Bloated Whitescale Salmon", best = "Winterspring", zones = {} },
+    [1467] = { name = "Spotted Sunfish", best = "Redridge Mountains", zones = {} },
+    [6717] = { name = "Gaffer Jack", best = "Silithus", zones = {} },
+    [16967] = { name = "Feralas Ahi", best = "Feralas", zones = {} },
+    [16968] = { name = "Sar'theris Striker", best = "Desolace", zones = {} },
+    [16969] = { name = "Savage Coast Blue Sailfin", best = "Stranglethorn Vale", zones = {} },
+    [16970] = { name = "Misty Reed Mahi Mahi", best = "Swamp of Sorrows", zones = {} },
+    [19803] = { name = "Brownell's Blue Striped Racer", best = "Stranglethorn Vale", zones = {} },
+    [19805] = { name = "Keefer's Angelfish", best = "Stranglethorn Vale", zones = {} },
+    [19806] = { name = "Dezian Queenfish", best = "Stranglethorn Vale", zones = {} },
+    [19807] = { name = "Speckled Tastyfish", best = "Stranglethorn Vale", zones = {} },
+    [19808] = { name = "Rockhide Strongfish", best = "Stranglethorn Vale", zones = {} },
+    [251524] = { name = "Whimsyfin", best = "Redridge Mountains", zones = {} }, -- Icy Veins; catch rate unknown, so the bar doesn't count it
 }
 
 -- Cooking recipes that use a fish: fishID -> list of
@@ -139,8 +136,7 @@ ns.FISH_RECIPES = {
 }
 
 -- Rare and special fish for the Records tab, in this order.
--- Notable catches for the Records tab, grouped. Item IDs from Wowhead's
--- Forever database (2026-10-24). Everything here arrives through the loot
+-- Notable catches for the Records tab, grouped. Everything here arrives through the loot
 -- window, so the journal's per-item first-catch record is enough to light
 -- one up. Old Ironjaw and Old Crafty aren't on Forever.
 ns.NOTABLE = {
@@ -178,18 +174,16 @@ ns.NOTABLE = {
     } },
 }
 
--- zone -> set of fish IDs with a real catch rate there (traces under 0.5%
--- are left out so "every fish in a zone" is something a person can finish).
+-- zone -> set of fish IDs that are a real catch there (traces are left out so
+-- "every fish in a zone" is something a person can finish).
 local zoneFish
 function ns.ZoneFish()
     if not zoneFish then
         zoneFish = {}
         for id, fish in pairs(ns.FISH) do
-            for zone, rate in pairs(fish.zones) do
-                if rate >= 0.5 then
-                    zoneFish[zone] = zoneFish[zone] or {}
-                    zoneFish[zone][id] = true
-                end
+            for _, zone in ipairs(fish.zones) do
+                zoneFish[zone] = zoneFish[zone] or {}
+                zoneFish[zone][id] = true
             end
         end
     end
@@ -208,70 +202,69 @@ ns.RARE_FISH = {
     { id = 251524, note = "New in Forever" },            -- Whimsyfin
 }
 
--- Everything else that comes up on the line, read from Wowhead's Forever zone and item
--- pages on 2026-10-28, same shares as ns.FISH. Not fish: kept out of the zone-fish count,
+-- Everything else that comes up on the line. Not fish: kept out of the zone-fish count,
 -- the zone clear and the uncaught list. kind: clam (clams and pearls), crate (crates and chests), trunk (trunks and rum), trophy (trophy fish), material (materials), odd (odd things), gear (only from fishing).
 -- Random greens, potions and recipes that also turn up now and then are left out; the site
 -- counts them per zone instead.
 ns.CATCHES = {
-    [7973] = { name = "Big-mouth Clam", kind = "clam", zones = { ["Eastern Plaguelands"] = 9.6, ["Azshara"] = 7.9, ["Tanaris"] = 5.9, ["The Hinterlands"] = 4.1, ["Feralas"] = 1.9, ["Stranglethorn Vale"] = 0.1 } },
-    [7971] = { name = "Black Pearl", kind = "clam", zones = { ["Azshara"] = 0.05, ["Feralas"] = 0.05, ["The Hinterlands"] = 0.05, ["Tanaris"] = 0.05 } },
-    [5500] = { name = "Iridescent Pearl", kind = "clam", zones = { ["Azshara"] = 0.05, ["Feralas"] = 0.05, ["The Hinterlands"] = 0.05, ["Tanaris"] = 0.05 } },
-    [5498] = { name = "Small Lustrous Pearl", kind = "clam", zones = { ["Azshara"] = 0.05, ["Feralas"] = 0.05 } },
-    [7974] = { name = "Zesty Clam Meat", kind = "clam", zones = { ["Azshara"] = 0.2, ["Feralas"] = 0.2, ["The Hinterlands"] = 0.05, ["Tanaris"] = 0.05 } },
-    [6356] = { name = "Battered Chest", kind = "crate", zones = { ["Durotar"] = 1.2, ["Teldrassil"] = 1.2, ["Tirisfal Glades"] = 0.05 } },
-    [6351] = { name = "Dented Crate", kind = "crate", zones = { ["Silverpine Forest"] = 0.2, ["Westfall"] = 0.2, ["Darkshore"] = 0.2, ["The Barrens"] = 0.05 } },
-    [13874] = { name = "Heavy Crate", kind = "crate", zones = { ["Eastern Plaguelands"] = 0.4, ["Azshara"] = 0.3, ["Tanaris"] = 0.1, ["The Hinterlands"] = 0.1, ["Feralas"] = 0.05, ["Stranglethorn Vale"] = 0.05 } },
-    [13875] = { name = "Ironbound Locked Chest", kind = "crate", zones = { ["Tanaris"] = 0.2, ["The Hinterlands"] = 0.2, ["Azshara"] = 0.05, ["Feralas"] = 0.05, ["Stranglethorn Vale"] = 0.05 } },
-    [13918] = { name = "Reinforced Locked Chest", kind = "crate", zones = { ["Eastern Plaguelands"] = 1.1, ["Azshara"] = 0.6 } },
-    [6357] = { name = "Sealed Crate", kind = "crate", zones = { ["Swamp of Sorrows"] = 0.4, ["Dustwallow Marsh"] = 0.3, ["Stranglethorn Vale"] = 0.1, ["Desolace"] = 0.1, ["Arathi Highlands"] = 0.05, ["Tanaris"] = 0.05, ["The Barrens"] = 0.05 } },
-    [6353] = { name = "Small Chest", kind = "crate", zones = { ["Darkshore"] = 0.2, ["Westfall"] = 0.2, ["Silverpine Forest"] = 0.1, ["The Barrens"] = 0.05 } },
-    [6354] = { name = "Small Locked Chest", kind = "crate", zones = { ["Wetlands"] = 0.4, ["Ashenvale"] = 0.1, ["Hillsbrad Foothills"] = 0.1 } },
-    [6355] = { name = "Sturdy Locked Chest", kind = "crate", zones = { ["Swamp of Sorrows"] = 0.4, ["Dustwallow Marsh"] = 0.2, ["Stranglethorn Vale"] = 0.2, ["Desolace"] = 0.1, ["Arathi Highlands"] = 0.05, ["Tanaris"] = 0.05 } },
-    [6352] = { name = "Waterlogged Crate", kind = "crate", zones = { ["Wetlands"] = 0.4, ["Ashenvale"] = 0.1, ["Hillsbrad Foothills"] = 0.05 } },
-    [21150] = { name = "Iron Bound Trunk", kind = "trunk", zones = { ["Alterac Mountains"] = 8.4, ["Stranglethorn Vale"] = 4.9, ["Desolace"] = 4.2, ["Dustwallow Marsh"] = 2.7, ["Arathi Highlands"] = 2.1, ["The Barrens"] = 0.4 } },
-    [21151] = { name = "Rumsey Rum Black Label", kind = "trunk", zones = { ["Stranglethorn Vale"] = 2.5, ["Alterac Mountains"] = 2, ["Tanaris"] = 1.5, ["Desolace"] = 1.1, ["Dustwallow Marsh"] = 0.7, ["Feralas"] = 0.6, ["Arathi Highlands"] = 0.5, ["Azshara"] = 0.4, ["The Barrens"] = 0.05 } },
-    [21114] = { name = "Rumsey Rum Dark", kind = "trunk", zones = { ["Hillsbrad Foothills"] = 2.8, ["Stonetalon Mountains"] = 1.4, ["Wetlands"] = 1.2, ["Ashenvale"] = 0.2 } },
-    [20709] = { name = "Rumsey Rum Light", kind = "trunk", zones = { ["Westfall"] = 3.3, ["Silverpine Forest"] = 3.3, ["The Barrens"] = 2, ["Loch Modan"] = 1.4, ["Darkshore"] = 0.9 } },
-    [20708] = { name = "Tightly Sealed Trunk", kind = "trunk", zones = { ["Westfall"] = 8.4, ["Silverpine Forest"] = 8, ["The Barrens"] = 4.9, ["Loch Modan"] = 2.9, ["Darkshore"] = 2.5 } },
-    [21113] = { name = "Watertight Trunk", kind = "trunk", zones = { ["Hillsbrad Foothills"] = 6.7, ["Stonetalon Mountains"] = 3.3, ["Wetlands"] = 3, ["Ashenvale"] = 0.5 } },
-    [6292] = { name = "10 Pound Mud Snapper", kind = "trophy", zones = { ["Dun Morogh"] = 0.7, ["Elwynn Forest"] = 0.7, ["Mulgore"] = 0.7, ["Tirisfal Glades"] = 0.6, ["Durotar"] = 0.3, ["Teldrassil"] = 0.3, ["Duskwood"] = 0.05, ["Westfall"] = 0.05 } },
-    [13909] = { name = "12 Pound Lobster", kind = "trophy", zones = { ["Azshara"] = 0.05, ["Eastern Plaguelands"] = 0.05 } },
-    [6294] = { name = "12 Pound Mud Snapper", kind = "trophy", zones = { ["Dun Morogh"] = 0.4, ["Duskwood"] = 0.4, ["Elwynn Forest"] = 0.4, ["Mulgore"] = 0.4, ["Tirisfal Glades"] = 0.4, ["Teldrassil"] = 0.2, ["Durotar"] = 0.1, ["The Barrens"] = 0.05, ["Westfall"] = 0.05 } },
-    [6295] = { name = "15 Pound Mud Snapper", kind = "trophy", zones = { ["Dun Morogh"] = 0.05, ["Elwynn Forest"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Durotar"] = 0.05, ["Mulgore"] = 0.05, ["Teldrassil"] = 0.05 } },
-    [13901] = { name = "15 Pound Salmon", kind = "trophy", zones = { ["Deadwind Pass"] = 0.1, ["Eastern Plaguelands"] = 0.1, ["Alterac Valley"] = 0.1, ["Winterspring"] = 0.1, ["Duskwood"] = 0.05, ["Feralas"] = 0.05 } },
-    [6309] = { name = "17 Pound Catfish", kind = "trophy", zones = { ["Darnassus"] = 0.4, ["Arathi Basin"] = 0.3, ["Orgrimmar"] = 0.3, ["Stormwind City"] = 0.3, ["Thunder Bluff"] = 0.3, ["Undercity"] = 0.2, ["Redridge Mountains"] = 0.2, ["Loch Modan"] = 0.1, ["Stonetalon Mountains"] = 0.1, ["Duskwood"] = 0.1, ["Thousand Needles"] = 0.1, ["Ashenvale"] = 0.1, ["The Barrens"] = 0.1, ["Arathi Highlands"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Alterac Mountains"] = 0.05, ["Darkshore"] = 0.05, ["Desolace"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Silverpine Forest"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Durotar"] = 0.05, ["Stranglethorn Vale"] = 0.05, ["Westfall"] = 0.05, ["Wetlands"] = 0.05 } },
-    [13902] = { name = "18 Pound Salmon", kind = "trophy", zones = { ["Alterac Valley"] = 0.1, ["Silithus"] = 0.1, ["Eastern Plaguelands"] = 0.05, ["Winterspring"] = 0.05, ["Deadwind Pass"] = 0.05, ["Stormwind City"] = 0.05 } },
-    [6310] = { name = "19 Pound Catfish", kind = "trophy", zones = { ["Thousand Needles"] = 0.3, ["Redridge Mountains"] = 0.2, ["Thunder Bluff"] = 0.2, ["Duskwood"] = 0.2, ["Stonetalon Mountains"] = 0.2, ["Stormwind City"] = 0.2, ["Arathi Highlands"] = 0.1, ["Darnassus"] = 0.1, ["Orgrimmar"] = 0.1, ["Ashenvale"] = 0.1, ["Loch Modan"] = 0.1, ["Alterac Mountains"] = 0.1, ["Desolace"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Undercity"] = 0.05, ["The Barrens"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Darkshore"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Silverpine Forest"] = 0.05, ["Stranglethorn Vale"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Westfall"] = 0.05, ["Wetlands"] = 0.05, ["Durotar"] = 0.05, ["Elwynn Forest"] = 0.05 } },
-    [6311] = { name = "22 Pound Catfish", kind = "trophy", zones = { ["Thousand Needles"] = 0.1, ["Arathi Highlands"] = 0.05, ["Redridge Mountains"] = 0.05, ["Ashenvale"] = 0.05, ["Desolace"] = 0.05, ["Stonetalon Mountains"] = 0.05, ["Stormwind City"] = 0.05, ["Undercity"] = 0.05, ["Alterac Mountains"] = 0.05, ["Darnassus"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Orgrimmar"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Thunder Bluff"] = 0.05, ["Darkshore"] = 0.05, ["Loch Modan"] = 0.05, ["The Barrens"] = 0.05, ["Tirisfal Glades"] = 0.05, ["Westfall"] = 0.05, ["Stranglethorn Vale"] = 0.05 } },
-    [13913] = { name = "22 Pound Lobster", kind = "trophy", zones = { ["Azshara"] = 0.05, ["Eastern Plaguelands"] = 0.05 } },
-    [13903] = { name = "22 Pound Salmon", kind = "trophy", zones = { ["Alterac Valley"] = 0.05, ["Duskwood"] = 0.05, ["Winterspring"] = 0.05, ["Eastern Plaguelands"] = 0.05, ["Deadwind Pass"] = 0.05 } },
-    [13904] = { name = "25 Pound Salmon", kind = "trophy", zones = { ["Feralas"] = 0.05, ["Alterac Valley"] = 0.05, ["Deadwind Pass"] = 0.05, ["Eastern Plaguelands"] = 0.05, ["Winterspring"] = 0.05 } },
-    [6363] = { name = "26 Pound Catfish", kind = "trophy", zones = { ["Duskwood"] = 0.1, ["Alterac Mountains"] = 0.05, ["Arathi Highlands"] = 0.05, ["Redridge Mountains"] = 0.05, ["Desolace"] = 0.05, ["Dustwallow Marsh"] = 0.05, ["Stonetalon Mountains"] = 0.05, ["Ashenvale"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Stranglethorn Vale"] = 0.05, ["Swamp of Sorrows"] = 0.05, ["Wetlands"] = 0.05 } },
-    [13905] = { name = "29 Pound Salmon", kind = "trophy", zones = { ["Alterac Valley"] = 0.05, ["Eastern Plaguelands"] = 0.05, ["Winterspring"] = 0.05 } },
-    [6364] = { name = "32 Pound Catfish", kind = "trophy", zones = { ["Arathi Highlands"] = 0.05, ["Redridge Mountains"] = 0.05, ["Ashenvale"] = 0.05, ["Desolace"] = 0.05, ["Dustwallow Marsh"] = 0.05 } },
-    [13885] = { name = "34 Pound Redgill", kind = "trophy", zones = { ["Moonglade"] = 0.2, ["Western Plaguelands"] = 0.2, ["Felwood"] = 0.2, ["Un'Goro Crater"] = 0.2, ["Feralas"] = 0.1, ["Azshara"] = 0.05, ["The Hinterlands"] = 0.05, ["Desolace"] = 0.05, ["Eastern Plaguelands"] = 0.05 } },
-    [13886] = { name = "37 Pound Redgill", kind = "trophy", zones = { ["Moonglade"] = 0.2, ["Western Plaguelands"] = 0.2, ["Felwood"] = 0.2, ["Un'Goro Crater"] = 0.1, ["Feralas"] = 0.05, ["The Hinterlands"] = 0.05, ["Azshara"] = 0.05, ["Eastern Plaguelands"] = 0.05, ["Desolace"] = 0.05 } },
-    [13876] = { name = "40 Pound Yellowtail", kind = "trophy", zones = { ["Tanaris"] = 0.2, ["The Hinterlands"] = 0.1, ["Azshara"] = 0.05, ["Feralas"] = 0.05, ["Stranglethorn Vale"] = 0.05 } },
-    [13882] = { name = "42 Pound Redgill", kind = "trophy", zones = { ["Felwood"] = 0.05, ["Moonglade"] = 0.05, ["Un'Goro Crater"] = 0.05, ["Western Plaguelands"] = 0.05, ["Feralas"] = 0.05, ["The Hinterlands"] = 0.05, ["Azshara"] = 0.05, ["Desolace"] = 0.05, ["Ashenvale"] = 0.05 } },
-    [13883] = { name = "45 Pound Redgill", kind = "trophy", zones = { ["Un'Goro Crater"] = 0.05, ["Felwood"] = 0.05, ["Moonglade"] = 0.05, ["Western Plaguelands"] = 0.05, ["Feralas"] = 0.05, ["The Hinterlands"] = 0.05, ["Azshara"] = 0.05, ["Eastern Plaguelands"] = 0.05 } },
-    [13884] = { name = "49 Pound Redgill", kind = "trophy", zones = { ["Un'Goro Crater"] = 0.05, ["Feralas"] = 0.05, ["Moonglade"] = 0.05, ["Western Plaguelands"] = 0.05, ["Felwood"] = 0.05, ["The Hinterlands"] = 0.05 } },
-    [13887] = { name = "52 Pound Redgill", kind = "trophy", zones = { ["Un'Goro Crater"] = 0.05, ["Western Plaguelands"] = 0.05 } },
-    [13907] = { name = "7 Pound Lobster", kind = "trophy", zones = { ["Eastern Plaguelands"] = 0.2, ["Azshara"] = 0.1 } },
-    [13908] = { name = "9 Pound Lobster", kind = "trophy", zones = { ["Eastern Plaguelands"] = 0.05, ["Azshara"] = 0.05 } },
-    [7070] = { name = "Elemental Water", kind = "material", zones = { ["Azshara"] = 0.7 } },
-    [7080] = { name = "Essence of Water", kind = "material", zones = { ["Azshara"] = 0.5 } },
-    [7079] = { name = "Globe of Water", kind = "material", zones = { ["Azshara"] = 0.5 } },
-    [10505] = { name = "Solid Blasting Powder", kind = "material", zones = { ["Azshara"] = 0.05, ["The Hinterlands"] = 0.05 } },
-    [3820] = { name = "Stranglekelp", kind = "material", zones = { ["Silverpine Forest"] = 5.1, ["Westfall"] = 5, ["Stranglethorn Vale"] = 4.5, ["Hillsbrad Foothills"] = 4, ["Alterac Mountains"] = 3.4, ["The Barrens"] = 3.1, ["Tanaris"] = 2.5, ["Stonetalon Mountains"] = 2, ["Wetlands"] = 1.7, ["Desolace"] = 1.7, ["Loch Modan"] = 1.7, ["Darkshore"] = 1.4, ["Dustwallow Marsh"] = 1.2, ["Feralas"] = 1, ["Arathi Highlands"] = 0.9, ["Azshara"] = 0.6, ["Ashenvale"] = 0.3 } },
-    [6456] = { name = "Acidic Slime", kind = "odd", zones = { ["Stonetalon Mountains"] = 0.2, ["The Barrens"] = 0.05 } },
-    [6304] = { name = "Damp Diary Page (Day 4)", kind = "odd", zones = { ["Ashenvale"] = 0.05 } },
-    [6306] = { name = "Damp Diary Page (Day 512)", kind = "odd", zones = { ["Ashenvale"] = 0.05 } },
-    [6307] = { name = "Message in a Bottle", kind = "odd", zones = { ["Wetlands"] = 0.4, ["Darkshore"] = 0.2, ["Westfall"] = 0.2, ["Ashenvale"] = 0.2, ["Silverpine Forest"] = 0.2, ["Hillsbrad Foothills"] = 0.05, ["The Barrens"] = 0.05 } },
-    [6297] = { name = "Old Skull", kind = "odd", zones = { ["Undercity"] = 15.1, ["Tirisfal Glades"] = 4.7, ["Silverpine Forest"] = 0.8, ["Ashenvale"] = 0.2, ["Un'Goro Crater"] = 0.1, ["Darkshore"] = 0.05, ["Darnassus"] = 0.05 } },
-    [6301] = { name = "Old Teamster's Skull", kind = "odd", zones = { ["Tirisfal Glades"] = 1.1, ["Undercity"] = 0.5, ["Darnassus"] = 0.05, ["Ashenvale"] = 0.05, ["Silverpine Forest"] = 0.05 } },
-    [770] = { name = "Pointy Crocolisk Tooth", kind = "odd", zones = { ["Stranglethorn Vale"] = 0.05 } },
-    [6457] = { name = "Rusted Engineering Parts", kind = "odd", zones = { ["Stonetalon Mountains"] = 0.4 } },
-    [6360] = { name = "Steelscale Crushfish", kind = "gear", zones = { ["Ashenvale"] = 0.05, ["Hillsbrad Foothills"] = 0.05, ["Wetlands"] = 0.05 } },
-    [8350] = { name = "The 1 Ring", kind = "gear", zones = { ["Westfall"] = 0.2, ["Darnassus"] = 0.05, ["Stormwind City"] = 0.05, ["Thunder Bluff"] = 0.05, ["Orgrimmar"] = 0.05, ["Silverpine Forest"] = 0.05, ["Undercity"] = 0.05, ["Darkshore"] = 0.05, ["The Barrens"] = 0.05 } },
+    [7973] = { name = "Big-mouth Clam", kind = "clam" },
+    [7971] = { name = "Black Pearl", kind = "clam" },
+    [5500] = { name = "Iridescent Pearl", kind = "clam" },
+    [5498] = { name = "Small Lustrous Pearl", kind = "clam" },
+    [7974] = { name = "Zesty Clam Meat", kind = "clam" },
+    [6356] = { name = "Battered Chest", kind = "crate" },
+    [6351] = { name = "Dented Crate", kind = "crate" },
+    [13874] = { name = "Heavy Crate", kind = "crate" },
+    [13875] = { name = "Ironbound Locked Chest", kind = "crate" },
+    [13918] = { name = "Reinforced Locked Chest", kind = "crate" },
+    [6357] = { name = "Sealed Crate", kind = "crate" },
+    [6353] = { name = "Small Chest", kind = "crate" },
+    [6354] = { name = "Small Locked Chest", kind = "crate" },
+    [6355] = { name = "Sturdy Locked Chest", kind = "crate" },
+    [6352] = { name = "Waterlogged Crate", kind = "crate" },
+    [21150] = { name = "Iron Bound Trunk", kind = "trunk" },
+    [21151] = { name = "Rumsey Rum Black Label", kind = "trunk" },
+    [21114] = { name = "Rumsey Rum Dark", kind = "trunk" },
+    [20709] = { name = "Rumsey Rum Light", kind = "trunk" },
+    [20708] = { name = "Tightly Sealed Trunk", kind = "trunk" },
+    [21113] = { name = "Watertight Trunk", kind = "trunk" },
+    [6292] = { name = "10 Pound Mud Snapper", kind = "trophy" },
+    [13909] = { name = "12 Pound Lobster", kind = "trophy" },
+    [6294] = { name = "12 Pound Mud Snapper", kind = "trophy" },
+    [6295] = { name = "15 Pound Mud Snapper", kind = "trophy" },
+    [13901] = { name = "15 Pound Salmon", kind = "trophy" },
+    [6309] = { name = "17 Pound Catfish", kind = "trophy" },
+    [13902] = { name = "18 Pound Salmon", kind = "trophy" },
+    [6310] = { name = "19 Pound Catfish", kind = "trophy" },
+    [6311] = { name = "22 Pound Catfish", kind = "trophy" },
+    [13913] = { name = "22 Pound Lobster", kind = "trophy" },
+    [13903] = { name = "22 Pound Salmon", kind = "trophy" },
+    [13904] = { name = "25 Pound Salmon", kind = "trophy" },
+    [6363] = { name = "26 Pound Catfish", kind = "trophy" },
+    [13905] = { name = "29 Pound Salmon", kind = "trophy" },
+    [6364] = { name = "32 Pound Catfish", kind = "trophy" },
+    [13885] = { name = "34 Pound Redgill", kind = "trophy" },
+    [13886] = { name = "37 Pound Redgill", kind = "trophy" },
+    [13876] = { name = "40 Pound Yellowtail", kind = "trophy" },
+    [13882] = { name = "42 Pound Redgill", kind = "trophy" },
+    [13883] = { name = "45 Pound Redgill", kind = "trophy" },
+    [13884] = { name = "49 Pound Redgill", kind = "trophy" },
+    [13887] = { name = "52 Pound Redgill", kind = "trophy" },
+    [13907] = { name = "7 Pound Lobster", kind = "trophy" },
+    [13908] = { name = "9 Pound Lobster", kind = "trophy" },
+    [7070] = { name = "Elemental Water", kind = "material" },
+    [7080] = { name = "Essence of Water", kind = "material" },
+    [7079] = { name = "Globe of Water", kind = "material" },
+    [10505] = { name = "Solid Blasting Powder", kind = "material" },
+    [3820] = { name = "Stranglekelp", kind = "material" },
+    [6456] = { name = "Acidic Slime", kind = "odd" },
+    [6304] = { name = "Damp Diary Page (Day 4)", kind = "odd" },
+    [6306] = { name = "Damp Diary Page (Day 512)", kind = "odd" },
+    [6307] = { name = "Message in a Bottle", kind = "odd" },
+    [6297] = { name = "Old Skull", kind = "odd" },
+    [6301] = { name = "Old Teamster's Skull", kind = "odd" },
+    [770] = { name = "Pointy Crocolisk Tooth", kind = "odd" },
+    [6457] = { name = "Rusted Engineering Parts", kind = "odd" },
+    [6360] = { name = "Steelscale Crushfish", kind = "gear" },
+    [8350] = { name = "The 1 Ring", kind = "gear" },
 }

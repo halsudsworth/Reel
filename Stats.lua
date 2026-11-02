@@ -148,20 +148,14 @@ local function SessionZone(session)
     return best
 end
 
--- "Elwynn Forest +5": the zone with the biggest share of catches (or the
--- data's own pick for your faction, where that share can't be trusted or is
--- the other side's capital), and how many other zones have more than a trace.
+-- "Elwynn Forest +5": where to go for it (for your faction, where that's a
+-- capital), and how many other zones it's a real catch in.
 local function FoundIn(fish)
-    local best, most, others = fish.best, -1, 0
+    local best, others = fish.best, 0
     if type(best) == "table" then best = best[UnitFactionGroup("player")] end
-    if not best then
-        for zone, percent in pairs(fish.zones) do
-            if percent > most then best, most = zone, percent end
-        end
-    end
     if not best then return "Location unknown" end
-    for zone, percent in pairs(fish.zones) do
-        if zone ~= best and percent >= 0.1 then others = others + 1 end
+    for _, zone in ipairs(fish.zones) do
+        if zone ~= best then others = others + 1 end
     end
     return others > 0 and string.format("%s +%d", best, others) or best
 end
@@ -663,11 +657,9 @@ ns.RegisterBarSegment({
             for id in pairs(entry.items) do caught[id] = true end
         end
         local have, total = 0, 0
-        for id, fish in pairs(ns.FISH) do
-            if (fish.zones[zone] or 0) >= 0.1 then
-                total = total + 1
-                if caught[id] then have = have + 1 end
-            end
+        for id in pairs(ns.ZoneFish()[zone] or {}) do
+            total = total + 1
+            if caught[id] then have = have + 1 end
         end
         if total == 0 then return end
         local t = string.format("Zone fish %d/%d", have, total)

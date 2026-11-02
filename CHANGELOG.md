@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.3
+
+- The fish data is rebuilt. Each fish knows the zones where it's a real catch and where to go for it.
+- "Zone fish" on the bar counts only fish that are a real catch in the zone: rare traces no longer count.
+
 ## 1.0.0-rc.2
 
 - Catches with auto-loot on are logged in the journal.

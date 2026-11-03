@@ -25,8 +25,8 @@ For World of Warcraft: Forever only.
 
 ## The journal
 
-- **Every catch:** logged per character with time, zone and skill. Fish, zones, sessions and records.
-- **Records:** the 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares. Feats for fishing every zone and finishing one.
+- **Every catch:** logged per character with the time, zone, subzone, spot on the map, your skill and level, and everything that came up on the line, not just fish. Fish, zones, sessions and records.
+- **Records:** the 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares and what's new in Forever. Feats for fishing ten zones, a hundred catches in one evening, and every fish in a zone.
 - **Derby:** a Speckled Tastyfish counter during the Extravaganza, and your Master Angler wins kept.
 
 ## Leaderboards and events
@@ -42,7 +42,7 @@ No account needed. Nothing leaves your game unless you paste it.
 
 ## Setup
 
-Install from CurseForge or Wago, or drop the `Reel` folder into `Interface\AddOns`. `/reel` opens the settings (`/reelfish` if another addon uses `/reel`).
+Install from CurseForge or Wago, or drop the `Reel` folder into `World of Warcraft\_forever_\Interface\AddOns`. `/reel` opens the settings (`/reelfish` if another addon uses `/reel`).
 
 ## Reporting a bug
 

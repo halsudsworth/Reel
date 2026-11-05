@@ -159,6 +159,15 @@ local function Exit(instant)
     UpdateLetterbox()
 end
 
+-- The player left on purpose (Show UI, the key, moving, Escape, unequipping the pole):
+-- fishing mode ends now too, so names, sound and graphics come back with the UI
+-- instead of after the done-fishing delay. The next cast starts it again.
+local function Leave()
+    if not active then return end
+    Exit()
+    ns.EndFishingNow()
+end
+
 -- Exit button: a small "Show UI" button that stays visible while faded.
 -- Drag to move; a drag never counts as a click.
 local function BuildExitButton()
@@ -188,7 +197,7 @@ local function BuildExitButton()
         C_Timer.After(0, function() self.dragging = false end)
     end)
     b:SetScript("OnClick", function(self)
-        if not self.dragging then Exit() end
+        if not self.dragging then Leave() end
     end)
     b:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
@@ -203,7 +212,7 @@ end
 
 function ReelToggleCleanView()
     if active then
-        Exit()
+        Leave()
     else
         Enter(true)
     end
@@ -223,7 +232,7 @@ ns.On("PLAYER_EQUIPMENT_CHANGED", function()
     if ns.PoleEquipped() then
         if s.cleanStart == "pole" and not InCombatLockdown() then Enter() end
     elseif s.cleanExitPole then
-        Exit()
+        Leave()
     end
 end)
 
@@ -239,7 +248,7 @@ end
 ns.On("PLAYER_REGEN_DISABLED", function() Exit(true) end)
 
 ns.On("PLAYER_STARTED_MOVING", function()
-    if ReelDB.settings.cleanExitMove then Exit() end
+    if ReelDB.settings.cleanExitMove then Leave() end
 end)
 
 ns.On("REEL_READY", function()
@@ -249,7 +258,7 @@ ns.On("REEL_READY", function()
 
     -- Escape opens the game menu when nothing else is open.
     if GameMenuFrame then
-        GameMenuFrame:HookScript("OnShow", function() ns.ExitCleanView() end)
+        GameMenuFrame:HookScript("OnShow", Leave)
     end
 
     C_Timer.NewTicker(1, function()

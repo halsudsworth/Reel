@@ -231,6 +231,12 @@ local function EndFishing()
     end
 end
 
+-- Fishing mode off now, for Clean View when the player leaves it on purpose. Not in
+-- combat, where some of the settings can't be changed; combat has its own handling.
+function ns.EndFishingNow()
+    if not InCombatLockdown() then EndFishing() end
+end
+
 -- Checks again every second after the delay, so a delay changed mid-wait
 -- (or a timer landing a hair early) can't leave fishing mode on for good.
 local function ScheduleEnd()

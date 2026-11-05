@@ -141,8 +141,9 @@ local function FadeTo(alpha, instant)
     end)
 end
 
-local function Enter()
-    if active or not ReelDB.settings.cleanView then return end
+-- force: the Toggle clean view key, which works whether or not Clean View is on for casting.
+local function Enter(force)
+    if active or not (force or ReelDB.settings.cleanView) then return end
     active = true
     ApplyKeep()
     FadeTo(0)
@@ -204,12 +205,7 @@ function ReelToggleCleanView()
     if active then
         Exit()
     else
-        active = false
-        if not ReelDB.settings.cleanView then
-            ns.Print("Turn on clean view on the Clean View page first.")
-            return
-        end
-        Enter()
+        Enter(true)
     end
 end
 

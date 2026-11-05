@@ -1,4 +1,4 @@
--- One key for the whole loop. Bound under Key Bindings > R.E.E.L. > Fish:
+-- One key for the whole loop. Bound under Options > Keybindings > AddOns > Fish:
 --   no lure on the pole  -> applies your chosen lure (Bar page)
 --   otherwise            -> casts Fishing
 --   bobber out           -> the same key is the interact key, which reels in
@@ -83,7 +83,21 @@ end)
 -- The cast event can arrive while the Fish key is still held from the press
 -- that cast; switching the binding under a held key could make the release
 -- reel in at once. A bite takes seconds, so wait for the key to come up.
+-- Reeling in uses the game's soft interact, which is gamepad-only (SoftTargetInteract 1)
+-- until the player turns on Enable Interact Key; the client won't let an addon change it.
+local INTERACT_PATH = "Options > Gameplay > Controls"
+local warnedInteract = false
+local function CheckInteractKey()
+    if warnedInteract or not GetBindingKey(FISH_BINDING) then return end
+    local value = tonumber((C_CVar and C_CVar.GetCVar or GetCVar)("SoftTargetInteract"))
+    if value and value < 2 then
+        warnedInteract = true
+        ns.Print("To reel in with the Fish key, turn on Enable Interact Key in " .. INTERACT_PATH .. ".")
+    end
+end
+
 ns.On("REEL_CAST", function()
+    CheckInteractKey()
     C_Timer.After(0.5, function()
         if ns.Channeling() then SetReeling(true) end
     end)
@@ -112,7 +126,7 @@ function ns.BuildOneKeyOptions(panel, anchor)
         function() return s.oneKeyLure end,
         function(v) s.oneKeyLure = v; UpdateMacro() end)
     lure:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
-    local note = W.Note(panel, "Bind the key under Key Bindings > R.E.E.L. > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's Interact With Target action, so soft targeting must be on in Options > Gameplay). Apply lure and Toggle window can be bound there too.", ns.CONTENT_WIDTH - 4)
+    local note = W.Note(panel, "Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in " .. INTERACT_PATH .. "). Apply lure and Toggle window can be bound there too.", ns.CONTENT_WIDTH - 4)
     note:SetPoint("TOPLEFT", lure, "BOTTOMLEFT", 0, -2)
     return lure
 end

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+The release for the launch of World of Warcraft: Forever.
+
+- Clean View, the immersion settings and the presets.
+- The bar, the lure button and one-key fishing.
+- The journal: every catch with time, place, skill and level, Records and Feats.
+- `/reel export` for the leaderboards and events on halsudsworth.com.
+- Fixed: Max graphics changed nothing on Forever.
+- Fixed: the Toggle clean view key works whether or not Clean View is on for casting.
+- Leaving Clean View (moving, Escape, Show UI) brings names, sound and graphics back at once, not 20 seconds later.
+- One key reels in only with the game's Enable Interact Key on (Options > Gameplay > Controls); R.E.E.L. now says so once in chat if it's off.
+
 ## 1.0.0-rc.5
 
 - The journal counts your casts and catches at each fishing skill in every spot, lure and gear included, so the site can work out the skill each zone needs.

@@ -58,9 +58,12 @@ local GRAPHICS_CVARS = {
 local FISHING_VIEW = 5 -- where the fishing camera is saved
 local RETURN_VIEW = 4  -- where the camera you had before is kept
 
+-- It returns an error number; nil or 0 means supported (Blizzard's Graphics.lua greys out a
+-- value only when the number indexes its error messages, 1 and up).
 local function Supported(cvar, value)
     if not IsGraphicsSettingValueSupported then return true end
-    return IsGraphicsSettingValueSupported(cvar, value, false) == nil
+    local err = IsGraphicsSettingValueSupported(cvar, value, false)
+    return not (type(err) == "number" and err > 0)
 end
 
 local function BestGraphicsValue(entry)

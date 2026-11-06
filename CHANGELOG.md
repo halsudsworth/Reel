@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed: fish tooltips now name a recipe vendor of your faction, nearest first, instead of always the first one listed.
+- Fixed: an error about secret auras when a mob attacked you while fishing.
+
 ## 1.0.0
 
 The release for the launch of World of Warcraft: Forever.

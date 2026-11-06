@@ -199,27 +199,33 @@ end
 -- Player buffs ---------------------------------------------------------------
 
 -- Auras are secret to addons in combat, so buffs are read out of combat and
--- the last list is kept until combat ends.
+-- the last list is kept until combat ends. Secrecy can start a moment before
+-- InCombatLockdown() says so (a mob's first hit), so a read that's refused
+-- also falls back to the kept list.
 local buffs = {}
 
-function ns.PlayerBuffs()
-    if InCombatLockdown() then
-        -- Drop buffs that ran out since combat started.
-        local now, live = GetTime(), {}
-        for _, aura in ipairs(buffs) do
-            if not aura.expirationTime or aura.expirationTime == 0 or aura.expirationTime > now then
-                live[#live + 1] = aura
-            end
+local function KeptBuffs()
+    -- Drop buffs that ran out since the list was read.
+    local now, live = GetTime(), {}
+    for _, aura in ipairs(buffs) do
+        if not aura.expirationTime or aura.expirationTime == 0 or aura.expirationTime > now then
+            live[#live + 1] = aura
         end
-        return live
     end
+    return live
+end
+
+function ns.PlayerBuffs()
+    if InCombatLockdown() then return KeptBuffs() end
     if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then return buffs end
-    buffs = {}
+    local read = {}
     for i = 1, 40 do
-        local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+        local ok, aura = pcall(C_UnitAuras.GetAuraDataByIndex, "player", i, "HELPFUL")
+        if not ok then return KeptBuffs() end
         if not aura then break end
-        buffs[#buffs + 1] = aura
+        read[#read + 1] = aura
     end
+    buffs = read
     return buffs
 end
 

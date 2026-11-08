@@ -29,7 +29,7 @@ ns.RegisterDefaults({
     barHidden = {},  -- segment key -> true when turned off
 })
 
-local BUTTON_MIN, BUTTON_MAX, BUTTON_PAD = 30, 40, 3
+local BUTTON_MIN, BUTTON_MAX, BUTTON_PAD = 30, 40, 5 -- PAD clears the border (4px inset) by a pixel
 
 local segments = {}
 local bar, text

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Right-click the minimap button for quick settings: show or lock the R.E.E.L. bar, Clean View, the splash booster, and Export journal.
 - Your journal now keeps the full text of Riggle Bassbait's winner yell, not only the winner's name.
 - Fixed: an error about a secret string when Riggle Bassbait yelled.
 

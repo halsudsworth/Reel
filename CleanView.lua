@@ -159,6 +159,13 @@ local function Exit(instant)
     UpdateLetterbox()
 end
 
+-- Clean View on or off from outside its page (the minimap button's menu).
+function ns.SetCleanView(v)
+    ReelDB.settings.cleanView = v
+    if not v then Exit() end
+    UpdateExitButton()
+end
+
 -- The player left on purpose (Show UI, the key, moving, Escape, unequipping the pole):
 -- fishing mode ends now too, so names, sound and graphics come back with the UI
 -- instead of after the done-fishing delay. The next cast starts it again.

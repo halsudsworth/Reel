@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Your journal now keeps the full text of Riggle Bassbait's winner yell, not only the winner's name.
+
 ## 1.0.1
 
 - Fixed: fish tooltips now name a recipe vendor of your faction, nearest first, instead of always the first one listed.

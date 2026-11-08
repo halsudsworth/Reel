@@ -78,20 +78,21 @@ ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender, _, _, _, _, _, _, _, _, _,
     if type(text) ~= "string" or not IsRiggle(sender, guid) then return end
     local data = ns.Data()
     if not data then return end
-    local name = text:match(WINNER)
-    if not name then
-        -- Not the English winner line: keep it as heard (once a day, at most 30 lines).
-        data.yells = data.yells or {}
-        local now = ns.Now()
-        for _, y in ipairs(data.yells) do
-            if y[2] == text and now - y[1] < 86400 then return end
-        end
+    -- Every line he yells is kept as heard, the winner line too, so its exact wording can be
+    -- read later (once a day, at most 30 lines).
+    data.yells = data.yells or {}
+    local now = ns.Now()
+    local heard = false
+    for _, y in ipairs(data.yells) do
+        if y[2] == text and now - y[1] < 86400 then heard = true; break end
+    end
+    if not heard then
         if #data.yells >= 30 then table.remove(data.yells, 1) end
         table.insert(data.yells, { now, text })
-        return
     end
+    local name = text:match(WINNER)
+    if not name then return end
     data.wins = data.wins or {}
-    local now = ns.Now()
     for _, w in ipairs(data.wins) do
         if w[2] == name and now - w[1] < 6 * 3600 then return end
     end

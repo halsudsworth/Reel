@@ -52,6 +52,7 @@ function W.Slider(parent, text, min, max, step, suffix, get, set)
 
     local label = W.Label(s, text, "GameFontHighlight")
     label:SetPoint("RIGHT", s, "LEFT", -8, 0)
+    s.label = label
     local value = W.Label(s, "", "GameFontHighlight")
     value:SetPoint("LEFT", s, "RIGHT", 8, 0)
 

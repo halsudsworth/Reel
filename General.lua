@@ -69,10 +69,12 @@ ns.RegisterPage({
         local delay = W.Slider(panel, "Done fishing after", 5, 60, 5, "s",
             function() return s.restoreDelay end,
             function(v) s.restoreDelay = v end)
-        delay:SetPoint("TOPLEFT", presetNote, "BOTTOMLEFT", 90, -24)
+        -- The slider's label sits to its left; leave room for all of it.
+        local labelRoom = math.ceil(delay.label:GetStringWidth()) + 8
+        delay:SetPoint("TOPLEFT", presetNote, "BOTTOMLEFT", labelRoom, -24)
 
         local note = W.Note(panel, "How long after your last bobber is gone before R.E.E.L. counts you as done fishing. Your sound settings go back, the bar hides, and clean view can end.", ns.CONTENT_WIDTH - 4)
-        note:SetPoint("TOPLEFT", delay, "BOTTOMLEFT", -90, -24)
+        note:SetPoint("TOPLEFT", delay, "BOTTOMLEFT", -labelRoom, -24)
 
         local minimap = W.Checkbox(panel, "Show minimap button",
             function() return s.minimapButton end,

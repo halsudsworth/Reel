@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.1.0
 
 - Fixed: the lure button on the R.E.E.L. bar now sits inside the gold border instead of covering its left edge.
 - Right-click the minimap button for quick settings: show or lock the R.E.E.L. bar, Clean View, the splash booster, and Export journal.
 - Your journal now keeps the full text of Riggle Bassbait's winner yell, not only the winner's name.
 - Fixed: an error about a secret string when Riggle Bassbait yelled.
+- Fixed: the "Done fishing after" slider on the General page no longer hangs off the left edge.
 
 ## 1.0.1
 

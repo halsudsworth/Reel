@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Your journal now keeps the full text of Riggle Bassbait's winner yell, not only the winner's name.
+- Fixed: an error about a secret string when Riggle Bassbait yelled.
 
 ## 1.0.1
 

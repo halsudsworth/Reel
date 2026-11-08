@@ -74,7 +74,15 @@ local function IsRiggle(sender, guid)
     return tonumber(id) == RIGGLE
 end
 
+-- A yell's text, sender and GUID can arrive as secret values, which an addon can't compare or
+-- read; then the yell is skipped.
+local function Readable(text, sender, guid)
+    if not issecretvalue then return true end
+    return not (issecretvalue(text) or issecretvalue(sender) or issecretvalue(guid))
+end
+
 ns.On("CHAT_MSG_MONSTER_YELL", function(text, sender, _, _, _, _, _, _, _, _, _, guid)
+    if not Readable(text, sender, guid) then return end
     if type(text) ~= "string" or not IsRiggle(sender, guid) then return end
     local data = ns.Data()
     if not data then return end

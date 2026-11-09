@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The lure button and the lure choice on the Bar page know "Secret" Bait, the new +25 lure in Forever.
+
 ## 1.1.0
 
 - Fixed: the lure button on the R.E.E.L. bar now sits inside the gold border instead of covering its left edge.

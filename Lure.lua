@@ -22,6 +22,9 @@ local LURES = {
     { id = 6530, name = "Nightcrawlers", bonus = 50, req = 50 },
     { id = 6811, name = "Aquadynamic Fish Lens", bonus = 50, req = 50 },
     { id = 6529, name = "Shiny Bauble", bonus = 25, req = 0 },
+    -- New in Forever (foreverchanges.pro, build 1.60.1.70862). Last of the +25s: it's Unique (5),
+    -- so the vendor Bauble goes first.
+    { id = 268880, name = "\"Secret\" Bait", bonus = 25, req = 0 },
 }
 
 -- Reads the icon from game files, so unlike GetItemInfo it works before the

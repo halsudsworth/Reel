@@ -34,8 +34,10 @@ local GetItemCountCompat = C_Item and C_Item.GetItemCount or GetItemCount
 
 local button, buttonLure
 
--- Seconds left on the main-hand temporary enchant (the lure), or nil.
+-- Seconds left on the lure, or nil. Only counts with a pole in hand, so a
+-- sharpening stone or poison on a weapon isn't taken for a lure.
 function ns.LureTimeLeft()
+    if not ns.PoleEquipped() then return end
     local has, expiration = GetWeaponEnchantInfo()
     if has and expiration then return expiration / 1000 end
 end

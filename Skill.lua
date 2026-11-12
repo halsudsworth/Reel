@@ -73,7 +73,12 @@ end)
 -- bonus from gear and food on top. Only the base counts toward the cap.
 ns.RegisterBarSegment({ key = "skill", label = "Fishing skill", order = 10, text = function()
     local rank, bonus, maxRank = ns.FishingSkill()
-    if not rank then return "Fishing ?" end
+    if not rank then
+        -- A character who hasn't learned fishing gets no skill item.
+        local ok, _, _, _, fishing = pcall(GetProfessions)
+        if ok and not fishing then return end
+        return "Fishing ?"
+    end
     local t = "Fishing " .. rank
     if maxRank and maxRank > 0 then t = t .. "/" .. maxRank end
     if bonus > 0 then t = t .. string.format(" |cff40ff40+%d|r", bonus) end

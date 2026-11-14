@@ -14,6 +14,11 @@ local PREFIX = "REEL"
 local HELLO_DELAY = 10  -- seconds after login, so the guild roster has loaded
 local REPORT_DELAY = 8  -- seconds after the hello to list who answered
 local REPLY_GAP = 30    -- answer each sender at most once in this many seconds
+local REPLY_JITTER = 5  -- answers wait a random 0-5 seconds, so a guild's copies don't all send at once
+local RETRY_DELAY, RETRIES = 3, 2
+-- SendAddonMessage results worth another try: AddonMessageThrottle, ChannelThrottle,
+-- GeneralError (the same three BigWigs retries).
+local RETRY_CODES = { [3] = true, [8] = true, [9] = true }
 
 local GetMeta = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local version = GetMeta and GetMeta("Reel", "Version") or "?"
@@ -21,9 +26,13 @@ local version = GetMeta and GetMeta("Reel", "Version") or "?"
 local registered = C_ChatInfo and C_ChatInfo.RegisterAddonMessagePrefix
     and C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
 
-local function Send(kind, channel, target)
+local function Send(kind, channel, target, tries)
     if not (C_ChatInfo and C_ChatInfo.SendAddonMessage) then return end
-    C_ChatInfo.SendAddonMessage(PREFIX, kind .. "\t" .. version, channel, target)
+    local result = C_ChatInfo.SendAddonMessage(PREFIX, kind .. "\t" .. version, channel, target)
+    tries = tries or 0
+    if RETRY_CODES[result] and tries < RETRIES then
+        C_Timer.After(RETRY_DELAY, function() Send(kind, channel, target, tries + 1) end)
+    end
 end
 
 local answered = {}  -- names that answered this login's hello
@@ -44,7 +53,7 @@ ns.On("CHAT_MSG_ADDON", function(prefix, text, channel, sender)
         local now = GetTime()
         if not repliedAt[sender] or now - repliedAt[sender] > REPLY_GAP then
             repliedAt[sender] = now
-            Send("HI", "WHISPER", sender)
+            C_Timer.After(math.random() * REPLY_JITTER, function() Send("HI", "WHISPER", sender) end)
         end
     elseif kind == "HI" then
         Record(sender, v)

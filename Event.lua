@@ -443,7 +443,7 @@ ns.RegisterPage({
     name = "Events",
     order = 12,
     build = function(panel)
-        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events count on the fishing bar while they run, and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
+        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events can be tracked on the fishing bar while they run, and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
         how:SetPoint("TOPLEFT")
 
         input = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")

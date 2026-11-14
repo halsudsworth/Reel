@@ -321,6 +321,13 @@ local function Joined()
     return data.events
 end
 
+-- Event ids the player took off the bar; they stay joined and in the export.
+local function Untracked()
+    local data = ns.Data()
+    data.eventUntracked = data.eventUntracked or {}
+    return data.eventUntracked
+end
+
 -- Joined event strings, for the export.
 function ns.EventStrings()
     return Joined()
@@ -362,6 +369,7 @@ local function Leave(index)
     local list = Joined()
     local ev = list[index] and Event(list[index])
     table.remove(list, index)
+    if ev then Untracked()[ev.id] = nil end
     if ev then ns.Print("Left " .. ev.name .. ".") end
     ns.UpdateBar()
 end
@@ -389,7 +397,7 @@ ns.RegisterBarSegment({ key = "event", label = "Joined events", order = 6, text 
     local lines = {}
     for _, str in ipairs(Joined()) do
         local ev = Event(str)
-        if ev and today >= ev.start and today <= ev["end"] then
+        if ev and not Untracked()[ev.id] and today >= ev.start and today <= ev["end"] then
             local t = ev.name .. ": " .. CachedProgress(str, ev, offset)
                 .. " |cff888888· " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left|r"
             if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then
@@ -410,7 +418,9 @@ local function RefreshRows()
     for i, row in ipairs(rows) do
         local ev = list[i] and Event(list[i])
         if ev then
-            row.label:SetText(string.format("%s  |cff888888%s to %s|r", ev.name, ev.start, ev["end"]))
+            local off = Untracked()[ev.id]
+            row.label:SetText(string.format("%s%s  |cff888888%s to %s|r", off and "|cff888888" or "", ev.name, ev.start, ev["end"]))
+            row.track:SetText(off and "Track" or "Untrack")
             row:Show()
         else
             row:Hide()
@@ -465,6 +475,16 @@ local function BuildBox()
         row.label:SetPoint("LEFT")
         local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows() end)
         leave:SetPoint("RIGHT")
+        -- Track: shown on the fishing bar. Untracked events stay joined.
+        row.track = W.Button(row, "Untrack", 70, function()
+            local ev = Joined()[i] and Event(Joined()[i])
+            if not ev then return end
+            local u = Untracked()
+            u[ev.id] = not u[ev.id] or nil
+            RefreshRows()
+            ns.UpdateBar()
+        end)
+        row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
         rows[i] = row
     end
 end

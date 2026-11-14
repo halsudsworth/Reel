@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
+
+- New Events tab: join an event or tournament by pasting its event code from halsudsworth.com (Copy event code on the event's page). Joined events can be tracked on the fishing bar while they run, with your progress and the time left, and your journal paste is scored for them. Untrack keeps an event joined but off the bar. `/reel event` and the minimap menu open the tab.
+- The Bar page scrolls when its checkboxes run past the bottom of the window.
+
+## 1.1.3
+
+- Guild hello: a moment after login, R.E.E.L. says hello to your guild, and guildmates running R.E.E.L. answer. A chat line lists who answered; `/reel guild` lists everyone heard from.
+
+## 1.1.2
+
+- Fixed: characters who haven't learned fishing no longer see "Fishing ?" on the bar.
+- Fixed: a sharpening stone, weightstone or poison on a weapon was shown as a lure. The lure timer now only counts with a fishing pole in hand.
+
+## 1.1.1
 
 - The lure button and the lure choice on the Bar page know "Secret" Bait, the new +25 lure in Forever.
 

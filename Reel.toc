@@ -37,3 +37,4 @@ Immersion.lua
 General.lua
 Debug.lua
 Export.lua
+Guild.lua

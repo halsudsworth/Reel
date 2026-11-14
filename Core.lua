@@ -387,6 +387,8 @@ SlashCmdList.REEL = function(msg)
         ns.ToggleDerbyTest()
     elseif msg == "where" then
         ns.PrintWhere()
+    elseif msg == "guild" then
+        ns.PrintGuild()
     elseif msg == "export" then
         ns.ShowExport()
     elseif not ns.ExitCleanView() then

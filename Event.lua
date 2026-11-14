@@ -118,7 +118,7 @@ end
 
 -- Event strings ------------------------------------------------------------------------
 
-local SCORINGS = { race = true, most = true, best30 = true, target = true, set = true, variety = true, quest = true }
+local SCORINGS = { race = true, most = true, best30 = true, best = true, target = true, set = true, variety = true, quest = true }
 
 local function AsList(v)
     if v == nil then return nil end
@@ -135,6 +135,9 @@ local function Decode(str)
     if type(ev) ~= "table" or ev.v ~= 1 then return nil, "That event string is damaged. Copy it again." end
     if type(ev.id) ~= "string" or type(ev.name) ~= "string" or not SCORINGS[ev.scoring] then
         return nil, "This version of R.E.E.L. can't count that event."
+    end
+    if ev.scoring == "best" and not (tonumber(ev.minutes) and ev.minutes >= 1) then
+        return nil, "That event string is damaged. Copy it again."
     end
     if type(ev.start) ~= "string" or type(ev["end"]) ~= "string" or type(ev.window) ~= "table" then
         return nil, "That event string is damaged. Copy it again."
@@ -299,13 +302,14 @@ local function Progress(ev, offset)
             for _ = 1, (e.c[7] or 1) do times[#times + 1] = e.c[1] end
         end
     end
-    if s == "best30" then
+    if s == "best30" or s == "best" then
+        local minutes = s == "best" and tonumber(ev.minutes) or 30
         local best, k = 0, 1
         for i = 1, #times do
-            while times[i] - times[k] > 1800 do k = k + 1 end
+            while times[i] - times[k] > minutes * 60 do k = k + 1 end
             best = math.max(best, i - k + 1)
         end
-        return string.format("%d fish in your best 30 min", best)
+        return string.format("%d fish in your best %d min", best, minutes)
     end
     if (s == "race" or s == "target") and ev.target then
         return string.format("%d of %d fish", math.min(total, ev.target), ev.target)

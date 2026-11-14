@@ -192,7 +192,11 @@ function ns.ExportString()
         '"catches":' .. List(catches),
         '"wins":' .. List(wins),
         '"yells":' .. List(yells),
-        '"events":[]',
+        '"events":' .. List((function()
+            local out = {}
+            for i, s in ipairs(ns.EventStrings and ns.EventStrings() or {}) do out[i] = Str(s) end
+            return out
+        end)()),
     }
     local ruleset = Ruleset()
     if ruleset then table.insert(fields, 6, '"ruleset":' .. Str(ruleset)) end

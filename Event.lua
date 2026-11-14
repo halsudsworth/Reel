@@ -169,6 +169,24 @@ local function Clock(t, offset)
     return date("!%Y-%m-%d", u), c.hour * 60 + c.min
 end
 
+-- Unix time of a date's midnight in UTC (days from civil, so the player's own time zone
+-- doesn't enter into it).
+local function DateEpoch(d)
+    local y, m, day = d:match("(%d+)-(%d+)-(%d+)")
+    y, m, day = tonumber(y), tonumber(m), tonumber(day)
+    if m <= 2 then y = y - 1 end
+    local era = math.floor(y / 400)
+    local yoe = y - era * 400
+    local doy = math.floor((153 * ((m + 9) % 12) + 2) / 5) + day - 1
+    local doe = yoe * 365 + math.floor(yoe / 4) - math.floor(yoe / 100) + doy
+    return (era * 146097 + doe - 719468) * 86400
+end
+
+-- Seconds until the event's last date is over on the server clock.
+local function TimeLeft(ev, offset)
+    return DateEpoch(ev["end"]) + 86400 - offset * 60 - ns.Now()
+end
+
 local function HM(s) return tonumber(s:sub(1, 2)) * 60 + tonumber(s:sub(4, 5)) end
 
 local function PrevDate(d)
@@ -262,7 +280,7 @@ local function Progress(ev, offset)
             end
             if (n.distinct and kinds or count) >= n.n then done = done + 1 end
         end
-        return string.format("%d/%d done", done, #(ev.needs or {}))
+        return string.format("%d of %d done", done, #(ev.needs or {}))
     end
     if s == "variety" and ev.variety then
         local zs, fs, nz, nf = {}, {}, 0, 0
@@ -272,7 +290,7 @@ local function Progress(ev, offset)
                 if not fs[e.c[6]] then fs[e.c[6]] = true; nf = nf + 1 end
             end
         end
-        return string.format("%d/%d fish, %d/%d zones", math.min(nf, ev.variety.fish), ev.variety.fish, math.min(nz, ev.variety.zones), ev.variety.zones)
+        return string.format("%d of %d fish, %d of %d zones", math.min(nf, ev.variety.fish), ev.variety.fish, math.min(nz, ev.variety.zones), ev.variety.zones)
     end
     local total, times = 0, {}
     for _, e in ipairs(inside) do
@@ -287,12 +305,12 @@ local function Progress(ev, offset)
             while times[i] - times[k] > 1800 do k = k + 1 end
             best = math.max(best, i - k + 1)
         end
-        return string.format("best 30 min: %d", best)
+        return string.format("%d fish in your best 30 min", best)
     end
     if (s == "race" or s == "target") and ev.target then
-        return string.format("%d/%d", math.min(total, ev.target), ev.target)
+        return string.format("%d of %d fish", math.min(total, ev.target), ev.target)
     end
-    return string.format("%d caught", total)
+    return string.format("%d fish", total)
 end
 
 -- Joined events ------------------------------------------------------------------------
@@ -373,6 +391,7 @@ ns.RegisterBarSegment({ key = "event", label = "Joined events", order = 6, text 
         local ev = Event(str)
         if ev and today >= ev.start and today <= ev["end"] then
             local t = ev.name .. ": " .. CachedProgress(str, ev, offset)
+                .. " |cff888888· " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left|r"
             if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then
                 t = t .. " |cff888888(opens " .. ev.window.from .. ")|r"
             end

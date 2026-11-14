@@ -158,9 +158,17 @@ ns.On("PLAYER_REGEN_ENABLED", function() ns.UpdateBar() end)
 ns.RegisterPage({
     name = "Bar",
     order = 90,
-    build = function(panel)
+    build = function(page)
         local s = ReelDB.settings
         local controls = {}
+
+        -- One checkbox per bar item, so the list can outgrow the window: the page scrolls.
+        local scroll = CreateFrame("ScrollFrame", nil, page, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT")
+        scroll:SetPoint("BOTTOMRIGHT", -24, 0)
+        local panel = CreateFrame("Frame", nil, scroll)
+        panel:SetSize(ns.CONTENT_WIDTH - 24, 1)
+        scroll:SetScrollChild(panel)
 
         local shown = W.Checkbox(panel, "Show fishing bar",
             function() return s.bar end,
@@ -237,6 +245,11 @@ ns.RegisterPage({
             for _, entry in ipairs(subOptions) do
                 entry[1]:SetActive(not s.barHidden[entry[2]])
             end
+            -- The scroll height is the list's height, measured once the layout has settled.
+            C_Timer.After(0, function()
+                local top, bottom = panel:GetTop(), anchor:GetBottom()
+                if top and bottom then panel:SetHeight(top - bottom + 8) end
+            end)
         end
         return Refresh
     end,

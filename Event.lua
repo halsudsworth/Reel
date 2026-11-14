@@ -485,6 +485,9 @@ local function BuildBox()
             ns.UpdateBar()
         end)
         row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
+        row.label:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
+        row.label:SetJustifyH("LEFT")
+        row.label:SetWordWrap(false)
         rows[i] = row
     end
 end

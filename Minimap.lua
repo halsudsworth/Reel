@@ -37,6 +37,7 @@ local QUICK = {
       set = function(_, v) ns.SetCleanView(v) end },
     { text = "Splash booster", get = function(s) return s.boost end,
       set = function(s, v) s.boost = v; ns.ApplySettings() end },
+    { text = "Events", run = function() ns.ShowEvents() end },
     { text = "Export journal", run = function() ns.ShowExport() end },
 }
 

@@ -409,99 +409,101 @@ ns.RegisterBarSegment({ key = "event", label = "Joined events", order = 6, text 
     if #lines > 0 then return lines end
 end })
 
--- The window ---------------------------------------------------------------------------
+-- Events tab ---------------------------------------------------------------------------
 
-local box, input, rows
+local input, rows, none
+
+-- What a joined event's row says after its name: progress and time left while it runs.
+local function Status(str, ev)
+    local offset = ServerOffset()
+    local today = Today(offset)
+    if today < ev.start then return "starts " .. ev.start end
+    if today > ev["end"] then return "ended " .. ev["end"] end
+    return CachedProgress(str, ev, offset) .. " · " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left"
+end
 
 local function RefreshRows()
+    if not rows then return end
     local list = Joined()
     for i, row in ipairs(rows) do
         local ev = list[i] and Event(list[i])
         if ev then
             local off = Untracked()[ev.id]
-            row.label:SetText(string.format("%s%s  |cff888888%s to %s|r", off and "|cff888888" or "", ev.name, ev.start, ev["end"]))
+            row.label:SetText(string.format("%s%s|r  |cff888888%s|r", off and "|cff888888" or "|cffffffff", ev.name, Status(list[i], ev)))
             row.track:SetText(off and "Track" or "Untrack")
             row:Show()
         else
             row:Hide()
         end
     end
-    box.none:SetShown(#list == 0)
+    none:SetShown(#list == 0)
 end
 
-local function BuildBox()
-    box = CreateFrame("Frame", "ReelEventFrame", UIParent, "BasicFrameTemplateWithInset")
-    box:SetSize(460, 130 + MAX_EVENTS * 24)
-    box:SetPoint("CENTER")
-    box:SetFrameStrata("DIALOG")
-    box:EnableMouse(true)
-    box:SetMovable(true)
-    box:RegisterForDrag("LeftButton")
-    box:SetScript("OnDragStart", box.StartMoving)
-    box:SetScript("OnDragStop", box.StopMovingOrSizing)
-    tinsert(UISpecialFrames, "ReelEventFrame")
+ns.RegisterPage({
+    name = "Events",
+    order = 12,
+    build = function(panel)
+        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events count on the fishing bar while they run, and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
+        how:SetPoint("TOPLEFT")
 
-    local title = box:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    title:SetPoint("TOP", 0, -5)
-    title:SetText("Events")
+        input = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+        input:SetSize(ns.CONTENT_WIDTH - 100, 24)
+        input:SetPoint("TOPLEFT", how, "BOTTOMLEFT", 6, -10)
+        input:SetAutoFocus(false)
+        input:SetMaxLetters(0)
+        local function Submit()
+            if Join(input:GetText()) then input:SetText(""); input:ClearFocus(); RefreshRows() end
+        end
+        input:SetScript("OnEnterPressed", Submit)
+        input:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        local join = W.Button(panel, "Join", 70, Submit)
+        join:SetPoint("LEFT", input, "RIGHT", 8, 0)
 
-    local how = W.Label(box, "Paste an event string from halsudsworth.com (Ctrl+V), then Join.", "GameFontHighlight")
-    how:SetPoint("TOPLEFT", 16, -36)
+        local header = W.Label(panel, "Joined", "GameFontNormal")
+        header:SetPoint("TOPLEFT", input, "BOTTOMLEFT", -6, -16)
+        none = W.Label(panel, "None yet.", "GameFontDisableSmall")
+        none:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -6)
 
-    input = CreateFrame("EditBox", nil, box, "InputBoxTemplate")
-    input:SetSize(340, 24)
-    input:SetPoint("TOPLEFT", 20, -60)
-    input:SetAutoFocus(true)
-    input:SetMaxLetters(0)
-    local function Submit()
-        if Join(input:GetText()) then input:SetText(""); RefreshRows() end
-    end
-    input:SetScript("OnEnterPressed", Submit)
-    input:SetScript("OnEscapePressed", function() box:Hide() end)
-    local join = W.Button(box, "Join", 70, Submit)
-    join:SetPoint("LEFT", input, "RIGHT", 8, 0)
+        rows = {}
+        for i = 1, MAX_EVENTS do
+            local row = CreateFrame("Frame", nil, panel)
+            row:SetSize(ns.CONTENT_WIDTH - 4, 24)
+            row:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4 - (i - 1) * 26)
+            local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows() end)
+            leave:SetPoint("RIGHT")
+            -- Untracked events stay joined and in the export, off the fishing bar.
+            row.track = W.Button(row, "Untrack", 70, function()
+                local ev = Joined()[i] and Event(Joined()[i])
+                if not ev then return end
+                local u = Untracked()
+                u[ev.id] = not u[ev.id] or nil
+                RefreshRows()
+                ns.UpdateBar()
+            end)
+            row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
+            row.label = W.Label(row, "", "GameFontHighlightSmall")
+            row.label:SetPoint("LEFT")
+            row.label:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
+            row.label:SetJustifyH("LEFT")
+            row.label:SetWordWrap(false)
+            rows[i] = row
+        end
 
-    local header = W.Label(box, "Joined", "GameFontNormal")
-    header:SetPoint("TOPLEFT", 16, -96)
-    box.none = W.Label(box, "None yet.", "GameFontDisableSmall")
-    box.none:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -6)
-
-    rows = {}
-    for i = 1, MAX_EVENTS do
-        local row = CreateFrame("Frame", nil, box)
-        row:SetSize(420, 22)
-        row:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4 - (i - 1) * 24)
-        row.label = W.Label(row, "", "GameFontHighlightSmall")
-        row.label:SetPoint("LEFT")
-        local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows() end)
-        leave:SetPoint("RIGHT")
-        -- Track: shown on the fishing bar. Untracked events stay joined.
-        row.track = W.Button(row, "Untrack", 70, function()
-            local ev = Joined()[i] and Event(Joined()[i])
-            if not ev then return end
-            local u = Untracked()
-            u[ev.id] = not u[ev.id] or nil
+        return function()
+            if ns.Data() then Prune() end
+            input:SetText("")
             RefreshRows()
-            ns.UpdateBar()
-        end)
-        row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
-        row.label:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
-        row.label:SetJustifyH("LEFT")
-        row.label:SetWordWrap(false)
-        rows[i] = row
-    end
-end
+        end
+    end,
+})
 
+-- /reel event and the minimap menu open the tab.
 function ns.ShowEvents()
     if not ns.Data() then return end
-    if not box then BuildBox() end
-    Prune()
-    RefreshRows()
-    input:SetText("")
-    box:Show()
-    input:SetFocus()
+    ns.ShowPage("Events")
 end
 
+ns.On("REEL_DATA_CHANGED", RefreshRows)
 ns.On("REEL_READY", function() if ns.Data() then Prune() end end)
 
 ns.EventDecode, ns.EventJoin = Decode, Join -- for the load test

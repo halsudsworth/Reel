@@ -106,6 +106,18 @@ function ns.ToggleWindow()
     ns.UpdateBar()
 end
 
+-- Opens the window on a page, by name.
+function ns.ShowPage(name)
+    if not window then BuildWindow() end
+    ReelDB.settings.lastPage = name
+    if window:IsShown() then
+        for _, page in ipairs(pages) do if page.name == name then Select(page) end end
+    else
+        window:Show() -- OnShow selects lastPage
+    end
+    ns.UpdateBar()
+end
+
 function ns.WindowShown()
     return window ~= nil and window:IsShown()
 end

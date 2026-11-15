@@ -5,6 +5,7 @@
 --     key   = "lure",           saved on/off setting
 --     label = "Lure timer",     checkbox text on the Bar page
 --     order = 20,               position on the bar
+--     defaultOff = true,        optional: off until turned on on the Bar page
 --     text  = function(settings)
 --         return text, active   -- text: a string, a list of strings (one bar
 --     end,                      -- item each), or nil to hide; active true
@@ -26,7 +27,7 @@ ns.RegisterDefaults({
     barLayout = "horizontal", -- or "vertical": one item per line
     barScale = 100,  -- percent
     barPoint = nil,  -- { point, relativePoint, x, y }
-    barHidden = {},  -- segment key -> true when turned off
+    barHidden = {},  -- segment key -> true when turned off, false when turned on (for defaultOff items)
 })
 
 local BUTTON_MIN, BUTTON_MAX, BUTTON_PAD = 30, 40, 5 -- PAD clears the border (4px inset) by a pixel
@@ -37,6 +38,12 @@ local bar, text
 function ns.RegisterBarSegment(segment)
     segments[#segments + 1] = segment
     table.sort(segments, function(a, b) return a.order < b.order end)
+end
+
+local function Hidden(s, seg)
+    local h = s.barHidden[seg.key]
+    if h == nil then return seg.defaultOff or false end
+    return h
 end
 
 local function SavePosition()
@@ -61,7 +68,7 @@ function ns.UpdateBar()
     local s = ReelDB.settings
     local parts, active = {}, false
     for _, seg in ipairs(segments) do
-        if not s.barHidden[seg.key] then
+        if not Hidden(s, seg) then
             local ok, segText, segActive = pcall(seg.text, s)
             if not ok then
                 if not barErrors[seg.key] then barErrors[seg.key] = true; geterrorhandler()(segText) end
@@ -203,7 +210,7 @@ ns.RegisterPage({
         header:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 0, -76)
 
         controls[1], controls[2], controls[3], controls[4] = shown, locked, layout, scale
-        local subOptions = {} -- { checkbox, segment key }
+        local subOptions = {} -- { checkbox, segment }
         local Refresh
 
         -- Each row anchors to the previous one; sub-options are indented.
@@ -227,15 +234,18 @@ ns.RegisterPage({
 
         for _, seg in ipairs(segments) do
             local cb = W.Checkbox(panel, seg.label,
-                function() return not s.barHidden[seg.key] end,
-                function(v) s.barHidden[seg.key] = (not v) or nil; ns.UpdateBar(); Refresh() end)
+                function() return not Hidden(s, seg) end,
+                function(v)
+                    if seg.defaultOff then s.barHidden[seg.key] = not v else s.barHidden[seg.key] = (not v) or nil end
+                    ns.UpdateBar(); Refresh()
+                end)
             Row(cb, 0)
             for _, option in ipairs(seg.options or {}) do
                 local sub = W.Checkbox(panel, option.label,
                     function() return s[option.key] end,
                     function(v) s[option.key] = v; ns.UpdateBar() end)
                 Row(sub, 24)
-                subOptions[#subOptions + 1] = { sub, seg.key }
+                subOptions[#subOptions + 1] = { sub, seg }
             end
         end
 
@@ -243,7 +253,7 @@ ns.RegisterPage({
             for _, c in ipairs(controls) do c.Refresh() end
             lureChoice:SetActive(s.lureButton)
             for _, entry in ipairs(subOptions) do
-                entry[1]:SetActive(not s.barHidden[entry[2]])
+                entry[1]:SetActive(not Hidden(s, entry[2]))
             end
             -- The scroll height is the list's height, measured once the layout has settled.
             C_Timer.After(0, function()

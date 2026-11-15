@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0
+
+- Fish tab: a new Value column shows what each fish you've caught is worth (count times price). With Auctionator installed it uses Auctionator's price, marked with a grey a; otherwise the vendor price, marked with a grey v.
+- Sessions tab: three new columns: catches per hour, the average time per catch, and value per hour.
+- New bar item, off by default: catches per hour this session (Bar page).
+- New key binding: Quick recast (no lure). It cancels your cast and casts again straight away, without putting on a lure. Set it under Key Bindings > AddOns > R.E.E.L.
+- "Play sound when tabbed out" on the Sound page now works on its own, without Splash booster.
+
 ## 1.2.1
 
 - New event tracker: joined events that are running get their own box, like the quest tracker, instead of a line on the fishing bar. Each event shows its progress and the time left; a checklist shows each of its lines. Drag the title to move it, click it to fold it up. Untrack on the Events tab hides an event from it.

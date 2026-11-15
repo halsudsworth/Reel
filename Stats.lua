@@ -1,8 +1,10 @@
 -- Stats page: the fishing journal, in four tabs.
---   Fish      every item ever caught (click a header to sort), then the
---             known fish not caught yet (from FishData.lua)
+--   Fish      every item ever caught (click a header to sort) with what the
+--             catch is worth, then the known fish not caught yet (FishData.lua)
 --   Zones     zones, click to open sub-zones, click again for their catches
---   Sessions  sessions grouped by day, click one for its catches
+--   Sessions  sessions grouped by day, with catches per hour, time per catch and
+--             value per hour; click one for its catches
+-- Value: Auctionator's last-scanned price where it has one, else the vendor price.
 --   Records   best session, biggest stack, rarest catch, totals, rare fish
 -- A dropdown picks a character with catch data, or all of them together.
 
@@ -33,6 +35,48 @@ end
 
 local function ClockTime(t)
     return (date("%I:%M %p", t):gsub("^0", ""))
+end
+
+-- 12345 copper -> "1g 23s", the two largest coins.
+local function Money(copper)
+    copper = math.floor(copper + 0.5)
+    local g, sv, c = math.floor(copper / 10000), math.floor(copper % 10000 / 100), copper % 100
+    local GOLD, SILVER, COPPER = "|cffffd700g|r", "|cffc7c7cfs|r", "|cffeda55fc|r"
+    if g > 0 then return g .. GOLD .. (sv > 0 and (" " .. sv .. SILVER) or "") end
+    if sv > 0 then return sv .. SILVER .. (c > 0 and (" " .. c .. COPPER) or "") end
+    return c .. COPPER
+end
+
+-- One item's price in copper and true when it's an auction price: Auctionator's (its public
+-- API, when installed) if it has one, else the vendor price. Nil when the client hasn't
+-- loaded the item yet; it hands item info out only once it has.
+local GetItemInfoCompat = C_Item and C_Item.GetItemInfo or GetItemInfo
+local function Price(id)
+    local api = Auctionator and Auctionator.API and Auctionator.API.v1
+    if api and api.GetAuctionPriceByItemID then
+        local ok, price = pcall(api.GetAuctionPriceByItemID, "Reel", id)
+        if ok and type(price) == "number" and price > 0 then return price, true end
+    end
+    return (select(11, GetItemInfoCompat(id)))
+end
+
+-- What an items table is worth in copper, and whether every item's price was known.
+local function ItemsValue(items)
+    local total, complete = 0, true
+    for id, item in pairs(items) do
+        local price = Price(id)
+        if price then total = total + price * item.count else complete = false end
+    end
+    return total, complete
+end
+
+-- Fish tab cell: count x price, marked a (auction) or v (vendor).
+local AUCTION_MARK, VENDOR_MARK = " |cff888888a|r", " |cff888888v|r"
+local function ValueCell(id, count)
+    local price, auction = Price(id)
+    if not price then return GREY .. "...|r" end
+    if price == 0 then return "-" end
+    return Money(price * count) .. (auction and AUCTION_MARK or VENDOR_MARK)
 end
 
 local function ItemName(link)
@@ -286,10 +330,11 @@ local fishTab = {
     sortKey = "count",
     descending = true,
     columns = {
-        { title = "Fish", width = 220, sort = "name" },
-        { title = "Caught", width = 60, align = "RIGHT", sort = "count" },
-        { title = "First caught", width = 154, sort = "first" },
-        { title = "Last caught", width = 66, sort = "last" },
+        { title = "Fish", width = 196, sort = "name" },
+        { title = "Caught", width = 48, align = "RIGHT", sort = "count" },
+        { title = "First caught", width = 138, sort = "first" },
+        { title = "Last caught", width = 58, sort = "last" },
+        { title = "Value", width = 60, align = "RIGHT", sort = "value" },
     },
 }
 
@@ -304,12 +349,14 @@ end
 
 function fishTab.Rows(view)
     local key, descending = fishTab.sortKey, fishTab.descending
+    local idOf = {} -- fish entry -> item ID (kept out of the saved tables)
     local function Value(f)
         if key == "name" then return ItemName(f.link) end
+        if key == "value" then return (Price(idOf[f]) or 0) * f.count end
         return f[key] or 0
     end
     local list = {}
-    for _, f in pairs(view.fish) do list[#list + 1] = f end
+    for id, f in pairs(view.fish) do idOf[f] = id; list[#list + 1] = f end
     table.sort(list, function(a, b)
         local x, y = Value(a), Value(b)
         if x == y then return ItemName(a.link) < ItemName(b.link) end
@@ -319,7 +366,7 @@ function fishTab.Rows(view)
     local rows = {}
     for _, f in ipairs(list) do
         rows[#rows + 1] = {
-            cells = { f.link, f.count, When(f.first, f.firstZone), ShortDate(f.last) },
+            cells = { f.link, f.count, When(f.first, f.firstZone), ShortDate(f.last), ValueCell(idOf[f], f.count) },
             link = f.link,
         }
     end
@@ -333,7 +380,7 @@ function fishTab.Rows(view)
         table.sort(missing, function(a, b) return a.fish.name < b.fish.name end)
         for _, m in ipairs(missing) do
             rows[#rows + 1] = {
-                cells = { GREY .. m.fish.name .. "|r", GREY .. "-|r", GREY .. FoundIn(m.fish) .. "|r", "" },
+                cells = { GREY .. m.fish.name .. "|r", GREY .. "-|r", GREY .. FoundIn(m.fish) .. "|r", "", "" },
                 link = "item:" .. m.id,
             }
         end
@@ -406,13 +453,25 @@ local sessionsTab = {
     key = "sessions",
     name = "Sessions",
     columns = {
-        { title = "Started", width = 120 },
-        { title = "Length", width = 70, align = "RIGHT" },
-        { title = "Zone", width = 190 },
-        { title = "Fish", width = 60, align = "RIGHT" },
-        { title = "Bonus", width = 60, align = "RIGHT" },
+        { title = "Started", width = 100 },
+        { title = "Length", width = 54, align = "RIGHT" },
+        { title = "Zone", width = 120 },
+        { title = "Fish", width = 38, align = "RIGHT" },
+        { title = "Bonus", width = 42, align = "RIGHT" },
+        { title = "Per hr", width = 44, align = "RIGHT" },
+        { title = "Each", width = 42, align = "RIGHT" },
+        { title = "Value/hr", width = 60, align = "RIGHT" },
     },
 }
+
+-- Catches per hour, time per catch and vendor value per hour, or dashes.
+local function PaceCells(s)
+    local seconds, perHour, each = ns.SessionPace(s)
+    if not seconds then return "-", "-", "-" end
+    local value, complete = ItemsValue(s.items)
+    local valueCell = complete and Money(value * 3600 / seconds) or GREY .. "...|r"
+    return math.floor(perHour + 0.5), ns.FormatTime(each), valueCell
+end
 
 function sessionsTab.Rows(view)
     -- Newest first, grouped by the day each session started.
@@ -436,15 +495,16 @@ function sessionsTab.Rows(view)
     local rows = {}
     for _, day in ipairs(days) do
         rows[#rows + 1] = {
-            cells = { date("%A, %b ", day.start) .. tonumber(date("%d", day.start)), "", "", day.fish, day.bonus },
+            cells = { date("%a, %b ", day.start) .. tonumber(date("%d", day.start)), "", "", day.fish, day.bonus },
             heading = true,
         }
         for _, s in ipairs(day.sessions) do
             local started = ClockTime(s.start)
             if s == ns.session then started = started .. "  |cff40ff40now|r" end
             local length = s.first and s.last and s.last > s.first and ns.FormatTime(s.last - s.first) or "-"
+            local perHour, each, value = PaceCells(s)
             rows[#rows + 1] = {
-                cells = { Arrow(sessionsOpen[s]) .. started, length, SessionZone(s), s.fish, s.bonus or 0 },
+                cells = { Arrow(sessionsOpen[s]) .. started, length, SessionZone(s), s.fish, s.bonus or 0, perHour, each, value },
                 indent = 1,
                 onClick = Toggle(sessionsOpen, s),
             }
@@ -642,6 +702,15 @@ ns.RegisterPage({
 })
 
 ns.On("REEL_DATA_CHANGED", Refresh)
+
+-- An item's price wasn't loaded when the Fish or Sessions tab was drawn: draw it again once
+-- the client has it (one redraw for a burst of items).
+local redrawQueued = false
+ns.On("GET_ITEM_INFO_RECEIVED", function()
+    if redrawQueued or not ((current == sessionsTab or current == fishTab) and panel and panel:IsVisible()) then return end
+    redrawQueued = true
+    C_Timer.After(0.2, function() redrawQueued = false; Refresh() end)
+end)
 
 -- Bar item: "Zone fish 3/7", how many of the fish known for this zone (more
 -- than a trace on Wowhead) this character has caught here. With a pole only.

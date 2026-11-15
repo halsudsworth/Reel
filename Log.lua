@@ -249,6 +249,14 @@ end
 ns.On("LOOT_READY", OnLoot)
 ns.On("LOOT_OPENED", OnLoot)
 
+-- A session's pace: seconds from its first cast to its last cast or catch, catches per hour and
+-- seconds per catch over that time. Nil until there's a catch and some time between the two.
+function ns.SessionPace(s)
+    local seconds = s.first and s.last and s.last - s.first
+    if not seconds or seconds <= 0 or (s.catches or 0) == 0 then return end
+    return seconds, s.catches * 3600 / seconds, seconds / s.catches
+end
+
 -- "42 fish this session (+6 bonus)"; the bonus part only with Luremaster.
 ns.RegisterBarSegment({
     key = "session",
@@ -260,5 +268,17 @@ ns.RegisterBarSegment({
             t = t .. string.format(" |cff40ff40(+%d bonus)|r", ns.LuremasterCount())
         end
         return t
+    end,
+})
+
+-- "38 catches an hour" this session. Off until turned on on the Bar page.
+ns.RegisterBarSegment({
+    key = "catchRate",
+    label = "Catches per hour this session",
+    order = 41,
+    defaultOff = true,
+    text = function()
+        local _, perHour = ns.SessionPace(ns.session)
+        if perHour then return string.format("%d catches an hour", math.floor(perHour + 0.5)) end
     end,
 })

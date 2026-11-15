@@ -6,7 +6,8 @@
 -- The key is bound to a secure button whose macro is rewritten out of combat
 -- (lure or cast). While a bobber is out the key is overridden to the game's
 -- INTERACTTARGET binding, then put back when the channel ends. Also adds
--- bindings for applying a lure and for the window.
+-- bindings for applying a lure, for the window, and Quick recast: pull the
+-- bobber in and cast again at once, never applying a lure.
 
 local _, ns = ...
 local W = ns.W
@@ -16,6 +17,7 @@ ns.RegisterDefaults({
 })
 
 _G["BINDING_NAME_CLICK ReelFishButton:LeftButton"] = "Fish (lure, cast, reel in)"
+_G["BINDING_NAME_CLICK ReelRecastButton:LeftButton"] = "Quick recast (no lure)"
 _G["BINDING_NAME_CLICK ReelLureKeyButton:LeftButton"] = "Apply lure"
 BINDING_NAME_REEL_TOGGLE_WINDOW = "Toggle the R.E.E.L. window"
 
@@ -24,7 +26,7 @@ function ReelToggleWindow()
 end
 
 local FISH_BINDING = "CLICK ReelFishButton:LeftButton"
-local fishButton, lureKeyButton
+local fishButton, lureKeyButton, recastButton
 local reeling = false -- the key is currently the interact key
 
 local function LureMacro(lure)
@@ -43,6 +45,11 @@ local function UpdateMacro()
     -- The Apply lure key has its own key-down button; the bar's lure button
     -- is for the mouse and fires on both down and up.
     lureKeyButton:SetAttribute("macrotext", chosen and LureMacro(chosen) or "")
+end
+
+-- /stopcasting ends the channel (the bobber goes), then the cast starts a new one.
+local function RecastMacro()
+    return "/stopcasting\n/cast " .. ns.fishingName
 end
 
 -- While a bobber is out, the Fish key reels in instead.
@@ -70,6 +77,8 @@ end
 ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
     fishButton = KeyButton("ReelFishButton")
     lureKeyButton = KeyButton("ReelLureKeyButton")
+    recastButton = KeyButton("ReelRecastButton")
+    if ns.fishingName then recastButton:SetAttribute("macrotext", RecastMacro()) end
     UpdateMacro()
     C_Timer.NewTicker(1, UpdateMacro)
 end) end)
@@ -126,7 +135,7 @@ function ns.BuildOneKeyOptions(panel, anchor)
         function() return s.oneKeyLure end,
         function(v) s.oneKeyLure = v; UpdateMacro() end)
     lure:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
-    local note = W.Note(panel, "Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in " .. INTERACT_PATH .. "). Apply lure and Toggle window can be bound there too.", ns.CONTENT_WIDTH - 4)
+    local note = W.Note(panel, "Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in " .. INTERACT_PATH .. "). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too.", ns.CONTENT_WIDTH - 4)
     note:SetPoint("TOPLEFT", lure, "BOTTOMLEFT", 0, -2)
     return lure
 end

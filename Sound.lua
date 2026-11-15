@@ -34,14 +34,15 @@ local function Volume(percent)
 end
 
 ns.RegisterCVars(function(s, targets)
+    -- Sound while tabbed out stands on its own; the rest is the splash booster.
+    if s.bgSound then
+        targets.Sound_EnableSoundWhenGameIsInBG = "1"
+    end
     if not s.boost then return end
     targets.Sound_EnableSFX = "1"
     targets.Sound_SFXVolume = Volume(s.sfx)
     targets.Sound_MusicVolume = "0"
     targets.Sound_AmbienceVolume = "0"
-    if s.bgSound then
-        targets.Sound_EnableSoundWhenGameIsInBG = "1"
-    end
     if s.setMaster then
         targets.Sound_EnableAllSound = "1"
         targets.Sound_MasterVolume = Volume(s.master)
@@ -62,7 +63,6 @@ ns.RegisterPage({
 
         local function Refresh()
             for _, c in ipairs({ boost, bgSound, setMaster, master, sfx }) do c.Refresh() end
-            bgSound:SetActive(s.boost)
             setMaster:SetActive(s.boost)
             master:SetActive(s.boost and s.setMaster)
             sfx:SetActive(s.boost)

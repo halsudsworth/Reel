@@ -19,6 +19,7 @@ ns.RegisterDefaults({
     cleanExitIdle = false, -- restoreDelay seconds after the last bobber is gone
     cleanExitMove = false,
     keepBar = true,
+    keepTracker = true,
     keepLoot = true,
     keepChat = false,
     keepMinimap = false,
@@ -85,6 +86,7 @@ local function KeptFrames()
     local s = ReelDB.settings
     local list = { ReelFrame } -- the Reel window always stays usable
     if s.keepBar then list[#list + 1] = ns.bar end
+    if s.keepTracker and ReelEventTracker then list[#list + 1] = ReelEventTracker end
     if s.keepLoot then list[#list + 1] = LootFrame end
     if s.keepChat or GetTime() < flashUntil then ChatFrames(list) end
     if s.keepMinimap then list[#list + 1] = MinimapCluster or Minimap end
@@ -384,6 +386,7 @@ ns.RegisterPage({
 
         Header("Keep visible in clean view", -10)
         Box("R.E.E.L. bar", "keepBar")
+        Box("Event tracker", "keepTracker")
         Box("Loot window", "keepLoot")
         Box("Chat", "keepChat")
         Box("Minimap", "keepMinimap")

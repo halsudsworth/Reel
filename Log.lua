@@ -249,13 +249,13 @@ end
 ns.On("LOOT_READY", OnLoot)
 ns.On("LOOT_OPENED", OnLoot)
 
--- "Caught 42 (+6 bonus)"; the bonus part only with Luremaster.
+-- "42 fish this session (+6 bonus)"; the bonus part only with Luremaster.
 ns.RegisterBarSegment({
     key = "session",
     label = "Fish caught this session",
     order = 40,
     text = function()
-        local t = "Caught " .. ns.session.fish
+        local t = ns.session.fish .. " fish this session"
         if ns.HasLuremaster() then
             t = t .. string.format(" |cff40ff40(+%d bonus)|r", ns.LuremasterCount())
         end

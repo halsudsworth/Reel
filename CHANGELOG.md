@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1
+
+- New event tracker: joined events that are running get their own box, like the quest tracker, instead of a line on the fishing bar. Each event shows its progress and the time left; a checklist shows each of its lines. Drag the title to move it, click it to fold it up. Untrack on the Events tab hides an event from it.
+- Timed dash events (most fish in your best few minutes) are counted, with your best run and your last few minutes on separate lines.
+- Clean view can keep the event tracker visible (Clean view tab, Keep visible in clean view).
+- The bar's catch count now reads "21 fish this session".
+- Mithril Bound Trunk, Bloated Mightfish and Ravaged Fishing Pole are on the catch list.
+
 ## 1.2.0
 
 - New Events tab: join an event or tournament by pasting its event code from halsudsworth.com (Copy event code on the event's page). Joined events can be tracked on the fishing bar while they run, with your progress and the time left, and your journal paste is scored for them. Untrack keeps an event joined but off the bar. `/reel event` and the minimap menu open the tab.

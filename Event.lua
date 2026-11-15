@@ -268,8 +268,8 @@ local function Progress(ev, offset)
     local inside = Inside(ev, offset)
     local s = ev.scoring
     if s == "set" or s == "quest" then
-        local done = 0
-        for _, n in ipairs(ev.needs or {}) do
+        local done, details = 0, {}
+        for i, n in ipairs(ev.needs or {}) do
             local count, seen, kinds = 0, {}, 0
             for _, e in ipairs(inside) do
                 if MatchesNeed(n, e.c, e.min) then
@@ -281,9 +281,11 @@ local function Progress(ev, offset)
                     end
                 end
             end
-            if (n.distinct and kinds or count) >= n.n then done = done + 1 end
+            local have = n.distinct and kinds or count
+            if have >= n.n then done = done + 1 end
+            details[#details + 1] = { text = string.format("%s: %d/%d", n.label or ("Line " .. i), math.min(have, n.n), n.n), done = have >= n.n }
         end
-        return string.format("%d of %d done", done, #(ev.needs or {}))
+        return string.format("%d of %d done", done, #(ev.needs or {})), details
     end
     if s == "variety" and ev.variety then
         local zs, fs, nz, nf = {}, {}, 0, 0
@@ -309,7 +311,13 @@ local function Progress(ev, offset)
             while times[i] - times[k] > minutes * 60 do k = k + 1 end
             best = math.max(best, i - k + 1)
         end
-        return string.format("%d fish in your best %d min", best, minutes)
+        local recent, now = 0, ns.Now()
+        for i = #times, 1, -1 do
+            if now - times[i] > minutes * 60 then break end
+            recent = recent + 1
+        end
+        local bestText = string.format("Best %d min: %d fish", minutes, best)
+        return bestText, { { text = bestText }, { text = string.format("Last %d min: %d fish", minutes, recent) } }
     end
     if (s == "race" or s == "target") and ev.target then
         return string.format("%d of %d fish", math.min(total, ev.target), ev.target)
@@ -388,30 +396,120 @@ local function CachedProgress(str, ev, offset)
     local n, minute = #ns.Data().catches, math.floor(ns.Now() / 60)
     local c = cache[str]
     if not (c and c.n == n and c.minute == minute) then
-        c = { n = n, minute = minute, text = Progress(ev, offset) }
+        local text, details = Progress(ev, offset)
+        c = { n = n, minute = minute, text = text, details = details }
         cache[str] = c
     end
-    return c.text
+    return c.text, c.details
 end
 
-ns.RegisterBarSegment({ key = "event", label = "Joined events", order = 6, text = function()
-    if not ns.Data() then return end
+-- Event tracker ----------------------------------------------------------------------
+-- Tracked events that are running, listed like the quest tracker: the name, then its
+-- objectives. Drag the title to move it, click it to fold it up.
+
+local TRACKER_WIDTH = 240
+local tracker, title, lines = nil, nil, {}
+
+ns.RegisterDefaults({ tracker = true, trackerCollapsed = false })
+
+local function TrackerLine(i)
+    if not lines[i] then
+        lines[i] = tracker:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        lines[i]:SetJustifyH("LEFT")
+        lines[i]:SetWidth(TRACKER_WIDTH - 12)
+    end
+    return lines[i]
+end
+
+-- What the tracker shows: one block per running, tracked event.
+local function TrackerBlocks()
     local offset = ServerOffset()
     local today = Today(offset)
-    local lines = {}
+    local blocks = {}
     for _, str in ipairs(Joined()) do
         local ev = Event(str)
         if ev and not Untracked()[ev.id] and today >= ev.start and today <= ev["end"] then
-            local t = ev.name .. ": " .. CachedProgress(str, ev, offset)
-                .. " |cff888888· " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left|r"
-            if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then
-                t = t .. " |cff888888(opens " .. ev.window.from .. ")|r"
+            local text, details = CachedProgress(str, ev, offset)
+            local rows = {}
+            if details then
+                for _, d in ipairs(details) do rows[#rows + 1] = { text = d.text, done = d.done } end
+            else
+                rows[1] = { text = text }
             end
-            lines[#lines + 1] = t
+            local left = ns.FormatTime(TimeLeft(ev, offset)) .. " left"
+            if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then left = left .. ", opens " .. ev.window.from end
+            rows[#rows + 1] = { text = left, dim = true }
+            blocks[#blocks + 1] = { name = ev.name, rows = rows }
         end
     end
-    if #lines > 0 then return lines end
-end })
+    return blocks
+end
+
+function ns.UpdateTracker()
+    if not tracker or not ns.Data() then return end
+    local s = ReelDB.settings
+    local blocks = s.tracker and TrackerBlocks() or {}
+    if #blocks == 0 then tracker:Hide(); return end
+    title:SetText((s.trackerCollapsed and "+ " or "- ") .. "Fishing events (" .. #blocks .. ")")
+    local n, y = 0, -18
+    if not s.trackerCollapsed then
+        for _, b in ipairs(blocks) do
+            n = n + 1
+            local l = TrackerLine(n)
+            l:SetFontObject("GameFontNormal")
+            l:SetText(b.name)
+            l:ClearAllPoints()
+            l:SetPoint("TOPLEFT", 0, y - 6)
+            y = y - 6 - l:GetStringHeight()
+            for _, r in ipairs(b.rows) do
+                n = n + 1
+                l = TrackerLine(n)
+                l:SetFontObject("GameFontHighlightSmall")
+                l:SetText((r.done or r.dim) and ("|cff888888- " .. r.text .. "|r") or ("- " .. r.text))
+                l:ClearAllPoints()
+                l:SetPoint("TOPLEFT", 10, y - 2)
+                y = y - 2 - l:GetStringHeight()
+            end
+        end
+    end
+    for i, l in ipairs(lines) do l:SetShown(i <= n) end
+    tracker:SetHeight(-y + 4)
+    tracker:Show()
+end
+
+ns.On("REEL_READY", function()
+    local s = ReelDB.settings
+    tracker = CreateFrame("Frame", "ReelEventTracker", UIParent)
+    tracker:SetWidth(TRACKER_WIDTH)
+    tracker:SetFrameStrata("LOW")
+    tracker:SetMovable(true)
+    tracker:SetClampedToScreen(true)
+    local p = s.trackerPoint
+    if p then tracker:SetPoint(p[1], UIParent, p[2], p[3], p[4]) else tracker:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -90, -250) end
+
+    local head = CreateFrame("Button", nil, tracker)
+    head:SetPoint("TOPLEFT")
+    head:SetSize(TRACKER_WIDTH, 16)
+    head:RegisterForDrag("LeftButton")
+    head:RegisterForClicks("LeftButtonUp")
+    head:SetScript("OnDragStart", function() tracker:StartMoving() end)
+    head:SetScript("OnDragStop", function()
+        tracker:StopMovingOrSizing()
+        local point, _, relativePoint, x, y = tracker:GetPoint()
+        s.trackerPoint = { point, relativePoint, x, y }
+    end)
+    head:SetScript("OnClick", function()
+        s.trackerCollapsed = not s.trackerCollapsed
+        ns.UpdateTracker()
+    end)
+    title = head:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    title:SetPoint("LEFT")
+    title:SetJustifyH("LEFT")
+    tracker:Hide()
+    C_Timer.NewTicker(5, ns.UpdateTracker)
+    ns.UpdateTracker()
+end)
+ns.On("REEL_DATA_CHANGED", function() ns.UpdateTracker() end)
 
 -- Events tab ---------------------------------------------------------------------------
 
@@ -447,7 +545,7 @@ ns.RegisterPage({
     name = "Events",
     order = 12,
     build = function(panel)
-        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events can be tracked on the fishing bar while they run, and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
+        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events show in the event tracker while they run (drag its title to move it, click it to fold it), and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
         how:SetPoint("TOPLEFT")
 
         input = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
@@ -456,7 +554,7 @@ ns.RegisterPage({
         input:SetAutoFocus(false)
         input:SetMaxLetters(0)
         local function Submit()
-            if Join(input:GetText()) then input:SetText(""); input:ClearFocus(); RefreshRows() end
+            if Join(input:GetText()) then input:SetText(""); input:ClearFocus(); RefreshRows(); ns.UpdateTracker() end
         end
         input:SetScript("OnEnterPressed", Submit)
         input:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
@@ -473,16 +571,16 @@ ns.RegisterPage({
             local row = CreateFrame("Frame", nil, panel)
             row:SetSize(ns.CONTENT_WIDTH - 4, 24)
             row:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4 - (i - 1) * 26)
-            local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows() end)
+            local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows(); ns.UpdateTracker() end)
             leave:SetPoint("RIGHT")
-            -- Untracked events stay joined and in the export, off the fishing bar.
+            -- Untracked events stay joined and in the export, off the event tracker.
             row.track = W.Button(row, "Untrack", 70, function()
                 local ev = Joined()[i] and Event(Joined()[i])
                 if not ev then return end
                 local u = Untracked()
                 u[ev.id] = not u[ev.id] or nil
                 RefreshRows()
-                ns.UpdateBar()
+                ns.UpdateTracker()
             end)
             row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
             row.label = W.Label(row, "", "GameFontHighlightSmall")

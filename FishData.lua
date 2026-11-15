@@ -42,6 +42,7 @@ ns.FISH = {
     [8366] = { name = "Bloated Mithril Head Trout", best = "Arathi Highlands", zones = {} },
     [13881] = { name = "Bloated Redgill", best = "Durotar", zones = {} },
     [13891] = { name = "Bloated Whitescale Salmon", best = "Winterspring", zones = {} },
+    [21243] = { name = "Bloated Mightfish", best = "Azshara", zones = {} },
     [1467] = { name = "Spotted Sunfish", best = "Redridge Mountains", zones = {} },
     [6717] = { name = "Gaffer Jack", best = "Silithus", zones = {} },
     [16967] = { name = "Feralas Ahi", best = "Feralas", zones = {} },
@@ -228,6 +229,7 @@ ns.CATCHES = {
     [20709] = { name = "Rumsey Rum Light", kind = "trunk" },
     [20708] = { name = "Tightly Sealed Trunk", kind = "trunk" },
     [21113] = { name = "Watertight Trunk", kind = "trunk" },
+    [21228] = { name = "Mithril Bound Trunk", kind = "trunk" },
     [6292] = { name = "10 Pound Mud Snapper", kind = "trophy" },
     [13909] = { name = "12 Pound Lobster", kind = "trophy" },
     [6294] = { name = "12 Pound Mud Snapper", kind = "trophy" },
@@ -267,4 +269,5 @@ ns.CATCHES = {
     [6457] = { name = "Rusted Engineering Parts", kind = "odd" },
     [6360] = { name = "Steelscale Crushfish", kind = "gear" },
     [8350] = { name = "The 1 Ring", kind = "gear" },
+    [285094] = { name = "Ravaged Fishing Pole", kind = "gear" },
 }

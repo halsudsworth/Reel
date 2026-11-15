@@ -3,7 +3,7 @@
 -- The string is "!REELEV1!" and the base64 of a JSON document (site/FORMAT.md, "Event
 -- string"). Joined strings are kept per character in data.events and go out with the
 -- journal export, so halsudsworth.com scores the paste against them. While an event runs,
--- the fishing bar shows a counter worked out from this character's catches.
+-- the event tracker shows a counter worked out from this character's catches.
 --
 -- The counter follows the site's scoring (site/server/lib/core.php) closely enough to
 -- show progress; the site's score is the one that counts.

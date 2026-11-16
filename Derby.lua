@@ -122,13 +122,17 @@ end
 ns.RegisterBarSegment({
     key = "derby",
     label = "Tastyfish (Sunday derby only)",
+    name = "Tastyfish",
+    group = "status",
     order = 5,
+    icon = function() return (C_Item and C_Item.GetItemIconByID or GetItemIcon)(FISH) end,
     text = function()
         if not ContestRunning() then return end
         local count = GetItemCountCompat(FISH)
+        local t = string.format("%d/%d", count, GOAL)
         if count >= GOAL then
-            return string.format("|cff40ff40Tastyfish %d/%d - turn in to Riggle Bassbait|r", count, GOAL), true
+            return { value = "|cff4fd13a" .. t .. "|r", tip = "Tastyfish " .. t .. " - turn in to Riggle Bassbait" }, true
         end
-        return string.format("Tastyfish %d/%d", count, GOAL), true
+        return { value = t, tip = "Tastyfish " .. t }, true
     end,
 })

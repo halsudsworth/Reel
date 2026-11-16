@@ -37,5 +37,9 @@ Immersion.lua
 General.lua
 Debug.lua
 Export.lua
+CalendarData.lua
+Calendar.lua
+EventArt.lua
 Event.lua
 Guild.lua
+Options.lua

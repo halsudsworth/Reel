@@ -70,17 +70,44 @@ ns.On("UNIT_INVENTORY_CHANGED", function(unit)
 end)
 
 -- "Fishing 148/150 +100": base skill, the cap your training allows, and the
--- bonus from gear and food on top. Only the base counts toward the cap.
-ns.RegisterBarSegment({ key = "skill", label = "Fishing skill", order = 10, text = function()
-    local rank, bonus, maxRank = ns.FishingSkill()
-    if not rank then
-        -- A character who hasn't learned fishing gets no skill item.
-        local ok, _, _, _, fishing = pcall(GetProfessions)
-        if ok and not fishing then return end
-        return "Fishing ?"
-    end
-    local t = "Fishing " .. rank
-    if maxRank and maxRank > 0 then t = t .. "/" .. maxRank end
-    if bonus > 0 then t = t .. string.format(" |cff40ff40+%d|r", bonus) end
-    return t
-end })
+-- bonus from gear and food on top. Only the base counts toward the cap. The bar's top line,
+-- with the skill line under it showing base against cap.
+ns.RegisterDefaults({
+    castCountdown = false, -- the skill line counts the cast down while the bobber is out
+})
+
+-- The Fishing channel's start and end in seconds (GetTime's clock), from the client's channel info,
+-- or nil when no bobber is out.
+local function ChannelTimes()
+    if not (ns.Channeling() and UnitChannelInfo) then return end
+    local _, _, _, startMS, endMS = UnitChannelInfo("player")
+    if startMS and endMS and endMS > startMS then return startMS / 1000, endMS / 1000 end
+end
+
+ns.RegisterBarSegment({
+    key = "skill", label = "Fishing skill", name = "Fishing", group = "skill", order = 10,
+    icon = "Interface\\Icons\\Trade_Fishing",
+    text = function(s)
+        local rank, bonus, maxRank = ns.FishingSkill()
+        if not rank then
+            -- A character who hasn't learned fishing gets no skill item.
+            local ok, _, _, _, fishing = pcall(GetProfessions)
+            if ok and not fishing then return end
+            return { value = "?", tip = "Fishing ?" }
+        end
+        local t = tostring(rank)
+        if maxRank and maxRank > 0 then t = t .. "/" .. maxRank end
+        local plain = "Fishing " .. t .. (bonus > 0 and (" +" .. bonus) or "")
+        if bonus > 0 then t = t .. string.format(" |cff4fd13a+%d|r", bonus) end
+        local info = { value = t, tip = plain, progress = maxRank and maxRank > 0 and rank / maxRank or nil }
+        -- Cast countdown: while the bobber is out the skill line runs down over the cast's real length.
+        if s.castCountdown then
+            local start, finish = ChannelTimes()
+            if start then info.countdown = { start = start, finish = finish } end
+        end
+        return info
+    end,
+    options = {
+        { key = "castCountdown", label = "Cast countdown" },
+    },
+})

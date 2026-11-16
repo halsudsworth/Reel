@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.4.0
+
+A new look for everything R.E.E.L. shows you: oiled oak, brass nails and lantern light.
+
+- The R.E.E.L. window is rebuilt: an oak frame with a brass nameplate, Journal and Events tabs along the top, a painted banner on every tab, and Export at the bottom.
+- Journal: Fish, Zones, Sessions and Records.
+  - Fish: click a column to sort; click a fish for when and where you first and last caught it.
+  - Sessions: fish names run the full width, so they're no longer cut short.
+  - Records: tackle trays for Treasures, Pools and wreckage, the Stranglethorn Extravaganza and Rare fish, plus cards for the Derby, Feats and your Records.
+- Events: Hal's calendar is built in, so it works without halsudsworth.com. It shows what's running now with your standing, today's and this week's challenge, the next two events, and joining by code.
+- Settings moved to Esc > Options > AddOns > R.E.E.L., on four pages: At the water, Clean View, Sound and General. The gear in the window, `/reel options` and the minimap button's right-click menu open them.
+- The bar is rebuilt, with three layouts: Vertical, Horizontal and Icons (horizontal).
+  - Lure, food and camp each show an icon and their timer; hover for the buff's name.
+  - A catch shows the fish in the lure button's place with its name and count, without hiding the rest of the bar. A long name scrolls slowly.
+  - New, off by default: a cast countdown.
+- New: click the food icon on the bar to eat your best fishing food, or pick which food with the Use menu on the At the water page. There's a key binding for it too.
+- "New in Forever" is gone from Records. Ravaged Fishing Pole is now a Treasure, and Whimsyfin is an ordinary fish.
+- Fixed: grey items count at their vendor price. A silly auction listing for a junk item could make a session look worth gold.
+- Fixed: Hal's calendar events on the Events tab now match your catches' zones, so standings and challenges count.
+- Fixed: closing the R.E.E.L. window in combat no longer leaves the bar up until combat ends.
+
 ## 1.3.0
 
 - Fish tab: a new Value column shows what each fish you've caught is worth (count times price). With Auctionator installed it uses Auctionator's price, marked with a grey a; otherwise the vendor price, marked with a grey v.

@@ -263,7 +263,7 @@ local function Inside(ev, offset)
     return out
 end
 
--- The bar text for one event.
+-- The tracker's text for one event, its lines, and the number (done lines, best, or fish).
 local function Progress(ev, offset)
     local inside = Inside(ev, offset)
     local s = ev.scoring
@@ -285,7 +285,7 @@ local function Progress(ev, offset)
             if have >= n.n then done = done + 1 end
             details[#details + 1] = { text = string.format("%s: %d/%d", n.label or ("Line " .. i), math.min(have, n.n), n.n), done = have >= n.n }
         end
-        return string.format("%d of %d done", done, #(ev.needs or {})), details
+        return string.format("%d of %d done", done, #(ev.needs or {})), details, done
     end
     if s == "variety" and ev.variety then
         local zs, fs, nz, nf = {}, {}, 0, 0
@@ -317,12 +317,12 @@ local function Progress(ev, offset)
             recent = recent + 1
         end
         local bestText = string.format("Best %d min: %d fish", minutes, best)
-        return bestText, { { text = bestText }, { text = string.format("Last %d min: %d fish", minutes, recent) } }
+        return bestText, { { text = bestText }, { text = string.format("Last %d min: %d fish", minutes, recent) } }, best
     end
     if (s == "race" or s == "target") and ev.target then
-        return string.format("%d of %d fish", math.min(total, ev.target), ev.target)
+        return string.format("%d of %d fish", math.min(total, ev.target), ev.target), nil, total
     end
-    return string.format("%d fish", total)
+    return string.format("%d fish", total), nil, total
 end
 
 -- Joined events ------------------------------------------------------------------------
@@ -512,10 +512,14 @@ end)
 ns.On("REEL_DATA_CHANGED", function() ns.UpdateTracker() end)
 
 -- Events tab ---------------------------------------------------------------------------
+-- Direction A's Events screen (site/art/ui/mockup/index.html): Hal's calendar carried offline on
+-- the left (what's running with this character's standing, today's and this week's challenge),
+-- joining by code and the joined list on the right, then what's coming up; Export at the foot.
 
-local input, rows, none
+local C = W.C
+local input, RefreshRows
 
--- What a joined event's row says after its name: progress and time left while it runs.
+-- What a joined event's row says under its name: progress and time left while it runs.
 local function Status(str, ev)
     local offset = ServerOffset()
     local today = Today(offset)
@@ -523,78 +527,519 @@ local function Status(str, ev)
     if today > ev["end"] then return "ended " .. ev["end"] end
     return CachedProgress(str, ev, offset) .. " · " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left"
 end
+local GetItemIconCompat = C_Item and C_Item.GetItemIconByID or GetItemIcon
+local MONTHS = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
+local DAYS = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" }
 
-local function RefreshRows()
-    if not rows then return end
-    local list = Joined()
-    for i, row in ipairs(rows) do
-        local ev = list[i] and Event(list[i])
-        if ev then
-            local off = Untracked()[ev.id]
-            row.label:SetText(string.format("%s%s|r  |cff888888%s|r", off and "|cff888888" or "|cffffffff", ev.name, Status(list[i], ev)))
-            row.track:SetText(off and "Track" or "Untrack")
-            row:Show()
-        else
-            row:Hide()
+local function Parts(d)
+    local y, m, day = d:match("(%d+)-(%d+)-(%d+)")
+    local weekday = (math.floor(DateEpoch(d) / 86400) + 4) % 7 + 1 -- 1970-01-01 was a Thursday
+    return tonumber(y), tonumber(m), tonumber(day), weekday
+end
+
+-- "November 4", "Fri November 20", "Monday November 9", "Sunday, November 15"
+local function MonthDay(d) local _, m, day = Parts(d); return MONTHS[m] .. " " .. day end
+local function ShortDay(d) local _, _, _, w = Parts(d); return DAYS[w]:sub(1, 3) .. " " .. MonthDay(d) end
+local function LongDay(d) local _, _, _, w = Parts(d); return DAYS[w] .. " " .. MonthDay(d) end
+
+local function Span(ev, Day)
+    if ev.start == ev["end"] then return Day(ev.start) end
+    return Day(ev.start) .. " to " .. Day(ev["end"])
+end
+
+-- A zone's name: the client's own (in its language) where it knows the map, else the calendar's.
+local function ZoneName(id)
+    local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(id)
+    return info and info.name or (ns.CALENDAR_DATA.maps[id] or tostring(id))
+end
+
+-- "Durotar", "Hillsbrad Foothills, Duskwood or Ashenvale"
+local function ZoneList(zones)
+    if not zones or #zones == 0 then return nil end
+    local names = {}
+    for i, id in ipairs(zones) do names[i] = ZoneName(id) end
+    if #names == 1 then return names[1] end
+    return table.concat(names, ", ", 1, #names - 1) .. " or " .. names[#names]
+end
+
+local function IsJoined(id)
+    for _, str in ipairs(Joined()) do
+        local ev = Event(str)
+        if ev and ev.id == id then return true end
+    end
+    return false
+end
+
+-- Map IDs as the zone names this client writes in each catch (the journal keeps GetZoneText(),
+-- which is the map's own name, in the client's language).
+local function ZoneNames(zones)
+    if not zones then return nil end
+    local out = {}
+    for i, id in ipairs(zones) do out[i] = ZoneName(id) end
+    return out
+end
+
+-- A calendar event as the counter reads it: whole dates on the server clock, and its zones (map
+-- IDs in the calendar) as the names the catches carry.
+local function Countable(ev)
+    local c = {}
+    for k, v in pairs(ev) do c[k] = v end
+    c.window = { kind = "days" }
+    c.zone = ZoneNames(ev.zone)
+    if ev.needs then
+        c.needs = {}
+        for i, need in ipairs(ev.needs) do
+            local n = {}
+            for k, v in pairs(need) do n[k] = v end
+            n.zone = ZoneNames(need.zone)
+            c.needs[i] = n
         end
     end
-    none:SetShown(#list == 0)
+    return c
+end
+
+-- This character's standing in a calendar event: the counter's text and lines, and the number.
+-- Four corners (two parts) isn't something the counter can read, so it has none.
+local function Standing(ev)
+    if ev.parts then return nil end
+    return Progress(Countable(ev), ServerOffset())
+end
+
+-- The page's frames.
+local page = {}
+
+local function Box(parent, hex, edgeAlpha)
+    local f = CreateFrame("Frame", nil, parent)
+    local bg = W.Solid(f, "BACKGROUND", hex or C.card)
+    bg:SetAllPoints()
+    W.Outline(f, "BORDER", "000000", 1, 0)
+    W.Outline(f, "BORDER", C.amber, edgeAlpha or 0.14, 1, 1)
+    return f
+end
+
+-- A small heading: uppercase and dim, with an optional note on the right.
+local function Section(parent, width)
+    local f = CreateFrame("Frame", nil, parent)
+    f:SetSize(width, 16)
+    f.text = W.Text(f, 9.5, C.dim)
+    f.text:SetPoint("LEFT")
+    f.note = W.Text(f, 10, C.dim)
+    f.note:SetPoint("RIGHT")
+    f.note:SetJustifyH("RIGHT")
+    function f.Set(_, text, note) f.text:SetText(text:upper()); f.note:SetText(note or "") end
+    return f
+end
+
+local LEFT_W, RIGHT_W = 395, 251
+local ART_H = math.floor(LEFT_W * 125 / 512 + 0.5)
+
+-- A "Running now" card: the event's painting, its name, dates, rule, the needs with a tick each,
+-- the standing, and its badge.
+local function RunningCard(parent)
+    local card = Box(parent, C.card, 0.3)
+    card:SetWidth(LEFT_W)
+    card.art = card:CreateTexture(nil, "ARTWORK")
+    card.art:SetPoint("TOPLEFT", 1, -1)
+    card.art:SetSize(LEFT_W - 2, ART_H)
+    card.art:SetTexCoord(0, 1, 0, 125 / 128)
+    card.fade = W.Solid(card, "ARTWORK", C.card, 1, 1)
+    card.fade:SetPoint("BOTTOMLEFT", card.art, "BOTTOMLEFT")
+    card.fade:SetPoint("BOTTOMRIGHT", card.art, "BOTTOMRIGHT")
+    card.fade:SetHeight(math.floor(ART_H * 0.65))
+    W.Gradient(card.fade, "VERTICAL", C.card, 1, C.card, 0)
+    local textW = LEFT_W - 24 - 51 - 12
+    card.badge = card:CreateTexture(nil, "OVERLAY")
+    card.badge:SetSize(51, 51)
+    card.name = W.Text(card, 15, "ffffff", "OVERLAY")
+    card.name:SetWidth(textW)
+    card.when = W.Text(card, 10, C.amber2, "OVERLAY")
+    card.when:SetWidth(textW)
+    card.rule = W.Text(card, 10.5, C.ink2, "OVERLAY")
+    card.rule:SetWidth(textW)
+    card.rule:SetWordWrap(true)
+    card.needs = {}
+    for i = 1, 4 do
+        local n = {}
+        n.box = Box(card, C.pitch, 0.45)
+        n.box:SetSize(12, 12)
+        n.tick = n.box:CreateTexture(nil, "OVERLAY")
+        n.tick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+        n.tick:SetSize(16, 16)
+        n.tick:SetPoint("CENTER")
+        n.text = W.Text(card, 10.5, C.ink, "OVERLAY")
+        n.text:SetWidth(textW - 20)
+        card.needs[i] = n
+    end
+    card.chip = CreateFrame("Frame", nil, card)
+    local chipBg = W.Solid(card.chip, "BACKGROUND", C.amber)
+    chipBg:SetAllPoints()
+    card.chip.text = W.Text(card.chip, 10, "140e08", "OVERLAY")
+    card.chip.text:SetShadowOffset(0, 0)
+    card.chip.text:SetPoint("CENTER")
+    return card
+end
+
+local function FillRunning(card, ev)
+    local art = ev.art and (W.TEX .. "event-" .. ev.art)
+    card.art:SetTexture(art)
+    card.badge:SetTexture(ev.art and (W.TEX .. "badge-" .. ev.art) or nil)
+    card.badge:SetShown(ev.art ~= nil)
+    card.name:SetText(ev.name)
+    card.when:SetText(Span(ev, MonthDay) .. (IsJoined(ev.id) and "  ·  joined" or ""))
+    card.rule:SetText(ev.note or "")
+    local y = -(ART_H + 1 - 22)
+    card.name:ClearAllPoints(); card.name:SetPoint("TOPLEFT", 12, y)
+    card.badge:ClearAllPoints(); card.badge:SetPoint("TOPRIGHT", -12, y - 2)
+    y = y - 19
+    card.when:ClearAllPoints(); card.when:SetPoint("TOPLEFT", 12, y)
+    y = y - 15
+    card.rule:ClearAllPoints(); card.rule:SetPoint("TOPLEFT", 12, y)
+    y = y - math.ceil(card.rule:GetStringHeight()) - 4
+    local text, details = Standing(ev)
+    local quest = ev.scoring == "quest" or ev.scoring == "set"
+    for i, n in ipairs(card.needs) do
+        local d = quest and details and details[i]
+        n.box:SetShown(d and true or false); n.text:SetShown(d and true or false)
+        if d then
+            n.tick:SetShown(d.done and true or false)
+            n.box:ClearAllPoints(); n.box:SetPoint("TOPLEFT", 12, y - 2)
+            n.text:ClearAllPoints(); n.text:SetPoint("TOPLEFT", 32, y - 1)
+            n.text:SetText(d.text)
+            y = y - 18
+        end
+    end
+    card.chip:SetShown(text ~= nil)
+    if text then
+        local done, total = text:match("^(%d+) of (%d+) done$")
+        if quest and done and done == total then text = "Done, " .. done .. " of " .. total end
+        card.chip.text:SetText(text)
+        card.chip:SetSize(math.ceil(card.chip.text:GetStringWidth()) + 16, 18)
+        card.chip:ClearAllPoints(); card.chip:SetPoint("TOPLEFT", 12, y - 6)
+        y = y - 6 - 18
+    end
+    card:SetHeight(math.max(-y + 12, ART_H + 51))
+end
+
+-- A challenge row: the fish's icon, Today or This week, the challenge, where, and the standing.
+local function ChallengeRow(parent)
+    local row = Box(parent, C.card, 0.14)
+    row:SetWidth(LEFT_W)
+    row.icon = row:CreateTexture(nil, "ARTWORK")
+    row.icon:SetSize(27, 27)
+    row.icon:SetPoint("LEFT", 9, 0)
+    row.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    local textW = LEFT_W - 9 - 27 - 9 - 80
+    row.kind = W.Text(row, 9.5, C.dim)
+    row.kind:SetPoint("TOPLEFT", 45, -8)
+    row.name = W.Text(row, 11, C.ink)
+    row.name:SetPoint("TOPLEFT", row.kind, "BOTTOMLEFT", 0, -2)
+    row.name:SetWidth(textW)
+    row.name:SetWordWrap(true)
+    row.where = W.Text(row, 10, C.ink2)
+    row.where:SetWidth(textW)
+    row.where:SetWordWrap(true)
+    row.big = W.Text(row, 16, C.amber2)
+    row.big:SetPoint("TOPRIGHT", -10, -9)
+    row.big:SetJustifyH("RIGHT")
+    row.caption = W.Text(row, 10, C.ink2)
+    row.caption:SetPoint("TOPRIGHT", row.big, "BOTTOMRIGHT", 0, -2)
+    row.caption:SetJustifyH("RIGHT")
+    return row
+end
+
+local function FillChallenge(row, ev, today)
+    local daily = ev.kind == "daily"
+    local fish = ev.fish and ev.fish[1]
+    row.icon:SetTexture(fish and GetItemIconCompat(fish) or "Interface\\Icons\\Trade_Fishing")
+    row.kind:SetText((daily and "Today" or (ev["end"] == today and "This week, ends tonight" or "This week")):upper())
+    row.name:SetText(ev.name)
+    local where = ZoneList(ev.zone)
+    if daily then
+        row.where:SetText(where or "Anywhere")
+    else
+        row.where:SetText(Span(ev, LongDay) .. ", " .. (where or "anywhere"))
+    end
+    row.where:ClearAllPoints(); row.where:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
+    local _, _, n = Progress(Countable(ev), ServerOffset())
+    row.big:SetText(n or 0)
+    if ev.scoring == "best30" then
+        row.caption:SetText("best 30 min")
+    elseif ev.scoring == "race" and ev.target then
+        row.caption:SetText("of " .. ev.target)
+    else
+        row.caption:SetText(daily and "today" or "this week")
+    end
+    row:SetHeight(math.max(48, 8 + 12 + math.ceil(row.name:GetStringHeight()) + 4 + math.ceil(row.where:GetStringHeight()) + 9))
+end
+
+-- A "Coming up" card: a crop of the event's painting, its name, dates and rule.
+local function ComingCard(parent)
+    local card = Box(parent, C.card, 0.14)
+    card:SetWidth(RIGHT_W)
+    card.art = card:CreateTexture(nil, "ARTWORK")
+    card.art:SetSize(89, 61)
+    card.art:SetPoint("TOPLEFT", 6, -6)
+    local textW = RIGHT_W - 6 - 89 - 9 - 6
+    card.name = W.Text(card, 11.5, C.ink)
+    card.name:SetPoint("TOPLEFT", card.art, "TOPRIGHT", 9, 0)
+    card.name:SetWidth(textW)
+    card.name:SetWordWrap(true)
+    card.when = W.Text(card, 9.5, C.amber2)
+    card.when:SetWidth(textW)
+    card.when:SetWordWrap(true)
+    card.rule = W.Text(card, 9.5, C.ink2)
+    card.rule:SetWidth(textW)
+    card.rule:SetWordWrap(true)
+    return card
+end
+
+local function FillComing(card, ev)
+    card.art:SetTexture(ev.art and (W.TEX .. "event-" .. ev.art) or nil)
+    -- the painting at the card's shape (89x61 out of 512x125), centred on its subject
+    local w = 125 * 89 / 61 / 512
+    local left = ns.EVENT_ART_LEFT[ev.art] or (0.5 - w / 2)
+    card.art:SetTexCoord(left, left + w, 0, 125 / 128)
+    card.name:SetText(ev.name)
+    card.when:SetText(Span(ev, ShortDay))
+    card.rule:SetText(ev.note or "")
+    card.when:ClearAllPoints(); card.when:SetPoint("TOPLEFT", card.name, "BOTTOMLEFT", 0, -2)
+    card.rule:ClearAllPoints(); card.rule:SetPoint("TOPLEFT", card.when, "BOTTOMLEFT", 0, -2)
+    local textH = card.name:GetStringHeight() + 2 + card.when:GetStringHeight() + 2 + card.rule:GetStringHeight()
+    card:SetHeight(math.ceil(math.max(61, textH)) + 12)
+end
+
+-- A joined event: its name, then its standing and time left, with Untrack and Leave.
+local function JoinedRow(parent, i)
+    local row = CreateFrame("Frame", nil, parent)
+    row:SetWidth(RIGHT_W - 24)
+    row.label = W.Text(row, 10.5, "ffffff")
+    row.label:SetPoint("TOPLEFT")
+    row.label:SetWidth(RIGHT_W - 24)
+    row.label:SetWordWrap(true)
+    row.leave = W.OakButton(row, "Leave", function() Leave(i); RefreshRows(); ns.UpdateTracker() end, 20, 10.5)
+    -- Untracked events stay joined and in the export, off the event tracker.
+    row.track = W.OakButton(row, "Untrack", function()
+        local ev = Joined()[i] and Event(Joined()[i])
+        if not ev then return end
+        local u = Untracked()
+        u[ev.id] = not u[ev.id] or nil
+        RefreshRows()
+        ns.UpdateTracker()
+    end, 20, 10.5)
+    row.status = W.Text(row, 10, C.dim)
+    row.status:SetWordWrap(true)
+    return row
+end
+
+local function Layout()
+    local p = page
+    local offset = ServerOffset()
+    local today = ns.Calendar.Today()
+    p.sub:SetText((LongDay(today):gsub(" ", ", ", 1)))
+
+    -- left: running now, then the challenges
+    local y = 0
+    p.runningHead:SetPoint("TOPLEFT", 0, y)
+    y = y - 22
+    local running = ns.Calendar.Running(today)
+    for i, card in ipairs(p.running) do
+        local ev = running[i]
+        card:SetShown(ev ~= nil)
+        if ev then
+            FillRunning(card, ev)
+            card:ClearAllPoints(); card:SetPoint("TOPLEFT", 0, y)
+            y = y - card:GetHeight() - 8
+        end
+    end
+    p.nothing:SetShown(#running == 0)
+    if #running == 0 then
+        p.nothing:ClearAllPoints(); p.nothing:SetPoint("TOPLEFT", 0, y)
+        y = y - 20
+    end
+    y = y - 6
+    p.chalHead:ClearAllPoints(); p.chalHead:SetPoint("TOPLEFT", 0, y)
+    y = y - 22
+    for i, ev in ipairs({ ns.Calendar.Daily(today), ns.Calendar.Weekly(today) }) do
+        local row = p.challenges[i]
+        FillChallenge(row, ev, today)
+        row:ClearAllPoints(); row:SetPoint("TOPLEFT", 0, y)
+        y = y - row:GetHeight() - 8
+    end
+    p.leftChild:SetHeight(-y)
+
+    -- right: join, joined, coming up
+    y = 0
+    p.joinHead:SetPoint("TOPLEFT", 0, y)
+    y = y - 22
+    local by = -10
+    p.how:ClearAllPoints(); p.how:SetPoint("TOPLEFT", 12, by)
+    by = by - math.ceil(p.how:GetStringHeight()) - 8
+    p.inputBox:ClearAllPoints(); p.inputBox:SetPoint("TOPLEFT", 12, by)
+    p.join:ClearAllPoints(); p.join:SetPoint("TOPRIGHT", -12, by)
+    by = by - 22 - 10
+    p.joinedRule:ClearAllPoints(); p.joinedRule:SetPoint("TOPLEFT", 12, by); p.joinedRule:SetPoint("TOPRIGHT", -12, by)
+    by = by - 8
+    p.joinedHead:ClearAllPoints(); p.joinedHead:SetPoint("TOPLEFT", 12, by)
+    by = by - 18
+    local list = Joined()
+    for i, row in ipairs(p.joined) do
+        local ev = list[i] and Event(list[i])
+        row:SetShown(ev ~= nil)
+        if ev then
+            local off = Untracked()[ev.id]
+            row.label:SetText((off and "|cff8f8577" or "|cffffffff") .. ev.name .. "|r")
+            row.track.text:SetText(off and "Track" or "Untrack")
+            row.status:SetText(Status(list[i], ev))
+            local nameH = math.ceil(row.label:GetStringHeight())
+            row.leave:ClearAllPoints(); row.leave:SetPoint("TOPRIGHT", 0, -nameH - 3)
+            row.track:ClearAllPoints(); row.track:SetPoint("RIGHT", row.leave, "LEFT", -4, 0)
+            local statusW = RIGHT_W - 24 - row.leave:GetWidth() - row.track:GetWidth() - 12
+            row.status:SetWidth(statusW)
+            row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT", 0, -nameH - 6)
+            local h = nameH + 3 + math.max(20, math.ceil(row.status:GetStringHeight()) + 3)
+            row:SetHeight(h)
+            row:ClearAllPoints(); row:SetPoint("TOPLEFT", 12, by)
+            by = by - h - 8
+        end
+    end
+    p.none:SetShown(#list == 0)
+    if #list == 0 then
+        p.none:ClearAllPoints(); p.none:SetPoint("TOPLEFT", 12, by)
+        by = by - 18
+    end
+    p.joinBox:SetHeight(-by + 4)
+    p.joinBox:ClearAllPoints(); p.joinBox:SetPoint("TOPLEFT", 0, y)
+    y = y - p.joinBox:GetHeight() - 14
+    p.comingHead:ClearAllPoints(); p.comingHead:SetPoint("TOPLEFT", 0, y)
+    y = y - 22
+    local coming = ns.Calendar.Next(today, #p.coming)
+    for i, card in ipairs(p.coming) do
+        local ev = coming[i]
+        card:SetShown(ev ~= nil)
+        if ev then
+            FillComing(card, ev)
+            card:ClearAllPoints(); card:SetPoint("TOPLEFT", 0, y)
+            y = y - card:GetHeight() - 8
+        end
+    end
+    p.rightChild:SetHeight(-y)
+end
+
+RefreshRows = function()
+    if not page.panel or not page.panel:IsVisible() then return end
+    Layout()
+end
+
+-- A column that scrolls if it runs past the bottom.
+local function Column(parent, width)
+    local scroll = CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
+    scroll:SetWidth(width)
+    local child = CreateFrame("Frame", nil, scroll)
+    child:SetSize(width, 1)
+    scroll:SetScrollChild(child)
+    return scroll, child
 end
 
 ns.RegisterPage({
     name = "Events",
     order = 12,
+    place = "events",
     build = function(panel)
-        local how = W.Note(panel, "Join an event or tournament: on its page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events show in the event tracker while they run (drag its title to move it, click it to fold it), and your journal paste is scored for them.", ns.CONTENT_WIDTH - 4)
-        how:SetPoint("TOPLEFT")
+        local p = page
+        p.panel = panel
 
-        input = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
-        input:SetSize(ns.CONTENT_WIDTH - 100, 24)
-        input:SetPoint("TOPLEFT", how, "BOTTOMLEFT", 6, -10)
-        input:SetAutoFocus(false)
-        input:SetMaxLetters(0)
+        -- the painting, the title and today's date
+        local banner = CreateFrame("Frame", nil, panel)
+        banner:SetPoint("TOPLEFT"); banner:SetPoint("TOPRIGHT")
+        banner:SetHeight(78)
+        local paint = banner:CreateTexture(nil, "BACKGROUND")
+        paint:SetAllPoints()
+        paint:SetTexture(W.TEX .. "banner-events")
+        paint:SetTexCoord(0, 1, 0, 110 / 128)
+        local medal = banner:CreateTexture(nil, "ARTWORK")
+        medal:SetTexture(W.TEX .. "medal-events")
+        medal:SetSize(ns.MEDAL_SIZE, ns.MEDAL_SIZE)
+        medal:SetPoint("BOTTOMLEFT", ns.MEDAL_X, ns.MEDAL_Y)
+        local title = W.Text(banner, 22, "ffffff")
+        title:SetPoint("BOTTOMLEFT", ns.BANNER_TITLE_X, ns.BANNER_TITLE_Y)
+        title:SetText("Events")
+        p.sub = W.Text(banner, 10.5, C.ink2)
+        p.sub:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
+
+        -- the foot: Export, since pasting the journal is how events are scored
+        local foot = CreateFrame("Frame", nil, panel)
+        foot:SetPoint("BOTTOMLEFT"); foot:SetPoint("BOTTOMRIGHT")
+        foot:SetHeight(34)
+        local footBg = W.Solid(foot, "BACKGROUND", C.foot)
+        footBg:SetAllPoints()
+        local footLine = W.Solid(foot, "BORDER", C.amber, 0.22)
+        footLine:SetPoint("TOPLEFT"); footLine:SetPoint("TOPRIGHT"); footLine:SetHeight(1)
+        p.export = W.OakButton(foot, "Export", function() ns.ShowExport() end)
+        p.export:SetPoint("LEFT", 14, 0)
+        local hint = W.Text(foot, 10.5, C.dim)
+        hint:SetPoint("RIGHT", -14, 0)
+        hint:SetJustifyH("RIGHT")
+        hint:SetText("Paste it on |cffcdb894halsudsworth.com|r to be scored")
+
+        -- left column: Hal's calendar
+        local left, leftChild = Column(panel, LEFT_W)
+        left:SetPoint("TOPLEFT", banner, "BOTTOMLEFT", 14, -9)
+        left:SetPoint("BOTTOMLEFT", foot, "TOPLEFT", 14, 10)
+        p.leftChild = leftChild
+        p.runningHead = Section(leftChild, LEFT_W)
+        p.runningHead:Set("Running now", "Hal's calendar")
+        p.running = {}
+        for i = 1, 4 do p.running[i] = RunningCard(leftChild) end
+        p.nothing = W.Text(leftChild, 10.5, C.dim)
+        p.nothing:SetText("Nothing of Hal's is running today.")
+        p.chalHead = Section(leftChild, LEFT_W)
+        p.chalHead:Set("Challenges", "From the calendar")
+        p.challenges = { ChallengeRow(leftChild), ChallengeRow(leftChild) }
+
+        -- right column: join an event, what's joined, what's coming up
+        local right, rightChild = Column(panel, RIGHT_W)
+        right:SetPoint("TOPRIGHT", banner, "BOTTOMRIGHT", -36, -9)
+        right:SetPoint("BOTTOMRIGHT", foot, "TOPRIGHT", -36, 10)
+        p.rightChild = rightChild
+        p.joinHead = Section(rightChild, RIGHT_W)
+        p.joinHead:Set("Join an event")
+        p.joinBox = Box(rightChild, C.card, 0.14)
+        p.joinBox:SetWidth(RIGHT_W)
+        p.how = W.Text(p.joinBox, 10.5, C.ink2)
+        p.how:SetWidth(RIGHT_W - 24)
+        p.how:SetWordWrap(true)
+        p.how:SetText("On an event's or tournament's page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events show in the event tracker while they run (drag its title to move it, click it to fold it), and your journal paste is scored for them.")
         local function Submit()
             if Join(input:GetText()) then input:SetText(""); input:ClearFocus(); RefreshRows(); ns.UpdateTracker() end
         end
+        p.join = W.OakButton(p.joinBox, "Join", Submit, 22)
+        p.inputBox = Box(p.joinBox, "070504", 0.25)
+        p.inputBox:SetSize(RIGHT_W - 24 - p.join:GetWidth() - 8, 22)
+        input = CreateFrame("EditBox", nil, p.inputBox)
+        input:SetPoint("TOPLEFT", 7, 0)
+        input:SetPoint("BOTTOMRIGHT", -7, 0)
+        input:SetFont(W.FRIZ, 10.5, "")
+        input:SetTextColor(W.Hex(C.ink))
+        input:SetAutoFocus(false)
+        input:SetMaxLetters(0)
         input:SetScript("OnEnterPressed", Submit)
         input:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-        local join = W.Button(panel, "Join", 70, Submit)
-        join:SetPoint("LEFT", input, "RIGHT", 8, 0)
-
-        local header = W.Label(panel, "Joined", "GameFontNormal")
-        header:SetPoint("TOPLEFT", input, "BOTTOMLEFT", -6, -16)
-        none = W.Label(panel, "None yet.", "GameFontDisableSmall")
-        none:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -6)
-
-        rows = {}
-        for i = 1, MAX_EVENTS do
-            local row = CreateFrame("Frame", nil, panel)
-            row:SetSize(ns.CONTENT_WIDTH - 4, 24)
-            row:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4 - (i - 1) * 26)
-            local leave = W.Button(row, "Leave", 60, function() Leave(i); RefreshRows(); ns.UpdateTracker() end)
-            leave:SetPoint("RIGHT")
-            -- Untracked events stay joined and in the export, off the event tracker.
-            row.track = W.Button(row, "Untrack", 70, function()
-                local ev = Joined()[i] and Event(Joined()[i])
-                if not ev then return end
-                local u = Untracked()
-                u[ev.id] = not u[ev.id] or nil
-                RefreshRows()
-                ns.UpdateTracker()
-            end)
-            row.track:SetPoint("RIGHT", leave, "LEFT", -4, 0)
-            row.label = W.Label(row, "", "GameFontHighlightSmall")
-            row.label:SetPoint("LEFT")
-            row.label:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
-            row.label:SetJustifyH("LEFT")
-            row.label:SetWordWrap(false)
-            rows[i] = row
-        end
+        p.joinedRule = W.Solid(p.joinBox, "BORDER", C.rule, 0.075)
+        p.joinedRule:SetHeight(1)
+        p.joinedHead = W.Text(p.joinBox, 11.5, C.ink)
+        p.joinedHead:SetText("Joined")
+        p.none = W.Text(p.joinBox, 10.5, C.dim)
+        p.none:SetText("None yet.")
+        p.joined = {}
+        for i = 1, MAX_EVENTS do p.joined[i] = JoinedRow(p.joinBox, i) end
+        p.comingHead = Section(rightChild, RIGHT_W)
+        p.comingHead:Set("Coming up")
+        p.coming = { ComingCard(rightChild), ComingCard(rightChild) }
 
         return function()
             if ns.Data() then Prune() end
             input:SetText("")
-            RefreshRows()
+            Layout()
         end
     end,
 })

@@ -151,6 +151,7 @@ ns.NOTABLE = {
         { id = 13881, name = "Bloated Redgill",                    note = "Has a gem inside" },
         { id = 13891, name = "Bloated Whitescale Salmon",          note = "Has a gem inside" },
         { id = 21243, name = "Bloated Mightfish",                  note = "Azshara" },
+        { id = 285094, name = "Ravaged Fishing Pole",              note = "Source still unknown" },
     } },
     { group = "Pools and wreckage", items = {
         { id = 20708, name = "Tightly Sealed Trunk",   note = "Floating Debris pools" },
@@ -168,10 +169,6 @@ ns.NOTABLE = {
         { id = 19803, name = "Brownell's Blue Striped Racer",   note = "About 1 in 200 during the contest" },
         { id = 19806, name = "Dezian Queenfish",                note = "About 1 in 200 during the contest" },
         { id = 19808, name = "Rockhide Strongfish",             note = "A fished mace" },
-    } },
-    { group = "New in Forever", items = {
-        { id = 251524, name = "Whimsyfin",              note = "Redridge rivers, near the murlocs. The Alliance-side Deviate Fish" },
-        { id = 285094, name = "Ravaged Fishing Pole",   note = "Source still unknown" },
     } },
 }
 
@@ -200,7 +197,6 @@ ns.RARE_FISH = {
     { id = 16968, note = "Nat Pagle quest" },            -- Sar'theris Striker
     { id = 16969, note = "Nat Pagle quest" },            -- Savage Coast Blue Sailfin
     { id = 16970, note = "Nat Pagle quest" },            -- Misty Reed Mahi Mahi
-    { id = 251524, note = "New in Forever" },            -- Whimsyfin
 }
 
 -- Everything else that comes up on the line. Not fish: kept out of the zone-fish count,

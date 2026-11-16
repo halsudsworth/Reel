@@ -393,6 +393,8 @@ SlashCmdList.REEL = function(msg)
         ns.PrintGuild()
     elseif msg == "export" then
         ns.ShowExport()
+    elseif msg == "options" or msg == "settings" then
+        ns.OpenOptions()
     elseif not ns.ExitCleanView() then
         ns.ToggleWindow()
     end

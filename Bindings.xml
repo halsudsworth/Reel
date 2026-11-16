@@ -2,6 +2,7 @@
     <Binding name="CLICK ReelFishButton:LeftButton" header="REEL" category="ADDONS"/>
     <Binding name="CLICK ReelRecastButton:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ReelLureKeyButton:LeftButton" category="ADDONS"/>
+    <Binding name="CLICK ReelFoodKeyButton:LeftButton" category="ADDONS"/>
     <Binding name="REEL_TOGGLE_WINDOW" category="ADDONS">
         ReelToggleWindow()
     </Binding>

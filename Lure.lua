@@ -34,6 +34,12 @@ local GetItemCountCompat = C_Item and C_Item.GetItemCount or GetItemCount
 
 local button, buttonLure
 
+-- The icon for "no lure": the one picked on the Bar page, else the Shiny Bauble's (by item ID).
+local function MissingLureIcon()
+    local choice = ReelDB.settings.lureChoice
+    return GetItemIconCompat(type(choice) == "number" and choice or 6529) or "Interface\\Icons\\INV_Misc_Orb_03"
+end
+
 -- Seconds left on the lure, or nil. Only counts with a pole in hand, so a
 -- sharpening stone or poison on a weapon isn't taken for a lure.
 function ns.LureTimeLeft()
@@ -117,19 +123,28 @@ ns.UpdateLureButton = UpdateButton
 ns.On("BAG_UPDATE_DELAYED", UpdateButton)
 ns.On("PLAYER_REGEN_ENABLED", UpdateButton)
 
-ns.RegisterBarSegment({ key = "lure", label = "Lure timer", order = 20, text = function(s)
-    local left = ns.LureTimeLeft()
-    if left then
-        local t = "Lure " .. ns.FormatTime(left)
-        if left <= WARN_SECONDS then t = "|cffff4040" .. t .. " !!|r" end
-        return t, true
-    end
-    if ns.PoleEquipped() then
-        if buttonLure then
-            return "|cffff4040No lure|r - click the icon to add one", true
-        elseif s.lureButton then
-            return "|cffff4040No lure|r (none in bags)", true
+-- "8:24" (red with !! in the last 30 seconds), or a red "None": with a lure to put on, the
+-- button beside it; with none, the lure's icon greyed. The lure button sits in this row
+-- (Icons: it is the row's icon).
+ns.RegisterBarSegment({
+    key = "lure", label = "Lure timer", name = "Lure", group = "status", order = 20,
+    icon = function() return buttonLure and GetItemIconCompat(buttonLure.id) or "Interface\\Icons\\INV_Misc_Gem_Variety_02" end,
+    text = function(s)
+        local left = ns.LureTimeLeft()
+        local button = buttonLure ~= nil
+        if left then
+            local t = ns.FormatTime(left)
+            local tip = "Lure " .. t
+            if left <= WARN_SECONDS then t = "|cffff4a3a" .. t .. " !!|r" end
+            return { value = t, tip = tip, button = button, reserve = "88:88 !!" }, true
         end
-        return "|cffff4040No lure|r", true
-    end
-end })
+        if ns.PoleEquipped() then
+            if button then
+                return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No lure - click the icon to add one", button = true, reserve = "88:88 !!" }, true
+            end
+            -- None to put on: the lure's icon greyed with a red "None", the same as Food.
+            local tip = s.lureButton and "No lure (none in bags)" or "No lure"
+            return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = tip, missing = true, icon = MissingLureIcon(), reserve = "88:88 !!" }, true
+        end
+    end,
+})

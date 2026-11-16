@@ -220,6 +220,7 @@ local function OnLoot()
     if skillCell then skillCell[2] = skillCell[2] + 1 end
     session.catches = session.catches + 1
     session.last = now
+    local shown -- the first item, for the bar
     for slot = 1, GetNumLootItems() do
         local link = GetLootSlotLink(slot)
         local id = link and tonumber(link:match("item:(%d+)"))
@@ -242,8 +243,10 @@ local function OnLoot()
             if not stack or qty > stack.qty then
                 data.records.stack = { qty = qty, link = link, time = now, zone = zone }
             end
+            shown = shown or { id = id, link = link }
         end
     end
+    if shown then ns.ShowCatch(shown.id, shown.link, data.fish[shown.id].count) end
     ns.Fire("REEL_DATA_CHANGED")
 end
 ns.On("LOOT_READY", OnLoot)
@@ -257,17 +260,24 @@ function ns.SessionPace(s)
     return seconds, s.catches * 3600 / seconds, seconds / s.catches
 end
 
--- "42 fish this session (+6 bonus)"; the bonus part only with Luremaster.
+-- "42 fish this session (+6 bonus)"; the bonus part only with Luremaster. In the bar's foot;
+-- the number turns amber while a catch is showing.
 ns.RegisterBarSegment({
     key = "session",
     label = "Fish caught this session",
+    name = "Session",
+    group = "session",
     order = 40,
+    icon = "Interface\\Icons\\INV_Misc_1H_Bucket_B_01",
     text = function()
-        local t = ns.session.fish .. " fish this session"
+        local color = ns.BarCatchShowing() and "ffffd27a" or "ffefe3cc"
+        local n = "|c" .. color .. ns.session.fish .. "|r"
+        local value, tip = n .. " fish", ns.session.fish .. " fish this session"
         if ns.HasLuremaster() then
-            t = t .. string.format(" |cff40ff40(+%d bonus)|r", ns.LuremasterCount())
+            value = value .. string.format(" |cff4fd13a(+%d)|r", ns.LuremasterCount())
+            tip = tip .. string.format(" (+%d bonus)", ns.LuremasterCount())
         end
-        return t
+        return { value = value, short = n, tip = tip, reserve = "888 fish", reserveShort = "888" }
     end,
 })
 
@@ -275,10 +285,15 @@ ns.RegisterBarSegment({
 ns.RegisterBarSegment({
     key = "catchRate",
     label = "Catches per hour this session",
+    name = "Pace",
+    group = "session",
     order = 41,
     defaultOff = true,
+    icon = "Interface\\Icons\\INV_Misc_PocketWatch_02",
     text = function()
         local _, perHour = ns.SessionPace(ns.session)
-        if perHour then return string.format("%d catches an hour", math.floor(perHour + 0.5)) end
+        if not perHour then return { value = "-", short = "-", tip = "Catches an hour: after the first catch", reserve = "888 an hour", reserveShort = "888/h" } end
+        local n = math.floor(perHour + 0.5)
+        return { value = n .. " an hour", short = n .. "/h", tip = n .. " catches an hour", reserve = "888 an hour", reserveShort = "888/h" }
     end,
 })

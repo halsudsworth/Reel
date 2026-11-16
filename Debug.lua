@@ -118,6 +118,9 @@ function ns.Debug()
     d.MuteSoundFile = MuteSoundFile ~= nil
     d.UnmuteSoundFile = UnmuteSoundFile ~= nil
 
+    -- The bar's last catch: when, which item, and whether the catch display was shown and visible.
+    d.lastCatch = ReelDB.debugCatch or "none yet: catch a fish, then /reel debug again"
+
     -- What the client says each fished loot came from (pool object or not); see below.
     d.lootSources = ReelDB.debugLoot or "none yet: fish a few times, then /reel debug again"
 

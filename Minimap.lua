@@ -39,6 +39,7 @@ local QUICK = {
       set = function(s, v) s.boost = v; ns.ApplySettings() end },
     { text = "Events", run = function() ns.ShowEvents() end },
     { text = "Export journal", run = function() ns.ShowExport() end },
+    { text = "Settings", run = function() ns.OpenOptions() end },
 }
 
 local function RefreshMenu()

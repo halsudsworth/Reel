@@ -208,6 +208,12 @@ L["Options > Gameplay > Controls"] = "Options > Gameplay > Controls"
 L["To reel in with the Fish key, turn on Enable Interact Key in %s."] = "To reel in with the Fish key, turn on Enable Interact Key in %s."
 L["One key"] = "One key"
 L["Apply a lure first when the pole has none"] = "Apply a lure first when the pole has none"
+L["Controller button"] = "Controller button"
+L["D-pad up"] = "D-pad up"
+L["D-pad down"] = "D-pad down"
+L["D-pad left"] = "D-pad left"
+L["D-pad right"] = "D-pad right"
+L["The Fish key on a controller, while a fishing pole is equipped. Without a pole the button does what it normally does."] = "The Fish key on a controller, while a fishing pole is equipped. Without a pole the button does what it normally does."
 L["Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in %s). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too."] = "Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in %s). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too."
 
 -- Buffs.lua

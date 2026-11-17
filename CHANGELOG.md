@@ -1,7 +1,8 @@
 # Changelog
 
-## 1.4.2
+## 1.5.0
 
+- New: Controller button on the Casting page. Pick a gamepad button (A, B, X, Y, the shoulders and triggers, or the d-pad) and it's your Fish key while a fishing pole is equipped: lure, cast, and reel in. Without a pole it does what it normally does, and your keyboard key is unchanged.
 - Fixed: on a German, French or other non-English client, events joined with a code from halsudsworth.com now count your catches in the event's zones.
 - On non-English clients: the bar's Zone fish, the Completionist feat and the recipe vendor tips now know which zone you're in, the fishing skill bonus counts gear and lures, and the Food and Camp items find their buffs (each food or camp buff is learned the first time you eat or place it).
 - Events that count only one spot, like Tonga's survey, Something in the water and Hallow's feud, now name the spot by its area ID, so they count on non-English clients too.

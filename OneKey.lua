@@ -15,7 +15,19 @@ local W = ns.W
 
 ns.RegisterDefaults({
     oneKeyLure = true, -- the Fish key applies a lure first when the pole has none
+    controllerButton = "none", -- a gamepad button that is the Fish key while a pole is equipped
 })
+
+-- Gamepad buttons by WoW's key names, labelled the Xbox way (PAD1 is A/Cross).
+local PAD_BUTTONS = {
+    { value = "none", text = L["None"] },
+    { value = "PAD1", text = "A" }, { value = "PAD2", text = "B" },
+    { value = "PAD3", text = "X" }, { value = "PAD4", text = "Y" },
+    { value = "PADLSHOULDER", text = "LB" }, { value = "PADRSHOULDER", text = "RB" },
+    { value = "PADLTRIGGER", text = "LT" }, { value = "PADRTRIGGER", text = "RT" },
+    { value = "PADDUP", text = L["D-pad up"] }, { value = "PADDDOWN", text = L["D-pad down"] },
+    { value = "PADDLEFT", text = L["D-pad left"] }, { value = "PADDRIGHT", text = L["D-pad right"] },
+}
 
 _G["BINDING_NAME_CLICK ReelFishButton:LeftButton"] = L["Fish (lure, cast, reel in)"]
 _G["BINDING_NAME_CLICK ReelRecastButton:LeftButton"] = L["Quick recast (no lure)"]
@@ -27,7 +39,7 @@ function ReelToggleWindow()
 end
 
 local FISH_BINDING = "CLICK ReelFishButton:LeftButton"
-local fishButton, lureKeyButton, recastButton
+local fishButton, lureKeyButton, recastButton, padOwner
 local reeling = false -- the key is currently the interact key
 
 local function LureMacro(lure)
@@ -53,15 +65,32 @@ local function RecastMacro()
     return "/stopcasting\n/cast " .. ns.fishingName
 end
 
--- While a bobber is out, the Fish key reels in instead.
+-- The controller button, if one is picked and a fishing pole is equipped. Away from fishing
+-- the button keeps its own job (A jumps), so it's only taken over with the pole in hand.
+local function PadKey()
+    local key = ReelDB.settings.controllerButton
+    if key and key ~= "none" and ns.PoleEquipped() then return key end
+end
+
+-- The controller button is a second Fish key: an override binding, so the player's own
+-- bindings (keyboard and controller) are never changed.
+local function UpdatePad()
+    if not padOwner or InCombatLockdown() then return end
+    ClearOverrideBindings(padOwner)
+    local key = PadKey()
+    if key then SetOverrideBinding(padOwner, false, key, FISH_BINDING) end
+end
+
+-- While a bobber is out, the Fish key reels in instead (the keyboard key and the controller
+-- button; this override has priority over the controller button's own).
 local function SetReeling(on)
     if not fishButton or InCombatLockdown() or on == reeling then return end
     reeling = on
     ClearOverrideBindings(fishButton)
     if on then
         local key1, key2 = GetBindingKey(FISH_BINDING)
-        for _, key in ipairs({ key1, key2 }) do
-            SetOverrideBinding(fishButton, true, key, "INTERACTTARGET")
+        for _, key in ipairs({ key1, key2, PadKey() }) do
+            if key then SetOverrideBinding(fishButton, true, key, "INTERACTTARGET") end
         end
     end
 end
@@ -79,13 +108,16 @@ ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
     fishButton = KeyButton("ReelFishButton")
     lureKeyButton = KeyButton("ReelLureKeyButton")
     recastButton = KeyButton("ReelRecastButton")
+    padOwner = CreateFrame("Frame")
+    UpdatePad()
     if ns.fishingName then recastButton:SetAttribute("macrotext", RecastMacro()) end
     UpdateMacro()
     C_Timer.NewTicker(1, UpdateMacro)
 end) end)
 
 ns.On("BAG_UPDATE_DELAYED", UpdateMacro)
-ns.On("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateMacro() end end)
+ns.On("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateMacro(); UpdatePad() end end)
+ns.On("PLAYER_EQUIPMENT_CHANGED", UpdatePad)
 ns.On("UPDATE_BINDINGS", function()
     if reeling and not InCombatLockdown() then reeling = false; SetReeling(true) end
 end)
@@ -124,6 +156,7 @@ ns.On("PLAYER_REGEN_ENABLED", function()
         if ns.Channeling() then SetReeling(true) end
     end
     UpdateMacro()
+    UpdatePad()
 end)
 
 -- Casting page addition -------------------------------------------------------
@@ -138,5 +171,11 @@ function ns.BuildOneKeyOptions(panel, anchor)
     lure:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
     local note = W.Note(panel, string.format(L["Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in %s). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too."], INTERACT_PATH), ns.CONTENT_WIDTH - 4)
     note:SetPoint("TOPLEFT", lure, "BOTTOMLEFT", 0, -2)
-    return lure
+    local pad = W.Dropdown(panel, L["Controller button"], 130, PAD_BUTTONS,
+        function() return s.controllerButton end,
+        function(v) s.controllerButton = v; UpdatePad() end)
+    pad:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 120, -10)
+    local padNote = W.Note(panel, L["The Fish key on a controller, while a fishing pole is equipped. Without a pole the button does what it normally does."], ns.CONTENT_WIDTH - 4)
+    padNote:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -38)
+    return { Refresh = function() lure.Refresh(); pad.Refresh() end }
 end

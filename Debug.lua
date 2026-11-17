@@ -61,7 +61,9 @@ function ns.Debug()
             if info and info.lines then
                 for _, line in ipairs(info.lines) do
                     local t = line.leftText
-                    if t and t:lower():find("fishing") then
+                    -- English "fishing", the client's own word, or any number on the pole (a lure's line)
+                    if t and (t:lower():find("fishing") or t:lower():find(ns.FishingWord(), 1, true)
+                        or (slot == 16 and t:find("%d"))) then
                         d.gear[#d.gear + 1] = { slot = slot, item = GetInventoryItemLink("player", slot), line = t }
                     end
                 end

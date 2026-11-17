@@ -127,26 +127,12 @@ local function AsList(v)
 end
 
 -- Event codes from halsudsworth.com name zones in English; catches carry the zone in the
--- client's language. An English name the calendar knows goes through its map ID to this
--- client's name for the map. Subzones have no IDs, so they stay as they are.
-local englishToMap
-local function LocalZone(name)
-    if type(name) ~= "string" then return name end
-    if not englishToMap then
-        englishToMap = {}
-        local maps = ns.CALENDAR_DATA and ns.CALENDAR_DATA.maps or {}
-        for id, english in pairs(maps) do englishToMap[english:lower()] = id end
-    end
-    local id = englishToMap[name:lower()]
-    if not (id and C_Map and C_Map.GetMapInfo) then return name end
-    local ok, info = pcall(C_Map.GetMapInfo, id)
-    return ok and info and info.name or name
-end
-
+-- client's language, so each zone goes through its map ID to this client's name (ns.LocalZone).
+-- Subzones have no IDs, so they stay as they are.
 local function LocalZones(list)
     if not list then return nil end
     local out = {}
-    for i, name in ipairs(list) do out[i] = LocalZone(name) end
+    for i, name in ipairs(list) do out[i] = ns.LocalZone(name) end
     return out
 end
 

@@ -975,14 +975,20 @@ function recordsTab.Draw(view)
         if (s.catches or 0) > bestSession then bestSession = s.catches end
     end
     local complete = {} -- zones where every fish in FishData has been caught there
-    for zone, want in pairs(ns.ZoneFish()) do
-        local caught = {}
-        for _, entry in pairs(view.zones[zone] or {}) do
-            for fid in pairs(entry.items) do caught[fid] = true end
+    -- The journal keeps zones in the client's language, FishData in English.
+    local caughtIn = {}
+    for zone, subs in pairs(view.zones) do
+        local english = ns.EnglishZone(zone)
+        caughtIn[english] = caughtIn[english] or {}
+        for _, entry in pairs(subs) do
+            for fid in pairs(entry.items) do caughtIn[english][fid] = true end
         end
+    end
+    for zone, want in pairs(ns.ZoneFish()) do
+        local caught = caughtIn[zone] or {}
         local missing = 0
         for fid in pairs(want) do if not caught[fid] then missing = missing + 1 end end
-        if missing == 0 then complete[#complete + 1] = zone end
+        if missing == 0 then complete[#complete + 1] = ns.LocalZone(zone) end
     end
     table.sort(complete)
     local function Feat(f, name, need, have, target, done)
@@ -1182,7 +1188,7 @@ ns.RegisterBarSegment({
             for id in pairs(entry.items) do caught[id] = true end
         end
         local have, total = 0, 0
-        for id in pairs(ns.ZoneFish()[zone] or {}) do
+        for id in pairs(ns.ZoneFish()[ns.EnglishZone(zone)] or {}) do
             total = total + 1
             if caught[id] then have = have + 1 end
         end

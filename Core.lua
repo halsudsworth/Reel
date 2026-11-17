@@ -32,6 +32,56 @@ local function SpellName(id)
 end
 ns.SpellName = SpellName
 
+-- Zone names in the addon's data (FishData, recipe vendors, event codes) are English; the game
+-- gives them in the client's language. Map IDs tie the two together: Hal's calendar lists most
+-- zones, these are the rest (IDs from the Forever client's own map tree, /reel debug, 2026-11-16).
+local EXTRA_ZONE_IDS = {
+    [1418] = "Badlands", [1419] = "Blasted Lands", [1427] = "Searing Gorge",
+    [2482] = "Mount Hyjal", [2652] = "Shen'dralas",
+}
+local toEnglish, toLocal, fishingWord
+-- Built again after each loading screen (Core's PLAYER_ENTERING_WORLD), in case a map's name
+-- wasn't loaded the first time.
+function ns.ResetZoneNames() toEnglish, toLocal, fishingWord = nil, nil, nil end
+local function BuildZoneNames()
+    toEnglish, toLocal = {}, {}
+    local function Add(id, english)
+        local name = english
+        if C_Map and C_Map.GetMapInfo then
+            local ok, info = pcall(C_Map.GetMapInfo, id)
+            if ok and info and info.name and info.name ~= "" then name = info.name end
+        end
+        toEnglish[name] = toEnglish[name] or english
+        toLocal[english:lower()] = toLocal[english:lower()] or name
+    end
+    for id, english in pairs(ns.CALENDAR_DATA and ns.CALENDAR_DATA.maps or {}) do Add(id, english) end
+    for id, english in pairs(EXTRA_ZONE_IDS) do Add(id, english) end
+end
+
+-- The English name for a zone name this client gives (GetZoneText()), or the name as it is.
+function ns.EnglishZone(name)
+    if type(name) ~= "string" then return name end
+    if not toEnglish then BuildZoneNames() end
+    return toEnglish[name] or name
+end
+
+-- This client's name for an English zone name, or the name as it is.
+function ns.LocalZone(english)
+    if type(english) ~= "string" then return english end
+    if not toLocal then BuildZoneNames() end
+    return toLocal[english:lower()] or english
+end
+
+-- The word for Fishing in this client's language, lowercased ("fishing", "angeln"...): the
+-- Fishing spell's own name. For spotting fishing bonuses in tooltips and buff text.
+function ns.FishingWord()
+    if fishingWord == nil then
+        local name = SpellName(7620)
+        fishingWord = type(name) == "string" and name ~= "" and name:lower() or false
+    end
+    return fishingWord or "fishing"
+end
+
 -- The server's clock in Unix seconds. time() is the player's own computer clock and can be
 -- set to anything, so the journal stamps everything with this.
 local warnedClock = false
@@ -410,3 +460,5 @@ ns.On("PLAYER_LOGIN", function()
         end
     end
 end)
+
+ns.On("PLAYER_ENTERING_WORLD", ns.ResetZoneNames)

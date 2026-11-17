@@ -7,9 +7,9 @@
 -- the client. The Hut's buff isn't confirmed, so any buff named
 -- "<word> Fishing" (e.g. "Rare Fishing") is treated as a camp buff too.
 --
--- The one-hour cooldown is from fan guides. Placement is detected by spell
--- name; "Fishing Rack" is confirmed on Wowhead (spell 1262990), the others
--- are not.
+-- The one-hour cooldown is from fan guides. Placement is detected by the camp
+-- item's use spell (any language), the Rack's spell 1262990 (Wowhead), or the
+-- English spell name. A camp buff seen right after placing is remembered by ID.
 
 local _, ns = ...
 
@@ -29,8 +29,29 @@ ns.RegisterDefaults({
     campMissing = false, -- show "No camp buff" on the bar
 })
 
+-- A camp's buff: the known one, one remembered after placing a camp (any language), or the
+-- English "<word> Fishing" pattern.
 function ns.IsCampBuff(name, spellID)
-    return KNOWN_BUFFS[spellID] or (name and name:match("^%a+ Fishing$") ~= nil)
+    return KNOWN_BUFFS[spellID] or (ReelDB and ReelDB.campBuffs and ReelDB.campBuffs[spellID])
+        or (name and name:match("^%a+ Fishing$") ~= nil) or false
+end
+
+local campItems = {}
+for _, id in pairs(CAMP_ITEMS) do campItems[#campItems + 1] = id end
+-- The camp's buff lasts an hour; it turns up within a minute of placing it.
+ns.LearnBuffAfter("campBuffs", campItems, 1800, 60, { 1262990 })
+
+-- Which camp a cast placed: by the camp item's use spell (any language), else by English name.
+local function PlacedCamp(spellID)
+    if C_Item and C_Item.GetItemSpell then
+        for name, item in pairs(CAMP_ITEMS) do
+            local ok, _, itemSpell = pcall(C_Item.GetItemSpell, item)
+            if ok and itemSpell == spellID then return name end
+        end
+    end
+    if spellID == 1262990 then return "Fishing Rack" end
+    local name = ns.SpellName(spellID)
+    if name and PLACE_SPELLS[name] then return name end
 end
 
 -- Returns name, seconds left and icon of the active camp buff, or nil.
@@ -58,10 +79,8 @@ end
 
 ns.On("UNIT_SPELLCAST_SUCCEEDED", function(unit, _, spellID)
     if unit ~= "player" then return end
-    local name = ns.SpellName(spellID)
-    if name and PLACE_SPELLS[name] then
-        ReelDB.camp = { name = name, placed = time() }
-    end
+    local name = PlacedCamp(spellID)
+    if name then ReelDB.camp = { name = name, placed = time() } end
 end)
 
 -- Camp: the camp buff's timer, the camp's cooldown (dim), or a red "None"; the words are in the tooltip.

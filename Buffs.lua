@@ -66,6 +66,67 @@ function ns.FoodOptions()
     return list
 end
 
+-- The buff a fishing food gives is told apart by its English description ("fishing skill"),
+-- which other languages don't have. So: after eating one of FOODS, the long buff that turns up
+-- next is remembered by spell ID (ReelDB.fishingBuffs), and counts in any language from then on.
+-- ns.LearnBuffAfter is shared with the camp (Camp.lua).
+local watching = {} -- { store, spells = {spellID=true}, minDuration, until, before = {spellID=true} }
+
+local function ItemSpellID(itemID)
+    if not (C_Item and C_Item.GetItemSpell) then return end
+    local ok, _, spellID = pcall(C_Item.GetItemSpell, itemID)
+    return ok and spellID or nil
+end
+
+-- Watch for the buff that follows a cast of any of itemIDs' use spells (or of spellIDs), and
+-- keep its spell ID in ReelDB[store].
+function ns.LearnBuffAfter(store, itemIDs, minDuration, window, spellIDs)
+    local w = { store = store, items = itemIDs, extra = spellIDs, minDuration = minDuration, window = window }
+    watching[#watching + 1] = w
+    return w
+end
+
+local function Casts(w, spellID)
+    for _, id in ipairs(w.extra or {}) do if id == spellID then return true end end
+    for _, item in ipairs(w.items) do if ItemSpellID(item) == spellID then return true end end
+    return false
+end
+
+ns.On("UNIT_SPELLCAST_SUCCEEDED", function(unit, _, spellID)
+    if unit ~= "player" or not spellID then return end
+    for _, w in ipairs(watching) do
+        if Casts(w, spellID) then
+            w["until"] = GetTime() + w.window
+            w.before = {}
+            for _, aura in ipairs(ns.PlayerBuffs()) do if aura.spellId then w.before[aura.spellId] = true end end
+        end
+    end
+end)
+
+ns.On("UNIT_AURA", function(unit)
+    if unit ~= "player" then return end
+    for _, w in ipairs(watching) do
+        if w["until"] and GetTime() <= w["until"] then
+            for _, aura in ipairs(ns.PlayerBuffs()) do
+                local id = aura.spellId
+                if id and not w.before[id] and (aura.duration or 0) >= w.minDuration then
+                    ReelDB[w.store] = ReelDB[w.store] or {}
+                    ReelDB[w.store][id] = true
+                    w["until"] = nil
+                    break
+                end
+            end
+        elseif w["until"] then
+            w["until"] = nil
+        end
+    end
+end)
+
+local foodItems = {}
+for i, food in ipairs(FOODS) do foodItems[i] = food.id end
+-- Eating takes up to 30 seconds; food buffs last 15 minutes or more.
+ns.LearnBuffAfter("fishingBuffs", foodItems, 600, 45)
+
 local function FishingBuffs()
     local list = {}
     for _, aura in ipairs(ns.PlayerBuffs()) do

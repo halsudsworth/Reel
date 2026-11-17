@@ -5,11 +5,28 @@
 --   gear  - "Fishing +N" lines on equipped item tooltips ("Increased Fishing
 --           +5", "Enchanted: Fishing +2", and lures on the pole)
 --   buffs - the effect value of buffs that mention "fishing skill" (Well Fed)
+--   On other languages: gear by the client's own word for Fishing, buffs by the spell IDs
+--   remembered from eating a fishing food.
 
 local _, ns = ...
 
 local GEAR_SLOTS = 19
 local gearBonus, gearChecked = 0, 0
+
+-- "Fishing +5" on a tooltip line, in any language: the line names Fishing in the client's own
+-- word (the Fishing spell's name) and has a "+N" after it.
+local function GearLineBonus(text)
+    if type(text) ~= "string" then return end
+    local amount = text:match("[Ff]ishing[^%d%+]*%+(%d+)")
+    if amount then return tonumber(amount) end
+    local word = ns.FishingWord()
+    local lower = text:lower()
+    local at = lower:find(word, 1, true)
+    if not at then return end
+    amount = lower:match("%+%s*(%d+)", at + #word) or lower:match("%+%s*(%d+)")
+    return amount and tonumber(amount)
+end
+ns.GearLineBonus = GearLineBonus
 
 local function GearBonus()
     if GetTime() - gearChecked < 2 then return gearBonus end
@@ -19,8 +36,8 @@ local function GearBonus()
     for slot = 1, GEAR_SLOTS do
         local info = C_TooltipInfo.GetInventoryItem("player", slot)
         for _, line in ipairs(info and info.lines or {}) do
-            local amount = line.leftText and line.leftText:match("[Ff]ishing[^%d%+]*%+(%d+)")
-            if amount then gearBonus = gearBonus + tonumber(amount) end
+            local amount = GearLineBonus(line.leftText)
+            if amount then gearBonus = gearBonus + amount end
         end
     end
     return gearBonus
@@ -28,9 +45,12 @@ end
 
 local buffIsSkill = {} -- spellID -> true/false once the description loads
 
--- True for buffs whose description mentions "fishing skill" (e.g. Well Fed).
+-- True for buffs whose description mentions "fishing skill" (e.g. Well Fed), or that came from
+-- eating one of the fishing foods (Buffs.lua remembers those by spell ID, so they work in any
+-- language; the English text is only the first way in).
 function ns.IsFishingSkillBuff(spellID)
     if not spellID then return false end
+    if ReelDB and ReelDB.fishingBuffs and ReelDB.fishingBuffs[spellID] then return true end
     if buffIsSkill[spellID] == nil then
         local desc = C_Spell and C_Spell.GetSpellDescription and C_Spell.GetSpellDescription(spellID)
         if not desc or desc == "" then
@@ -39,7 +59,7 @@ function ns.IsFishingSkillBuff(spellID)
             end
             return false -- check again next time
         end
-        buffIsSkill[spellID] = desc:lower():find("fishing skill") ~= nil
+        buffIsSkill[spellID] = desc:lower():find("fishing skill", 1, true) ~= nil
     end
     return buffIsSkill[spellID]
 end

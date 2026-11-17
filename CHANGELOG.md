@@ -3,6 +3,7 @@
 ## 1.4.2
 
 - Fixed: on a German, French or other non-English client, events joined with a code from halsudsworth.com now count your catches in the event's zones.
+- On non-English clients: the bar's Zone fish, the Completionist feat and the recipe vendor tips now know which zone you're in, the fishing skill bonus counts gear, and the Food and Camp items find their buffs (each food or camp buff is learned the first time you eat or place it).
 
 ## 1.4.1
 

@@ -63,7 +63,7 @@ end
 local function Where(recipe)
     if not recipe.from then return recipe.how end
     local faction = UnitFactionGroup("player")
-    local zone = GetZoneText()
+    local zone = ns.EnglishZone(GetZoneText()) -- the vendor list is in English
     local continent = CONTINENT[zone]
     local pick, pickRank, count = nil, nil, 0
     for _, vendor in ipairs(recipe.from) do

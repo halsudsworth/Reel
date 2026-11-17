@@ -126,6 +126,30 @@ local function AsList(v)
     return { v }
 end
 
+-- Event codes from halsudsworth.com name zones in English; catches carry the zone in the
+-- client's language. An English name the calendar knows goes through its map ID to this
+-- client's name for the map. Subzones have no IDs, so they stay as they are.
+local englishToMap
+local function LocalZone(name)
+    if type(name) ~= "string" then return name end
+    if not englishToMap then
+        englishToMap = {}
+        local maps = ns.CALENDAR_DATA and ns.CALENDAR_DATA.maps or {}
+        for id, english in pairs(maps) do englishToMap[english:lower()] = id end
+    end
+    local id = englishToMap[name:lower()]
+    if not (id and C_Map and C_Map.GetMapInfo) then return name end
+    local ok, info = pcall(C_Map.GetMapInfo, id)
+    return ok and info and info.name or name
+end
+
+local function LocalZones(list)
+    if not list then return nil end
+    local out = {}
+    for i, name in ipairs(list) do out[i] = LocalZone(name) end
+    return out
+end
+
 -- The event in a string, or nil and why not.
 local function Decode(str)
     str = strtrim(str or "")
@@ -142,8 +166,8 @@ local function Decode(str)
     if type(ev.start) ~= "string" or type(ev["end"]) ~= "string" or type(ev.window) ~= "table" then
         return nil, "That event string is damaged. Copy it again."
     end
-    ev.zone, ev.fish, ev.sub = AsList(ev.zone), AsList(ev.fish), AsList(ev.sub)
-    for _, n in ipairs(ev.needs or {}) do n.zone, n.fish, n.sub, n.notSub = AsList(n.zone), AsList(n.fish), AsList(n.sub), AsList(n.notSub) end
+    ev.zone, ev.fish, ev.sub = LocalZones(AsList(ev.zone)), AsList(ev.fish), AsList(ev.sub)
+    for _, n in ipairs(ev.needs or {}) do n.zone, n.fish, n.sub, n.notSub = LocalZones(AsList(n.zone)), AsList(n.fish), AsList(n.sub), AsList(n.notSub) end
     return ev
 end
 

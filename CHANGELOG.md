@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.2
+
+- Fixed: on a German, French or other non-English client, events joined with a code from halsudsworth.com now count your catches in the event's zones.
+
 ## 1.4.1
 
 - Settings: the R.E.E.L. page in Options now has the presets, your R.E.E.L. key bindings with the key each is bound to, an Open Key Bindings button, Export, and links to the other pages.

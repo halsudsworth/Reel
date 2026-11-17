@@ -1,4 +1,4 @@
-![R.E.E.L.](.github/banner.png)
+![R.E.E.L.](.github/cover.png)
 
 # R.E.E.L.: A Fishing Addon
 

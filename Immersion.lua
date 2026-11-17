@@ -14,6 +14,7 @@
 -- Controls.lua). Camera views are the Key Bindings "Save View N" slots.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
@@ -212,26 +213,26 @@ ns.RegisterPage({
             return cb
         end
 
-        Header("Hide while fishing")
-        Box("Floating names and nameplates", "hideNames")
-        Box("Auto-loot while fishing", "fishingAutoLoot",
-            "Catches go straight to your bags and show on the bar.")
-        Box("Combat text and error messages", "hideCombatText",
-            "Damage numbers and the red \"You can't do that yet\" text. Error text comes back if you enter combat.")
-        Box("Bobber tooltip", "hideBobberTip")
+        Header(L["Hide while fishing"])
+        Box(L["Floating names and nameplates"], "hideNames")
+        Box(L["Auto-loot while fishing"], "fishingAutoLoot",
+            L["Catches go straight to your bags and show on the bar."])
+        Box(L["Combat text and error messages"], "hideCombatText",
+            L["Damage numbers and the red \"You can't do that yet\" text. Error text comes back if you enter combat."])
+        Box(L["Bobber tooltip"], "hideBobberTip")
 
-        Header("Look", -12)
-        Box("Max graphics quality", "maxGraphics",
-            "Water, view distance, ground detail, shadows, particles and lighting go to the highest setting this PC supports, then back to your own.")
-        Box("Fishing camera", "cameraView",
-            string.format("Switches to camera view %d at your first cast and back when you're done. Set up the view once with the button below; it uses Key Bindings > Camera > Save View %d, and view %d holds the camera you had before.", FISHING_VIEW, FISHING_VIEW, RETURN_VIEW))
+        Header(L["Look"], -12)
+        Box(L["Max graphics quality"], "maxGraphics",
+            L["Water, view distance, ground detail, shadows, particles and lighting go to the highest setting this PC supports, then back to your own."])
+        Box(L["Fishing camera"], "cameraView",
+            string.format(L["Switches to camera view %d at your first cast and back when you're done. Set up the view once with the button below; it uses Key Bindings > Camera > Save View %d, and view %d holds the camera you had before."], FISHING_VIEW, FISHING_VIEW, RETURN_VIEW))
 
-        local save = W.Button(panel, "Save current camera as fishing view", 260, function()
+        local save = W.Button(panel, L["Save current camera as fishing view"], 260, function()
             if SaveView then
                 SaveView(FISHING_VIEW)
-                ns.Print(string.format("Camera saved as view %d.", FISHING_VIEW))
+                ns.Print(string.format(L["Camera saved as view %d."], FISHING_VIEW))
             else
-                ns.Print("This client has no camera views.")
+                ns.Print(L["This client has no camera views."])
             end
         end)
         save:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 30, -6)
@@ -240,9 +241,9 @@ ns.RegisterPage({
         spacer:SetPoint("TOPLEFT", save, "BOTTOMLEFT", -30, -4)
         anchor = spacer
 
-        Box("Letterbox bars in Clean View", "letterbox",
-            "Cinematic black strips top and bottom while the interface is faded.")
-        local height = W.Slider(panel, "Bar height", 5, 20, 1, "%",
+        Box(L["Letterbox bars in Clean View"], "letterbox",
+            L["Cinematic black strips top and bottom while the interface is faded."])
+        local height = W.Slider(panel, L["Bar height"], 5, 20, 1, "%",
             function() return s.letterboxHeight end,
             function(v) s.letterboxHeight = v; ns.UpdateLetterbox() end)
         height:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 100, -10)

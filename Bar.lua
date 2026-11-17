@@ -55,6 +55,7 @@
 -- visibility only change out of combat.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
@@ -215,8 +216,8 @@ end
 
 local function Ordinal(n)
     local tens, ones = n % 100, n % 10
-    if tens >= 11 and tens <= 13 then return n .. "th" end
-    return n .. (ones == 1 and "st" or ones == 2 and "nd" or ones == 3 and "rd" or "th")
+    if tens >= 11 and tens <= 13 then return string.format(L["%dth"], n) end
+    return string.format(ones == 1 and L["%dst"] or ones == 2 and L["%dnd"] or ones == 3 and L["%drd"] or L["%dth"], n)
 end
 
 -- The catch -------------------------------------------------------------------
@@ -228,7 +229,7 @@ end
 -- Called by the journal when fishing loot comes in: the first item and how many of it this
 -- character has caught in all (zone and subzone are passed but no longer shown).
 function ns.ShowCatch(itemID, link, count)
-    local name = link and link:match("%[(.-)%]") or ("item " .. itemID)
+    local name = link and link:match("%[(.-)%]") or string.format(L["item %s"], itemID)
     local color = link and link:match("|c(%x%x%x%x%x%x%x%x)") or "ffffffff"
     local GetIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
     catch = {
@@ -806,7 +807,7 @@ local function DrawCatch(L, caught)
     end
     if lureRow then
         local label = lureRow.item.label
-        label:SetText("Caught")
+        label:SetText(ns.L["Caught"]) -- L here is the layout
         if L.mode == "horizontal" then
             -- centred over the cell; it may run into the cell's padding but not past its dividers
             label:ClearAllPoints()
@@ -882,7 +883,7 @@ end
 local wasShown, lastSettings = false, nil
 local forFishing = false -- the bar's up for fishing, not only for the window or Options
 local quiet = false      -- combat started with the bar up only for the window: clicks off, fades
-local LURE_ONLY = { key = "lureButtonOnly", name = "Lure", group = "status", order = 20 }
+local LURE_ONLY = { key = "lureButtonOnly", name = L["Lure"], group = "status", order = 20 }
 -- The bar as the settings preview (up only for the window or Options, unlocked, not fishing):
 -- every checked item shows as if a fishing pole were in hand, so checking a box shows its row.
 -- Lure, Food and Camp show their "None" as plain icons then; the buttons still need a pole.
@@ -916,7 +917,7 @@ local function Collect(s)
         for i, r in ipairs(rows) do
             if GROUP_RANK[r.seg.group or "status"] > 2 or (r.seg.group == "status" and r.seg.order > LURE_ONLY.order) then at = i; break end
         end
-        table.insert(rows, at, { seg = LURE_ONLY, info = { value = "", tip = "Apply lure", button = true }, item = Item(LURE_ONLY) })
+        table.insert(rows, at, { seg = LURE_ONLY, info = { value = "", tip = L["Apply lure"], button = true }, item = Item(LURE_ONLY) })
     end
     return rows, active
 end
@@ -1173,26 +1174,26 @@ ns.RegisterPage({
         scroll:SetScrollChild(panel)
 
         -- Top: Show and Lock on one line, Layout and Size on the next.
-        local shown = W.Checkbox(panel, "Show fishing bar",
+        local shown = W.Checkbox(panel, L["Show fishing bar"],
             function() return s.bar end,
             function(v) s.bar = v; ns.UpdateBar() end)
         shown:SetPoint("TOPLEFT", 0, 0)
-        local locked = W.Checkbox(panel, "Lock bar position",
+        local locked = W.Checkbox(panel, L["Lock bar position"],
             function() return s.barLocked end,
             function(v) s.barLocked = v; ns.UpdateBar() end)
         locked:SetPoint("TOPLEFT", 150, 0)
-        W.Tip(locked, "While unlocked, the bar stays visible with this page or the R.E.E.L. window open so you can drag it into place.")
+        W.Tip(locked, L["While unlocked, the bar stays visible with this page or the R.E.E.L. window open so you can drag it into place."])
 
         local layouts = {
-            { value = "vertical", text = "Vertical" },
-            { value = "horizontal", text = "Horizontal" },
-            { value = "icons", text = "Icons (horizontal)" },
+            { value = "vertical", text = L["Vertical"] },
+            { value = "horizontal", text = L["Horizontal"] },
+            { value = "icons", text = L["Icons (horizontal)"] },
         }
-        if ns.ICONS_COLUMN then layouts[#layouts + 1] = { value = "iconsColumn", text = "Icons (vertical)" } end
-        local layout = W.Dropdown(panel, "Layout", 130, layouts, function() return LayoutMode(s) end,
+        if ns.ICONS_COLUMN then layouts[#layouts + 1] = { value = "iconsColumn", text = L["Icons (vertical)"] } end
+        local layout = W.Dropdown(panel, L["Layout"], 130, layouts, function() return LayoutMode(s) end,
            function(v) s.barLayout = v; ns.UpdateBar() end)
         layout:SetPoint("TOPLEFT", 52, -34)
-        local scale = W.Slider(panel, "Size", 70, 150, 5, "%",
+        local scale = W.Slider(panel, L["Size"], 70, 150, 5, "%",
             function() return s.barScale end,
             function(v)
                 s.barScale = v
@@ -1207,7 +1208,7 @@ ns.RegisterPage({
         local ROW_H, NAME_X, OPT_X, USE_X = 36, 58, 190, 440
         local header = W.Text(panel, 13, W.C.amber2)
         header:SetPoint("TOPLEFT", 0, -78)
-        header:SetText("On the bar")
+        header:SetText(L["On the bar"])
         local y = -98
         local rule = Solid(panel, "ARTWORK", 0, C.rule, 0.15)
         rule:SetPoint("TOPLEFT", 0, y); rule:SetSize(width, 1)

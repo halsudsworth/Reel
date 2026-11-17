@@ -12,10 +12,11 @@
 -- English spell name. A camp buff seen right after placing is remembered by ID.
 
 local _, ns = ...
+local L = ns.L
 
 local COOLDOWN = 3600
 local KNOWN_BUFFS = { [1280341] = true } -- Uncommon Fishing (Fishing Rack)
-local PLACE_SPELLS = { ["Fish Bowl"] = "Bowl", ["Fishing Rack"] = "Rack", ["Fishing Hut"] = "Hut" }
+local PLACE_SPELLS = { ["Fish Bowl"] = L["Bowl"], ["Fishing Rack"] = L["Rack"], ["Fishing Hut"] = L["Hut"] }
 -- The camp items, for their icons on the bar (item IDs from site/data/gear.json "camp").
 local CAMP_ITEMS = { ["Fish Bowl"] = 279967, ["Fishing Rack"] = 279965, ["Fishing Hut"] = 279966 }
 local RACK = 279965 -- the camp whose buff is known (Uncommon Fishing)
@@ -86,8 +87,8 @@ end)
 -- Camp: the camp buff's timer, the camp's cooldown (dim), or a red "None"; the words are in the tooltip.
 ns.RegisterBarSegment({
     key = "camp",
-    label = "Camp buff",
-    name = "Camp",
+    label = L["Camp buff"],
+    name = L["Camp"],
     group = "status",
     order = 30,
     icon = "Interface\\Icons\\INV_FishingChair",
@@ -97,22 +98,22 @@ ns.RegisterBarSegment({
         if name then
             icon = icon or CampIcon(RACK)
             if left then return { value = ns.FormatTime(left), tip = name .. " " .. ns.FormatTime(left), reserve = "88:88", icon = icon }, true end
-            return { value = "on", tip = name, reserve = "88:88", icon = icon }, true
+            return { value = L["on"], tip = name, reserve = "88:88", icon = icon }, true
         end
         local placed, cdLeft = Cooldown()
         if placed then
             local t = ns.FormatTime(cdLeft)
-            return { value = "|cff8a7a63" .. t .. "|r", tip = PLACE_SPELLS[placed] .. " ready in " .. t, missing = true, reserve = "88:88",
+            return { value = "|cff8a7a63" .. t .. "|r", tip = string.format(L["%s ready in %s"], PLACE_SPELLS[placed], t), missing = true, reserve = "88:88",
                 icon = CampIcon(CAMP_ITEMS[placed] or RACK) }, true
         end
         if ns.PoleOrPreview() then
             -- With "No camp buff" turned off, no camp means no row at all.
             if s.campMissing then
-                return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No camp buff", missing = true, reserve = "88:88", icon = CampIcon(RACK) }, true
+                return { value = "|cffff4a3a" .. L["None"] .. "|r", short = "|cffff4a3a" .. L["None"] .. "|r", tip = L["No camp buff"], missing = true, reserve = "88:88", icon = CampIcon(RACK) }, true
             end
         end
     end,
     options = {
-        { key = "campMissing", label = "Show \"None\" when missing" },
+        { key = "campMissing", label = L["Show \"None\" when missing"] },
     },
 })

@@ -2,6 +2,7 @@
 -- minimap edge.
 
 local _, ns = ...
+local L = ns.L
 
 ns.RegisterDefaults({
     minimapButton = true,
@@ -29,17 +30,17 @@ end
 -- on Export, or a moment after the mouse leaves it.
 local menu
 local QUICK = {
-    { text = "Show R.E.E.L. bar", get = function(s) return s.bar end,
+    { text = L["Show R.E.E.L. bar"], get = function(s) return s.bar end,
       set = function(s, v) s.bar = v; ns.UpdateBar() end },
-    { text = "Lock R.E.E.L. bar", get = function(s) return s.barLocked end,
+    { text = L["Lock R.E.E.L. bar"], get = function(s) return s.barLocked end,
       set = function(s, v) s.barLocked = v; ns.UpdateBar() end },
-    { text = "Clean View", get = function(s) return s.cleanView end,
+    { text = L["Clean View"], get = function(s) return s.cleanView end,
       set = function(_, v) ns.SetCleanView(v) end },
-    { text = "Splash booster", get = function(s) return s.boost end,
+    { text = L["Splash booster"], get = function(s) return s.boost end,
       set = function(s, v) s.boost = v; ns.ApplySettings() end },
-    { text = "Events", run = function() ns.ShowEvents() end },
-    { text = "Export journal", run = function() ns.ShowExport() end },
-    { text = "Settings", run = function() ns.OpenOptions() end },
+    { text = L["Events"], run = function() ns.ShowEvents() end },
+    { text = L["Export journal"], run = function() ns.ShowExport() end },
+    { text = L["Settings"], run = function() ns.OpenOptions() end },
 }
 
 local function RefreshMenu()
@@ -140,7 +141,7 @@ local function Build()
     btn:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
         GameTooltip:SetText("R.E.E.L.")
-        GameTooltip:AddLine("Click to open. Right-click for quick settings. Drag to move.", 1, 1, 1)
+        GameTooltip:AddLine(L["Click to open. Right-click for quick settings. Drag to move."], 1, 1, 1)
         GameTooltip:Show()
     end)
     btn:SetScript("OnLeave", function() GameTooltip:Hide() end)

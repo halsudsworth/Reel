@@ -7,6 +7,7 @@
 -- Blizzard. Item IDs are from Wowhead's Forever database.
 
 local _, ns = ...
+local L = ns.L
 local WARN_SECONDS = 30
 
 ns.RegisterDefaults({
@@ -68,7 +69,7 @@ ns.ChosenLure = ChosenLure
 
 -- Choices for the Bar page dropdown.
 function ns.LureOptions()
-    local list = { { value = "best", text = "Best I have" } }
+    local list = { { value = "best", text = L["Best I have"] } }
     for _, lure in ipairs(LURES) do
         list[#list + 1] = { value = lure.id, text = lure.name }
     end
@@ -109,8 +110,8 @@ ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
     button:SetScript("OnEnter", function(self)
         if not buttonLure then return end
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Apply " .. buttonLure.name)
-        GameTooltip:AddLine(string.format("+%d Fishing, %d in bags", buttonLure.bonus, GetItemCountCompat(buttonLure.id)), 1, 1, 1)
+        GameTooltip:SetText(string.format(L["Apply %s"], buttonLure.name))
+        GameTooltip:AddLine(string.format(L["+%d Fishing, %d in bags"], buttonLure.bonus, GetItemCountCompat(buttonLure.id)), 1, 1, 1)
         GameTooltip:Show()
     end)
     button:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -128,14 +129,14 @@ ns.On("PLAYER_REGEN_ENABLED", UpdateButton)
 -- button beside it; with none, the lure's icon greyed. The lure button sits in this row
 -- (Icons: it is the row's icon).
 ns.RegisterBarSegment({
-    key = "lure", label = "Lure timer", name = "Lure", group = "status", order = 20,
+    key = "lure", label = L["Lure timer"], name = L["Lure"], group = "status", order = 20,
     -- The button works without the timer (it gets a Lure cell of its own), so it stays clickable
     -- with the row off; its Use menu needs the button.
     options = {
-        { key = "lureButton", label = "Apply-lure button", always = true,
+        { key = "lureButton", label = L["Apply-lure button"], always = true,
           changed = function() UpdateButton() end },
-        { key = "lureChoice", label = "Use", choices = function() return ns.LureOptions() end, needs = "lureButton",
-          note = "A picked lure falls back to your best one when you run out.",
+        { key = "lureChoice", label = L["Use"], choices = function() return ns.LureOptions() end, needs = "lureButton",
+          note = L["A picked lure falls back to your best one when you run out."],
           changed = function() UpdateButton() end },
     },
     icon = function() return buttonLure and GetItemIconCompat(buttonLure.id) or "Interface\\Icons\\INV_Misc_Gem_Variety_02" end,
@@ -144,17 +145,17 @@ ns.RegisterBarSegment({
         local button = buttonLure ~= nil
         if left then
             local t = ns.FormatTime(left)
-            local tip = "Lure " .. t
+            local tip = string.format(L["Lure %s"], t)
             if left <= WARN_SECONDS then t = "|cffff4a3a" .. t .. " !!|r" end
             return { value = t, tip = tip, button = button, reserve = "88:88 !!" }, true
         end
         if ns.PoleOrPreview() then
             if button and ns.PoleEquipped() then
-                return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No lure - click the icon to add one", button = true, reserve = "88:88 !!" }, true
+                return { value = "|cffff4a3a" .. L["None"] .. "|r", short = "|cffff4a3a" .. L["None"] .. "|r", tip = L["No lure - click the icon to add one"], button = true, reserve = "88:88 !!" }, true
             end
             -- None to put on: the lure's icon greyed with a red "None", the same as Food.
-            local tip = s.lureButton and "No lure (none in bags)" or "No lure"
-            return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = tip, missing = true, icon = MissingLureIcon(), reserve = "88:88 !!" }, true
+            local tip = s.lureButton and L["No lure (none in bags)"] or L["No lure"]
+            return { value = "|cffff4a3a" .. L["None"] .. "|r", short = "|cffff4a3a" .. L["None"] .. "|r", tip = tip, missing = true, icon = MissingLureIcon(), reserve = "88:88 !!" }, true
         end
     end,
 })

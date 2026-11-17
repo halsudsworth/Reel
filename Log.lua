@@ -19,6 +19,7 @@
 -- Times are the server's clock (ns.Now).
 
 local _, ns = ...
+local L = ns.L
 
 local JOIN_SECONDS = 600
 
@@ -264,36 +265,36 @@ end
 -- the number turns amber while a catch is showing.
 ns.RegisterBarSegment({
     key = "session",
-    label = "Fish this session",
-    name = "Session",
+    label = L["Fish this session"],
+    name = L["Session"],
     group = "session",
     order = 40,
     icon = "Interface\\Icons\\INV_Misc_1H_Bucket_B_01",
     text = function()
         local color = ns.BarCatchShowing() and "ffffd27a" or "ffefe3cc"
         local n = "|c" .. color .. ns.session.fish .. "|r"
-        local value, tip = n .. " fish", ns.session.fish .. " fish this session"
+        local value, tip = string.format(L["%s fish"], n), string.format(L["%s fish this session"], ns.session.fish)
         if ns.HasLuremaster() then
             value = value .. string.format(" |cff4fd13a(+%d)|r", ns.LuremasterCount())
-            tip = tip .. string.format(" (+%d bonus)", ns.LuremasterCount())
+            tip = tip .. string.format(L[" (+%d bonus)"], ns.LuremasterCount())
         end
-        return { value = value, short = n, tip = tip, reserve = "888 fish", reserveShort = "888" }
+        return { value = value, short = n, tip = tip, reserve = string.format(L["%s fish"], "888"), reserveShort = "888" }
     end,
 })
 
 -- "38 catches an hour" this session. Off until turned on on the Bar page.
 ns.RegisterBarSegment({
     key = "catchRate",
-    label = "Catches per hour",
-    name = "Pace",
+    label = L["Catches per hour"],
+    name = L["Pace"],
     group = "session",
     order = 41,
     defaultOff = true,
     icon = "Interface\\Icons\\INV_Misc_PocketWatch_02",
     text = function()
         local _, perHour = ns.SessionPace(ns.session)
-        if not perHour then return { value = "-", short = "-", tip = "Catches an hour: after the first catch", reserve = "888 an hour", reserveShort = "888/h" } end
+        if not perHour then return { value = "-", short = "-", tip = L["Catches an hour: after the first catch"], reserve = string.format(L["%s an hour"], "888"), reserveShort = string.format(L["%s/h"], "888") } end
         local n = math.floor(perHour + 0.5)
-        return { value = n .. " an hour", short = n .. "/h", tip = n .. " catches an hour", reserve = "888 an hour", reserveShort = "888/h" }
+        return { value = string.format(L["%s an hour"], n), short = string.format(L["%s/h"], n), tip = string.format(L["%s catches an hour"], n), reserve = string.format(L["%s an hour"], "888"), reserveShort = string.format(L["%s/h"], "888") }
     end,
 })

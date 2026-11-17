@@ -15,6 +15,7 @@
 -- Settings pages (no place) live in the game's Options > AddOns (Options.lua); the gear opens them.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 local C = W.C
 
@@ -114,7 +115,7 @@ local function BuildWindow()
     local barLine = W.Solid(bar, "BORDER", C.amber, 0.35)
     barLine:SetPoint("BOTTOMLEFT"); barLine:SetPoint("BOTTOMRIGHT"); barLine:SetHeight(1)
     local x = 12
-    for _, place in ipairs({ { "journal", "Journal" }, { "events", "Events" } }) do
+    for _, place in ipairs({ { "journal", L["Journal"] }, { "events", L["Events"] } }) do
         local tab = W.OakTab(bar, place[2], 13, 26, function() Select(PlacePage(place[1])) end)
         tab:SetPoint("BOTTOMLEFT", x, 1)
         x = x + tab:GetWidth() + 4
@@ -132,7 +133,7 @@ local function BuildWindow()
     gear.cog = cog
     gear:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Settings")
+        GameTooltip:SetText(L["Settings"])
         GameTooltip:Show()
     end)
     gear:SetScript("OnLeave", function() GameTooltip:Hide() end)

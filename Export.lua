@@ -3,6 +3,7 @@
 -- addon's repository is the contract. Times are the server's clock (ns.Now).
 
 local _, ns = ...
+local L = ns.L
 
 local PREFIX = "!REEL1!"
 
@@ -222,9 +223,9 @@ local function BuildBox()
 
     local title = box:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     title:SetPoint("TOP", 0, -5)
-    title:SetText("Your journal")
+    title:SetText(L["Your journal"])
 
-    local how = ns.W.Label(box, "Ctrl+C to copy, then paste it at halsudsworth.com/paste", "GameFontHighlight")
+    local how = ns.W.Label(box, L["Ctrl+C to copy, then paste it at halsudsworth.com/paste"], "GameFontHighlight")
     how:SetPoint("TOPLEFT", 16, -36)
 
     text = CreateFrame("EditBox", nil, box, "InputBoxTemplate")
@@ -246,7 +247,7 @@ function ns.ShowExport()
     local ok, value, count = pcall(ns.ExportString)
     if not ok then
         geterrorhandler()(value)
-        ns.Print("The journal couldn't be exported.")
+        ns.Print(L["The journal couldn't be exported."])
         return
     end
     if not box then BuildBox() end
@@ -254,6 +255,6 @@ function ns.ShowExport()
     text:SetText(value)
     text:HighlightText()
     text:SetFocus()
-    info:SetText(string.format("%d catches, %d KB", count, math.ceil(#value / 1024)))
+    info:SetText(string.format(L["%d catches, %d KB"], count, math.ceil(#value / 1024)))
     box:Show()
 end

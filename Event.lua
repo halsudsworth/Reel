@@ -9,6 +9,7 @@
 -- show progress; the site's score is the one that counts.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 local PREFIX = "!REELEV1!"
@@ -139,18 +140,18 @@ end
 -- The event in a string, or nil and why not.
 local function Decode(str)
     str = strtrim(str or "")
-    if str:sub(1, #PREFIX) ~= PREFIX then return nil, "That isn't an event string. It starts with " .. PREFIX .. "." end
+    if str:sub(1, #PREFIX) ~= PREFIX then return nil, string.format(L["That isn't an event string. It starts with %s."], PREFIX) end
     local json = Unbase64(str:sub(#PREFIX + 1))
     local ev = json and ParseJSON(json)
-    if type(ev) ~= "table" or ev.v ~= 1 then return nil, "That event string is damaged. Copy it again." end
+    if type(ev) ~= "table" or ev.v ~= 1 then return nil, L["That event string is damaged. Copy it again."] end
     if type(ev.id) ~= "string" or type(ev.name) ~= "string" or not SCORINGS[ev.scoring] then
-        return nil, "This version of R.E.E.L. can't count that event."
+        return nil, L["This version of R.E.E.L. can't count that event."]
     end
     if ev.scoring == "best" and not (tonumber(ev.minutes) and ev.minutes >= 1) then
-        return nil, "That event string is damaged. Copy it again."
+        return nil, L["That event string is damaged. Copy it again."]
     end
     if type(ev.start) ~= "string" or type(ev["end"]) ~= "string" or type(ev.window) ~= "table" then
-        return nil, "That event string is damaged. Copy it again."
+        return nil, L["That event string is damaged. Copy it again."]
     end
     -- Spots: area IDs in subId/notSubId (sub/notSub keep English names for older versions).
     ev.zone, ev.fish, ev.sub = LocalZones(AsList(ev.zone)), AsList(ev.fish), AsList(ev.subId or ev.sub)
@@ -305,9 +306,9 @@ local function Progress(ev, offset)
             end
             local have = n.distinct and kinds or count
             if have >= n.n then done = done + 1 end
-            details[#details + 1] = { text = string.format("%s: %d/%d", n.label or ("Line " .. i), math.min(have, n.n), n.n), done = have >= n.n }
+            details[#details + 1] = { text = string.format("%s: %d/%d", n.label or string.format(L["Line %d"], i), math.min(have, n.n), n.n), done = have >= n.n }
         end
-        return string.format("%d of %d done", done, #(ev.needs or {})), details, done
+        return string.format(L["%d of %d done"], done, #(ev.needs or {})), details, done
     end
     if s == "variety" and ev.variety then
         local zs, fs, nz, nf = {}, {}, 0, 0
@@ -317,7 +318,7 @@ local function Progress(ev, offset)
                 if not fs[e.c[6]] then fs[e.c[6]] = true; nf = nf + 1 end
             end
         end
-        return string.format("%d of %d fish, %d of %d zones", math.min(nf, ev.variety.fish), ev.variety.fish, math.min(nz, ev.variety.zones), ev.variety.zones)
+        return string.format(L["%d of %d fish, %d of %d zones"], math.min(nf, ev.variety.fish), ev.variety.fish, math.min(nz, ev.variety.zones), ev.variety.zones)
     end
     local total, times = 0, {}
     for _, e in ipairs(inside) do
@@ -338,13 +339,13 @@ local function Progress(ev, offset)
             if now - times[i] > minutes * 60 then break end
             recent = recent + 1
         end
-        local bestText = string.format("Best %d min: %d fish", minutes, best)
-        return bestText, { { text = bestText }, { text = string.format("Last %d min: %d fish", minutes, recent) } }, best
+        local bestText = string.format(L["Best %d min: %d fish"], minutes, best)
+        return bestText, { { text = bestText }, { text = string.format(L["Last %d min: %d fish"], minutes, recent) } }, best
     end
     if (s == "race" or s == "target") and ev.target then
-        return string.format("%d of %d fish", math.min(total, ev.target), ev.target), nil, total
+        return string.format(L["%d of %d fish"], math.min(total, ev.target), ev.target), nil, total
     end
-    return string.format("%d fish", total), nil, total
+    return string.format(L["%d fish"], total), nil, total
 end
 
 -- Joined events ------------------------------------------------------------------------
@@ -389,12 +390,12 @@ local function Join(str)
         if not old or old.id == ev.id then table.remove(list, i) end
     end
     if #list >= MAX_EVENTS then
-        ns.Print(string.format("You're in %d events already. Leave one first.", MAX_EVENTS))
+        ns.Print(string.format(L["You're in %d events already. Leave one first."], MAX_EVENTS))
         return false
     end
     list[#list + 1] = str
     decoded[str] = ev
-    ns.Print(string.format("Joined %s (%s to %s, server time). Your journal paste is scored for it.", ev.name, ev.start, ev["end"]))
+    ns.Print(string.format(L["Joined %s (%s to %s, server time). Your journal paste is scored for it."], ev.name, ev.start, ev["end"]))
     ns.UpdateBar()
     return true
 end
@@ -404,7 +405,7 @@ local function Leave(index)
     local ev = list[index] and Event(list[index])
     table.remove(list, index)
     if ev then Untracked()[ev.id] = nil end
-    if ev then ns.Print("Left " .. ev.name .. ".") end
+    if ev then ns.Print(string.format(L["Left %s."], ev.name)) end
     ns.UpdateBar()
 end
 
@@ -458,8 +459,8 @@ local function TrackerBlocks()
             else
                 rows[1] = { text = text }
             end
-            local left = ns.FormatTime(TimeLeft(ev, offset)) .. " left"
-            if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then left = left .. ", opens " .. ev.window.from end
+            local left = string.format(L["%s left"], ns.FormatTime(TimeLeft(ev, offset)))
+            if ev.window.kind ~= "days" and not InWindow(ev, ns.Now(), offset) then left = string.format(L["%s, opens %s"], left, ev.window.from) end
             rows[#rows + 1] = { text = left, dim = true }
             blocks[#blocks + 1] = { name = ev.name, rows = rows }
         end
@@ -472,7 +473,7 @@ function ns.UpdateTracker()
     local s = ReelDB.settings
     local blocks = s.tracker and TrackerBlocks() or {}
     if #blocks == 0 then tracker:Hide(); return end
-    title:SetText((s.trackerCollapsed and "+ " or "- ") .. "Fishing events (" .. #blocks .. ")")
+    title:SetText((s.trackerCollapsed and "+ " or "- ") .. string.format(L["Fishing events (%d)"], #blocks))
     local n, y = 0, -18
     if not s.trackerCollapsed then
         for _, b in ipairs(blocks) do
@@ -545,13 +546,13 @@ local input, RefreshRows
 local function Status(str, ev)
     local offset = ServerOffset()
     local today = Today(offset)
-    if today < ev.start then return "starts " .. ev.start end
-    if today > ev["end"] then return "ended " .. ev["end"] end
-    return CachedProgress(str, ev, offset) .. " · " .. ns.FormatTime(TimeLeft(ev, offset)) .. " left"
+    if today < ev.start then return string.format(L["starts %s"], ev.start) end
+    if today > ev["end"] then return string.format(L["ended %s"], ev["end"]) end
+    return CachedProgress(str, ev, offset) .. " · " .. string.format(L["%s left"], ns.FormatTime(TimeLeft(ev, offset)))
 end
 local GetItemIconCompat = C_Item and C_Item.GetItemIconByID or GetItemIcon
-local MONTHS = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-local DAYS = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" }
+local MONTHS = { L["January"], L["February"], L["March"], L["April"], L["May"], L["June"], L["July"], L["August"], L["September"], L["October"], L["November"], L["December"] }
+local DAYS = { L["Sunday"], L["Monday"], L["Tuesday"], L["Wednesday"], L["Thursday"], L["Friday"], L["Saturday"] }
 
 local function Parts(d)
     local y, m, day = d:match("(%d+)-(%d+)-(%d+)")
@@ -566,7 +567,7 @@ local function LongDay(d) local _, _, _, w = Parts(d); return DAYS[w] .. " " .. 
 
 local function Span(ev, Day)
     if ev.start == ev["end"] then return Day(ev.start) end
-    return Day(ev.start) .. " to " .. Day(ev["end"])
+    return string.format(L["%s to %s"], Day(ev.start), Day(ev["end"]))
 end
 
 -- A zone's name: the client's own (in its language) where it knows the map, else the calendar's.
@@ -581,7 +582,7 @@ local function ZoneList(zones)
     local names = {}
     for i, id in ipairs(zones) do names[i] = ZoneName(id) end
     if #names == 1 then return names[1] end
-    return table.concat(names, ", ", 1, #names - 1) .. " or " .. names[#names]
+    return string.format(L["%s or %s"], table.concat(names, ", ", 1, #names - 1), names[#names])
 end
 
 local function IsJoined(id)
@@ -707,7 +708,7 @@ local function FillRunning(card, ev)
     card.badge:SetTexture(ev.art and (W.TEX .. "badge-" .. ev.art) or nil)
     card.badge:SetShown(ev.art ~= nil)
     card.name:SetText(ev.name)
-    card.when:SetText(Span(ev, MonthDay) .. (IsJoined(ev.id) and "  ·  joined" or ""))
+    card.when:SetText(Span(ev, MonthDay) .. (IsJoined(ev.id) and ("  ·  " .. L["joined"]) or ""))
     card.rule:SetText(ev.note or "")
     local y = -(ART_H + 1 - 22)
     card.name:ClearAllPoints(); card.name:SetPoint("TOPLEFT", 12, y)
@@ -733,7 +734,8 @@ local function FillRunning(card, ev)
     card.chip:SetShown(text ~= nil)
     if text then
         local done, total = text:match("^(%d+) of (%d+) done$")
-        if quest and done and done == total then text = "Done, " .. done .. " of " .. total end
+        -- matches the English "%d of %d done" above; a translation of that line needs this pattern too
+        if quest and done and done == total then text = string.format(L["Done, %s of %s"], done, total) end
         card.chip.text:SetText(text)
         card.chip:SetSize(math.ceil(card.chip.text:GetStringWidth()) + 16, 18)
         card.chip:ClearAllPoints(); card.chip:SetPoint("TOPLEFT", 12, y - 6)
@@ -773,23 +775,23 @@ local function FillChallenge(row, ev, today)
     local daily = ev.kind == "daily"
     local fish = ev.fish and ev.fish[1]
     row.icon:SetTexture(fish and GetItemIconCompat(fish) or "Interface\\Icons\\Trade_Fishing")
-    row.kind:SetText((daily and "Today" or (ev["end"] == today and "This week, ends tonight" or "This week")):upper())
+    row.kind:SetText((daily and L["Today"] or (ev["end"] == today and L["This week, ends tonight"] or L["This week"])):upper())
     row.name:SetText(ev.name)
     local where = ZoneList(ev.zone)
     if daily then
-        row.where:SetText(where or "Anywhere")
+        row.where:SetText(where or L["Anywhere"])
     else
-        row.where:SetText(Span(ev, LongDay) .. ", " .. (where or "anywhere"))
+        row.where:SetText(Span(ev, LongDay) .. ", " .. (where or L["anywhere"]))
     end
     row.where:ClearAllPoints(); row.where:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
     local _, _, n = Progress(Countable(ev), ServerOffset())
     row.big:SetText(n or 0)
     if ev.scoring == "best30" then
-        row.caption:SetText("best 30 min")
+        row.caption:SetText(L["best 30 min"])
     elseif ev.scoring == "race" and ev.target then
-        row.caption:SetText("of " .. ev.target)
+        row.caption:SetText(string.format(L["of %s"], ev.target))
     else
-        row.caption:SetText(daily and "today" or "this week")
+        row.caption:SetText(daily and L["today"] or L["this week"])
     end
     row:SetHeight(math.max(48, 8 + 12 + math.ceil(row.name:GetStringHeight()) + 4 + math.ceil(row.where:GetStringHeight()) + 9))
 end
@@ -838,9 +840,9 @@ local function JoinedRow(parent, i)
     row.label:SetPoint("TOPLEFT")
     row.label:SetWidth(RIGHT_W - 24)
     row.label:SetWordWrap(true)
-    row.leave = W.OakButton(row, "Leave", function() Leave(i); RefreshRows(); ns.UpdateTracker() end, 20, 10.5)
+    row.leave = W.OakButton(row, L["Leave"], function() Leave(i); RefreshRows(); ns.UpdateTracker() end, 20, 10.5)
     -- Untracked events stay joined and in the export, off the event tracker.
-    row.track = W.OakButton(row, "Untrack", function()
+    row.track = W.OakButton(row, L["Untrack"], function()
         local ev = Joined()[i] and Event(Joined()[i])
         if not ev then return end
         local u = Untracked()
@@ -910,7 +912,7 @@ local function Layout()
         if ev then
             local off = Untracked()[ev.id]
             row.label:SetText((off and "|cff8f8577" or "|cffffffff") .. ev.name .. "|r")
-            row.track.text:SetText(off and "Track" or "Untrack")
+            row.track.text:SetText(off and L["Track"] or L["Untrack"])
             row.status:SetText(Status(list[i], ev))
             local nameH = math.ceil(row.label:GetStringHeight())
             row.leave:ClearAllPoints(); row.leave:SetPoint("TOPRIGHT", 0, -nameH - 3)
@@ -984,7 +986,7 @@ ns.RegisterPage({
         medal:SetPoint("BOTTOMLEFT", ns.MEDAL_X, ns.MEDAL_Y)
         local title = W.Text(banner, 22, "ffffff")
         title:SetPoint("BOTTOMLEFT", ns.BANNER_TITLE_X, ns.BANNER_TITLE_Y)
-        title:SetText("Events")
+        title:SetText(L["Events"])
         p.sub = W.Text(banner, 10.5, C.ink2)
         p.sub:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
 
@@ -996,12 +998,12 @@ ns.RegisterPage({
         footBg:SetAllPoints()
         local footLine = W.Solid(foot, "BORDER", C.amber, 0.22)
         footLine:SetPoint("TOPLEFT"); footLine:SetPoint("TOPRIGHT"); footLine:SetHeight(1)
-        p.export = W.OakButton(foot, "Export", function() ns.ShowExport() end)
+        p.export = W.OakButton(foot, L["Export"], function() ns.ShowExport() end)
         p.export:SetPoint("LEFT", 14, 0)
         local hint = W.Text(foot, 10.5, C.dim)
         hint:SetPoint("RIGHT", -14, 0)
         hint:SetJustifyH("RIGHT")
-        hint:SetText("Paste it on |cffcdb894halsudsworth.com|r to be scored")
+        hint:SetText(L["Paste it on |cffcdb894halsudsworth.com|r to be scored"])
 
         -- left column: Hal's calendar
         local left, leftChild = Column(panel, LEFT_W)
@@ -1009,13 +1011,13 @@ ns.RegisterPage({
         left:SetPoint("BOTTOMLEFT", foot, "TOPLEFT", 14, 10)
         p.leftChild = leftChild
         p.runningHead = Section(leftChild, LEFT_W)
-        p.runningHead:Set("Running now", "Hal's calendar")
+        p.runningHead:Set(L["Running now"], L["Hal's calendar"])
         p.running = {}
         for i = 1, 4 do p.running[i] = RunningCard(leftChild) end
         p.nothing = W.Text(leftChild, 10.5, C.dim)
-        p.nothing:SetText("Nothing of Hal's is running today.")
+        p.nothing:SetText(L["Nothing of Hal's is running today."])
         p.chalHead = Section(leftChild, LEFT_W)
-        p.chalHead:Set("Challenges", "From the calendar")
+        p.chalHead:Set(L["Challenges"], L["From the calendar"])
         p.challenges = { ChallengeRow(leftChild), ChallengeRow(leftChild) }
 
         -- right column: join an event, what's joined, what's coming up
@@ -1024,17 +1026,17 @@ ns.RegisterPage({
         right:SetPoint("BOTTOMRIGHT", foot, "TOPRIGHT", -36, 10)
         p.rightChild = rightChild
         p.joinHead = Section(rightChild, RIGHT_W)
-        p.joinHead:Set("Join an event")
+        p.joinHead:Set(L["Join an event"])
         p.joinBox = Box(rightChild, C.card, 0.14)
         p.joinBox:SetWidth(RIGHT_W)
         p.how = W.Text(p.joinBox, 10.5, C.ink2)
         p.how:SetWidth(RIGHT_W - 24)
         p.how:SetWordWrap(true)
-        p.how:SetText("On an event's or tournament's page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events show in the event tracker while they run (drag its title to move it, click it to fold it), and your journal paste is scored for them.")
+        p.how:SetText(L["On an event's or tournament's page at halsudsworth.com, click Copy event code, paste it here (Ctrl+V) and click Join. Joined events show in the event tracker while they run (drag its title to move it, click it to fold it), and your journal paste is scored for them."])
         local function Submit()
             if Join(input:GetText()) then input:SetText(""); input:ClearFocus(); RefreshRows(); ns.UpdateTracker() end
         end
-        p.join = W.OakButton(p.joinBox, "Join", Submit, 22)
+        p.join = W.OakButton(p.joinBox, L["Join"], Submit, 22)
         p.inputBox = Box(p.joinBox, "070504", 0.25)
         p.inputBox:SetSize(RIGHT_W - 24 - p.join:GetWidth() - 8, 22)
         input = CreateFrame("EditBox", nil, p.inputBox)
@@ -1049,13 +1051,13 @@ ns.RegisterPage({
         p.joinedRule = W.Solid(p.joinBox, "BORDER", C.rule, 0.075)
         p.joinedRule:SetHeight(1)
         p.joinedHead = W.Text(p.joinBox, 11.5, C.ink)
-        p.joinedHead:SetText("Joined")
+        p.joinedHead:SetText(L["Joined"])
         p.none = W.Text(p.joinBox, 10.5, C.dim)
-        p.none:SetText("None yet.")
+        p.none:SetText(L["None yet."])
         p.joined = {}
         for i = 1, MAX_EVENTS do p.joined[i] = JoinedRow(p.joinBox, i) end
         p.comingHead = Section(rightChild, RIGHT_W)
-        p.comingHead:Set("Coming up")
+        p.comingHead:Set(L["Coming up"])
         p.coming = { ComingCard(rightChild), ComingCard(rightChild) }
 
         return function()

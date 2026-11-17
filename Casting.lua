@@ -5,6 +5,7 @@
 -- player's own mouse-up then "clicks" it, and the binding is cleared after.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
@@ -15,11 +16,11 @@ ns.RegisterDefaults({
 })
 
 local MOUSE_BUTTONS = {
-    { value = "RightButton", text = "Right button", key = "BUTTON2" },
-    { value = "LeftButton", text = "Left button", key = "BUTTON1" },
-    { value = "MiddleButton", text = "Middle button", key = "BUTTON3" },
-    { value = "Button4", text = "Mouse button 4", key = "BUTTON4" },
-    { value = "Button5", text = "Mouse button 5", key = "BUTTON5" },
+    { value = "RightButton", text = L["Right button"], key = "BUTTON2" },
+    { value = "LeftButton", text = L["Left button"], key = "BUTTON1" },
+    { value = "MiddleButton", text = L["Middle button"], key = "BUTTON3" },
+    { value = "Button4", text = L["Mouse button 4"], key = "BUTTON4" },
+    { value = "Button5", text = L["Mouse button 5"], key = "BUTTON5" },
 }
 
 local WEAPON_CLASS, FISHING_POLE_SUBCLASS = 2, 20
@@ -96,30 +97,30 @@ ns.RegisterPage({
             speed:SetActive(s.doubleClick)
         end
 
-        doubleClick = W.Checkbox(panel, "Double-click to cast",
+        doubleClick = W.Checkbox(panel, L["Double-click to cast"],
             function() return s.doubleClick end,
             function(v) s.doubleClick = v; Refresh() end)
         doubleClick:SetPoint("TOPLEFT")
 
-        local note = W.Note(panel, "Double-click anywhere in the world to cast Fishing. Doesn't work in combat or when your cursor is over a character.", ns.CONTENT_WIDTH - 30)
+        local note = W.Note(panel, L["Double-click anywhere in the world to cast Fishing. Doesn't work in combat or when your cursor is over a character."], ns.CONTENT_WIDTH - 30)
         note:SetPoint("TOPLEFT", doubleClick, "BOTTOMLEFT", 26, 0)
 
-        mouseButton = W.Dropdown(panel, "Mouse button", 140, MOUSE_BUTTONS,
+        mouseButton = W.Dropdown(panel, L["Mouse button"], 140, MOUSE_BUTTONS,
             function() return s.castMouseButton end,
             function(v) s.castMouseButton = v; lastClick = 0 end)
         mouseButton:SetPoint("TOPLEFT", doubleClick, "BOTTOMLEFT", 90, -40)
 
-        needPole = W.Checkbox(panel, "Only with a fishing pole equipped",
+        needPole = W.Checkbox(panel, L["Only with a fishing pole equipped"],
             function() return s.needPole end,
             function(v) s.needPole = v; Refresh() end)
         needPole:SetPoint("TOPLEFT", doubleClick, "BOTTOMLEFT", 0, -72)
 
-        speed = W.Slider(panel, "Click speed", 200, 600, 50, "ms",
+        speed = W.Slider(panel, L["Click speed"], 200, 600, 50, "ms",
             function() return s.clickSpeed end,
             function(v) s.clickSpeed = v end)
         speed:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", 90, -14)
 
-        local speedNote = W.Note(panel, "Longest gap allowed between the two clicks.", ns.CONTENT_WIDTH - 4)
+        local speedNote = W.Note(panel, L["Longest gap allowed between the two clicks."], ns.CONTENT_WIDTH - 4)
         speedNote:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", 0, -40)
 
         local oneKeyLure = ns.BuildOneKeyOptions(panel, speedNote)

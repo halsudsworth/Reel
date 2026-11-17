@@ -8,6 +8,7 @@
 -- under Key Bindings > AddOns > Eat fishing food. Never eats on its own.
 
 local _, ns = ...
+local L = ns.L
 
 ns.RegisterDefaults({
     foodMissing = true, -- show "No food" on the bar
@@ -26,7 +27,7 @@ local FOODS = {
 }
 ns.FISHING_FOODS = FOODS
 
-_G["BINDING_NAME_CLICK ReelFoodKeyButton:LeftButton"] = "Eat fishing food"
+_G["BINDING_NAME_CLICK ReelFoodKeyButton:LeftButton"] = L["Eat fishing food"]
 
 local GetItemIconCompat = C_Item and C_Item.GetItemIconByID or GetItemIcon
 local GetItemCountCompat = C_Item and C_Item.GetItemCount or GetItemCount
@@ -59,7 +60,7 @@ ns.ChosenFood = ChosenFood
 
 -- Choices for the Bar page's "Use" menu.
 function ns.FoodOptions()
-    local list = { { value = "best", text = "Best I have" } }
+    local list = { { value = "best", text = L["Best I have"] } }
     for _, food in ipairs(FOODS) do
         list[#list + 1] = { value = food.id, text = food.name }
     end
@@ -174,8 +175,8 @@ ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
     button:SetScript("OnEnter", function(self)
         if not buttonFood then return end
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Eat " .. buttonFood.name)
-        GameTooltip:AddLine(string.format("+%d Fishing, %d in bags", buttonFood.bonus, GetItemCountCompat(buttonFood.id)), 1, 1, 1)
+        GameTooltip:SetText(string.format(L["Eat %s"], buttonFood.name))
+        GameTooltip:AddLine(string.format(L["+%d Fishing, %d in bags"], buttonFood.bonus, GetItemCountCompat(buttonFood.id)), 1, 1, 1)
         GameTooltip:Show()
     end)
     button:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -198,8 +199,8 @@ ns.On("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateBu
 -- With no buff and food in bags, the food button sits in this row.
 ns.RegisterBarSegment({
     key = "buffs",
-    label = "Food buff",
-    name = "Food",
+    label = L["Food buff"],
+    name = L["Food"],
     group = "status",
     order = 25,
     icon = function() return buttonFood and GetItemIconCompat(buttonFood.id) or "Interface\\Icons\\INV_Misc_Food_47" end,
@@ -207,7 +208,7 @@ ns.RegisterBarSegment({
         local tips, first, icon = {}, nil, nil
         for _, aura in ipairs(FishingBuffs()) do
             local exp = aura.expirationTime
-            local t = (exp and exp > 0) and ns.FormatTime(exp - GetTime()) or "on"
+            local t = (exp and exp > 0) and ns.FormatTime(exp - GetTime()) or L["on"]
             first = first or t
             icon = icon or aura.icon
             tips[#tips + 1] = (exp and exp > 0) and (aura.name .. " " .. t) or aura.name
@@ -218,22 +219,22 @@ ns.RegisterBarSegment({
         end
         if ns.PoleOrPreview() then
             if buttonFood then
-                local tip = "No food: click to eat " .. buttonFood.name
+                local tip = string.format(L["No food: click to eat %s"], buttonFood.name)
                 if s.foodMissing then
-                    return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = tip, button = "food", reserve = "88:88" }, true
+                    return { value = "|cffff4a3a" .. L["None"] .. "|r", short = "|cffff4a3a" .. L["None"] .. "|r", tip = tip, button = "food", reserve = "88:88" }, true
                 end
                 return { value = "", short = "", tip = tip, button = "food", reserve = "88:88" }, true
             end
             -- With "No food" turned off, no buff means no row at all.
             if s.foodMissing then
-                return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No food", missing = true, reserve = "88:88", icon = FOOD_ICON }, true
+                return { value = "|cffff4a3a" .. L["None"] .. "|r", short = "|cffff4a3a" .. L["None"] .. "|r", tip = L["No food"], missing = true, reserve = "88:88", icon = FOOD_ICON }, true
             end
         end
     end,
     options = {
-        { key = "foodMissing", label = "Show \"None\" when missing" },
-        { key = "foodChoice", label = "Use", choices = function() return ns.FoodOptions() end,
-          note = "A picked food falls back to your best one when you run out.",
+        { key = "foodMissing", label = L["Show \"None\" when missing"] },
+        { key = "foodChoice", label = L["Use"], choices = function() return ns.FoodOptions() end,
+          note = L["A picked food falls back to your best one when you run out."],
           changed = function() UpdateButton() end },
     },
 })

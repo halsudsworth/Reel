@@ -9,6 +9,7 @@
 -- A chat line after login lists who answered; /reel guild lists everyone seen.
 
 local _, ns = ...
+local L = ns.L
 
 local PREFIX = "REEL"
 local HELLO_DELAY = 10  -- seconds after login, so the guild roster has loaded
@@ -74,7 +75,7 @@ ns.On("PLAYER_ENTERING_WORLD", function()
         if not IsInGuild() then return end
         Send("HELLO", "GUILD")
         C_Timer.After(REPORT_DELAY, function()
-            if #answered > 0 then ns.Print("R.E.E.L. in guild: " .. Names(answered)) end
+            if #answered > 0 then ns.Print(string.format(L["R.E.E.L. in guild: %s"], Names(answered))) end
         end)
     end)
 end)
@@ -84,11 +85,11 @@ function ns.PrintGuild()
     local seen = ReelDB.guildSeen or {}
     local list = {}
     for name, entry in pairs(seen) do
-        list[#list + 1] = string.format("%s (%s, %s ago)", name, entry.v or "?", ns.FormatTime(ns.Now() - (entry.t or 0)))
+        list[#list + 1] = string.format(L["%s (%s, %s ago)"], name, entry.v or "?", ns.FormatTime(ns.Now() - (entry.t or 0)))
     end
     if #list == 0 then
-        ns.Print("No guild members with R.E.E.L. heard from yet.")
+        ns.Print(L["No guild members with R.E.E.L. heard from yet."])
     else
-        ns.Print("Guild members with R.E.E.L.: " .. Names(list))
+        ns.Print(string.format(L["Guild members with R.E.E.L.: %s"], Names(list)))
     end
 end

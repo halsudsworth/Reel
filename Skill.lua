@@ -9,6 +9,7 @@
 --   remembered from eating a fishing food.
 
 local _, ns = ...
+local L = ns.L
 
 local GEAR_SLOTS = 19
 local gearBonus, gearChecked = 0, 0
@@ -111,7 +112,7 @@ local function ChannelTimes()
 end
 
 ns.RegisterBarSegment({
-    key = "skill", label = "Fishing skill", name = "Fishing", group = "skill", order = 10,
+    key = "skill", label = L["Fishing skill"], name = L["Fishing"], group = "skill", order = 10,
     icon = "Interface\\Icons\\Trade_Fishing",
     text = function(s)
         local rank, bonus, maxRank = ns.FishingSkill()
@@ -119,11 +120,11 @@ ns.RegisterBarSegment({
             -- A character who hasn't learned fishing gets no skill item.
             local ok, _, _, _, fishing = pcall(GetProfessions)
             if ok and not fishing then return end
-            return { value = "?", tip = "Fishing ?" }
+            return { value = "?", tip = L["Fishing ?"] }
         end
         local t = tostring(rank)
         if maxRank and maxRank > 0 then t = t .. "/" .. maxRank end
-        local plain = "Fishing " .. t .. (bonus > 0 and (" +" .. bonus) or "")
+        local plain = string.format(L["Fishing %s"], t) .. (bonus > 0 and (" +" .. bonus) or "")
         if bonus > 0 then t = t .. string.format(" |cff4fd13a+%d|r", bonus) end
         local info = { value = t, tip = plain, progress = maxRank and maxRank > 0 and rank / maxRank or nil }
         -- Cast countdown: while the bobber is out the skill line runs down over the cast's real length.
@@ -134,6 +135,6 @@ ns.RegisterBarSegment({
         return info
     end,
     options = {
-        { key = "castCountdown", label = "Cast countdown" },
+        { key = "castCountdown", label = L["Cast countdown"] },
     },
 })

@@ -13,6 +13,7 @@
 -- A picker in the window's title bar chooses a character with catch data, or all of them.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 local C = W.C
 
@@ -142,7 +143,7 @@ local function ScopeOptions()
         if key ~= me and HasCatches(d) then others[#others + 1] = key end
     end
     table.sort(others)
-    local list = { { value = "all", text = "All characters" }, { value = me, text = me } }
+    local list = { { value = "all", text = L["All characters"] }, { value = me, text = me } }
     for _, key in ipairs(others) do
         list[#list + 1] = { value = key, text = key }
     end
@@ -207,7 +208,7 @@ end
 local function FoundIn(fish)
     local best, others = fish.best, 0
     if type(best) == "table" then best = best[UnitFactionGroup("player")] end
-    if not best then return "Location unknown" end
+    if not best then return L["Location unknown"] end
     for _, zone in ipairs(fish.zones) do
         if zone ~= best then others = others + 1 end
     end
@@ -232,8 +233,9 @@ local function ItemRows(rows, items, indent)
     end
 end
 
+-- one and many are format strings with the count's %d ("%d kind", "%d kinds").
 local function Plural(n, one, many)
-    return n .. " " .. (n == 1 and one or many)
+    return string.format(n == 1 and one or many, n)
 end
 
 -- Table ----------------------------------------------------------------------------------------
@@ -443,7 +445,7 @@ local function CreateTable(parent, columns, onSort)
     end
 
     function t.SetRows(rows)
-        if #rows == 0 then rows = { { cells = { nil, "|cff8a7a63Nothing caught yet.|r" } } } end
+        if #rows == 0 then rows = { { cells = { nil, "|cff8a7a63" .. L["Nothing caught yet."] .. "|r" } } } end
         local y = 0
         for i, data in ipairs(rows) do
             local row = Row(i)
@@ -488,17 +490,17 @@ local fishSelected -- the fish (item ID) whose First/Last line is open
 
 local fishTab = {
     key = "fish",
-    name = "Fish",
+    name = L["Fish"],
     banner = "banner-fish",
     medal = "medal-fish",
     sortKey = "count",
     descending = true,
     columns = {
         { width = 22, kind = "icon" },
-        { title = "Fish", sort = "name" },
-        { title = "Caught", width = 150, align = "RIGHT", sort = "count", kind = "bar" },
-        { title = "Zone", width = 160 },
-        { title = "Value", width = 76, align = "RIGHT", sort = "value" },
+        { title = L["Fish"], sort = "name" },
+        { title = L["Caught"], width = 150, align = "RIGHT", sort = "count", kind = "bar" },
+        { title = L["Zone"], width = 160 },
+        { title = L["Value"], width = 76, align = "RIGHT", sort = "value" },
     },
 }
 
@@ -514,7 +516,7 @@ end
 function fishTab.Summary(view)
     local total, kinds = 0, 0
     for _, f in pairs(view.fish) do total, kinds = total + f.count, kinds + 1 end
-    return total .. " caught, " .. Plural(kinds, "kind", "kinds")
+    return string.format(L["%d caught, %s"], total, Plural(kinds, L["%d kind"], L["%d kinds"]))
 end
 
 function fishTab.Rows(view)
@@ -548,7 +550,7 @@ function fishTab.Rows(view)
             onClick = function() fishSelected = not open and id or nil; Refresh() end,
         }
         if open then
-            rows[#rows + 1] = { kind = "detail", text = "First  |cffefe3cc" .. ShortDate(f.first) .. "|r          Last  |cffefe3cc" .. ShortDate(f.last) .. "|r          " .. (f.firstZone or "") }
+            rows[#rows + 1] = { kind = "detail", text = L["First"] .. "  |cffefe3cc" .. ShortDate(f.first) .. "|r          " .. L["Last"] .. "  |cffefe3cc" .. ShortDate(f.last) .. "|r          " .. (f.firstZone or "") }
         end
     end
 
@@ -560,7 +562,7 @@ function fishTab.Rows(view)
         end
         table.sort(missing, function(a, b) return a.fish.name < b.fish.name end)
         if #missing > 0 then
-            rows[#rows + 1] = { cells = { nil, "Not caught yet  |cff8a7a63" .. #missing .. "|r" }, heading = true }
+            rows[#rows + 1] = { cells = { nil, L["Not caught yet"] .. "  |cff8a7a63" .. #missing .. "|r" }, heading = true }
         end
         for _, m in ipairs(missing) do
             rows[#rows + 1] = {
@@ -576,15 +578,15 @@ end
 local zonesOpen = {} -- zone, or zone .. "\t" .. sub -> true
 local zonesTab = {
     key = "zones",
-    name = "Zones",
+    name = L["Zones"],
     banner = "banner-zones",
     medal = "medal-zones",
     columns = {
         { width = 14, kind = "toggle" },
-        { title = "Zone" },
-        { title = "Casts", width = 56, align = "RIGHT" },
-        { title = "Catches", width = 60, align = "RIGHT" },
-        { title = "Top catch", width = 210, kind = "item" },
+        { title = L["Zone"] },
+        { title = L["Casts"], width = 56, align = "RIGHT" },
+        { title = L["Catches"], width = 60, align = "RIGHT" },
+        { title = L["Top catch"], width = 210, kind = "item" },
     },
 }
 
@@ -626,7 +628,7 @@ end
 function zonesTab.Summary(view)
     local zones, casts, catches = 0, 0, 0
     for _, z in ipairs(ZoneList(view)) do zones, casts, catches = zones + 1, casts + z.casts, catches + z.catches end
-    return Plural(zones, "zone", "zones") .. ", " .. Plural(casts, "cast", "casts") .. ", " .. Plural(catches, "catch", "catches")
+    return Plural(zones, L["%d zone"], L["%d zones"]) .. ", " .. Plural(casts, L["%d cast"], L["%d casts"]) .. ", " .. Plural(catches, L["%d catch"], L["%d catches"])
 end
 
 function zonesTab.Rows(view)
@@ -658,19 +660,19 @@ end
 local sessionsOpen = {} -- session table -> true
 local sessionsTab = {
     key = "sessions",
-    name = "Sessions",
+    name = L["Sessions"],
     banner = "banner-sessions",
     medal = "medal-sessions",
     columns = {
         { width = 14, kind = "toggle" },
-        { title = "Started", width = 98 },
-        { title = "Length", width = 52, align = "RIGHT" },
-        { title = "Zone" },
-        { title = "Fish", width = 34, align = "RIGHT" },
-        { title = "Bonus", width = 40, align = "RIGHT" },
-        { title = "Per hr", width = 42, align = "RIGHT" },
-        { title = "Each", width = 40, align = "RIGHT" },
-        { title = "Value/hr", width = 62, align = "RIGHT" },
+        { title = L["Started"], width = 98 },
+        { title = L["Length"], width = 52, align = "RIGHT" },
+        { title = L["Zone"] },
+        { title = L["Fish"], width = 34, align = "RIGHT" },
+        { title = L["Bonus"], width = 40, align = "RIGHT" },
+        { title = L["Per hr"], width = 42, align = "RIGHT" },
+        { title = L["Each"], width = 40, align = "RIGHT" },
+        { title = L["Value/hr"], width = 62, align = "RIGHT" },
     },
 }
 
@@ -707,7 +709,7 @@ end
 function sessionsTab.Summary(view)
     local days, sessions = SessionDays(view), 0
     for _, day in ipairs(days) do sessions = sessions + #day.sessions end
-    return Plural(sessions, "session", "sessions") .. " in " .. Plural(#days, "day", "days")
+    return string.format(L["%s in %s"], Plural(sessions, L["%d session"], L["%d sessions"]), Plural(#days, L["%d day"], L["%d days"]))
 end
 
 function sessionsTab.Rows(view)
@@ -719,7 +721,7 @@ function sessionsTab.Rows(view)
         }
         for _, s in ipairs(day.sessions) do
             local started = ClockTime(s.start)
-            if s == ns.session then started = started .. "  |cff40ff40now|r" end
+            if s == ns.session then started = started .. "  |cff40ff40" .. L["now"] .. "|r" end
             local length = s.first and s.last and s.last > s.first and ns.FormatTime(s.last - s.first) or "-"
             local perHour, each, value = PaceCells(s)
             local open = sessionsOpen[s] and true or false
@@ -739,7 +741,7 @@ end
 
 local recordsTab = {
     key = "records",
-    name = "Records",
+    name = L["Records"],
     banner = "banner-records",
     medal = "hal",
 }
@@ -774,7 +776,7 @@ local function BuildRecords(frame)
     for _, section in ipairs(ns.NOTABLE) do sections[#sections + 1] = section end
     local rare = { group = "Rare fish", items = {} }
     for _, fish in ipairs(ns.RARE_FISH) do
-        rare.items[#rare.items + 1] = { id = fish.id, name = ns.FISH[fish.id] and ns.FISH[fish.id].name or ("item " .. fish.id), note = fish.note }
+        rare.items[#rare.items + 1] = { id = fish.id, name = ns.FISH[fish.id] and ns.FISH[fish.id].name or string.format(L["item %s"], fish.id), note = fish.note }
     end
     sections[#sections + 1] = rare
     local y = -2
@@ -782,7 +784,7 @@ local function BuildRecords(frame)
         local tray = { section = section }
         tray.name = W.Text(left, 11.5, C.ink)
         tray.name:SetPoint("TOPLEFT", 0, y)
-        tray.name:SetText(section.group)
+        tray.name:SetText(L[section.group]) -- FishData's groups are listed in Locale.lua
         tray.count = W.Text(left, 9.5, C.dim)
         tray.count:SetPoint("TOPRIGHT", left, "TOPLEFT", trayW, y - 1)
         tray.count:SetJustifyH("RIGHT")
@@ -850,7 +852,7 @@ local function BuildRecords(frame)
     side:SetPoint("TOPRIGHT", 0, 0)
     side:SetSize(SIDE, 1)
     r.side = side
-    local derby = Card(side, "Derby")
+    local derby = Card(side, L["Derby"])
     derby:SetPoint("TOPLEFT"); derby:SetSize(SIDE, 56)
     derby.icon = derby:CreateTexture(nil, "ARTWORK")
     derby.icon:SetSize(30, 30)
@@ -863,7 +865,7 @@ local function BuildRecords(frame)
     derby.big:SetJustifyH("RIGHT")
     r.derby = derby
 
-    local feats = Card(side, "Feats")
+    local feats = Card(side, L["Feats"])
     feats:SetPoint("TOPLEFT", derby, "BOTTOMLEFT", 0, -8)
     feats:SetSize(SIDE, 24 + 3 * 40)
     r.feats = {}
@@ -890,7 +892,7 @@ local function BuildRecords(frame)
         r.feats[i] = f
     end
 
-    local records = Card(side, "Records")
+    local records = Card(side, L["Records"])
     records:SetPoint("TOPLEFT", feats, "BOTTOMLEFT", 0, -8)
     -- each record: its label, then the value across the card's full width under it, then when
     -- and where; the totals are short enough to sit beside their labels
@@ -941,7 +943,7 @@ function recordsTab.Draw(view)
             firstAny = firstAny or s.item.id
             for _, line in ipairs(s.ring) do line:SetShown(recordsPick == s.item.id) end
         end
-        tray.count:SetText(have .. " of " .. #tray.slots)
+        tray.count:SetText(string.format(L["%d of %d"], have, #tray.slots))
     end
     -- the chosen find (the first one caught until one is clicked)
     local id = recordsPick or firstCaught or firstAny
@@ -955,7 +957,7 @@ function recordsTab.Draw(view)
         r.pick.icon:SetTexture(IconOf(id))
         r.pick.icon:SetDesaturated(not f)
         r.pick.name:SetText(f and f.link or ("|cff8f8577" .. item.name .. "|r"))
-        r.pick.meta:SetText(f and ("|cffffd27a" .. f.count .. "|r  ·  " .. item.note .. (f.firstZone and ("  ·  " .. f.firstZone) or "")) or ("Not caught yet  ·  " .. item.note))
+        r.pick.meta:SetText(f and ("|cffffd27a" .. f.count .. "|r  ·  " .. item.note .. (f.firstZone and ("  ·  " .. f.firstZone) or "")) or (L["Not caught yet"] .. "  ·  " .. item.note))
     end
 
     -- the derby fish and how many of it
@@ -995,19 +997,19 @@ function recordsTab.Draw(view)
         f.name:SetText(name)
         f.need:SetText(need)
         if done then
-            f.value:SetText("|cff4fd13aDone|r")
+            f.value:SetText("|cff4fd13a" .. L["Done"] .. "|r")
         elseif target then
             f.value:SetText(have .. "/" .. target)
         else
-            f.value:SetText("|cff8a7a63Not yet|r")
+            f.value:SetText("|cff8a7a63" .. L["Not yet"] .. "|r")
         end
         f.track:SetShown(target ~= nil)
         f.fill:SetShown(target ~= nil and have > 0)
         if target then f.fill:SetWidth(math.max(1, (f.track:GetWidth()) * math.min(1, have / target))) end
     end
-    Feat(r.feats[1], "Well travelled", "Fish in ten zones", math.min(zonesFished, 10), 10, zonesFished >= 10)
-    Feat(r.feats[2], "Long evening", "100 catches in one session", math.min(bestSession, 100), 100, bestSession >= 100)
-    Feat(r.feats[3], "Completionist", #complete > 0 and ("Every fish in " .. table.concat(complete, ", ")) or "Catch every fish listed for a zone", nil, nil, #complete > 0)
+    Feat(r.feats[1], L["Well travelled"], L["Fish in ten zones"], math.min(zonesFished, 10), 10, zonesFished >= 10)
+    Feat(r.feats[2], L["Long evening"], L["100 catches in one session"], math.min(bestSession, 100), 100, bestSession >= 100)
+    Feat(r.feats[3], L["Completionist"], #complete > 0 and string.format(L["Every fish in %s"], table.concat(complete, ", ")) or L["Catch every fish listed for a zone"], nil, nil, #complete > 0)
 
     -- the records
     local casts, catches = 0, 0
@@ -1022,20 +1024,20 @@ function recordsTab.Draw(view)
     for _, s in ipairs(view.sessions) do
         if s.fish > 0 and (not best or s.fish > best.fish) then best = s end
     end
-    lines[1] = { "Best session", best and (best.fish .. " fish") or "-", best and When(best.start, SessionZone(best)) }
+    lines[1] = { L["Best session"], best and string.format(L["%s fish"], best.fish) or "-", best and When(best.start, SessionZone(best)) }
     local stack = view.records.stack
-    lines[2] = { "Biggest stack", stack and (stack.qty .. "x " .. stack.link) or "-", stack and When(stack.time, stack.zone) }
+    lines[2] = { L["Biggest stack"], stack and (stack.qty .. "x " .. stack.link) or "-", stack and When(stack.time, stack.zone) }
     local rarest
     for _, f in pairs(view.fish) do
         local q, rq = f.quality or 0, rarest and (rarest.quality or 0)
         if not rarest or q > rq or (q == rq and f.count < rarest.count) then rarest = f end
     end
-    lines[3] = { "Rarest catch", rarest and rarest.link or "-", rarest and When(rarest.first, rarest.firstZone) }
-    lines[4] = { "Total casts", casts }
-    lines[5] = { "Total catches", string.format("%d (%s of casts)", catches, Rate(catches, casts)) }
+    lines[3] = { L["Rarest catch"], rarest and rarest.link or "-", rarest and When(rarest.first, rarest.firstZone) }
+    lines[4] = { L["Total casts"], casts }
+    lines[5] = { L["Total catches"], string.format(L["%d (%s of casts)"], catches, Rate(catches, casts)) }
     local scope = Scope()
     local earned, spent, held = ns.DerbyCoins(scope == "all" and ReelDB.chars or { ReelDB.chars[scope] })
-    lines[6] = { "Derby coins", string.format("%d earned, %d spent, %d held", earned, spent, held) }
+    lines[6] = { L["Derby coins"], string.format(L["%d earned, %d spent, %d held"], earned, spent, held) }
     for i, line in ipairs(r.records) do
         line.label:SetText(lines[i][1])
         -- item names without the link's brackets, so they fit the card
@@ -1112,13 +1114,13 @@ ns.RegisterPage({
         footBg:SetAllPoints()
         local footLine = W.Solid(foot, "BORDER", C.amber, 0.22)
         footLine:SetPoint("TOPLEFT"); footLine:SetPoint("TOPRIGHT"); footLine:SetHeight(1)
-        local export = W.OakButton(foot, "Export", function() ns.ShowExport() end)
+        local export = W.OakButton(foot, L["Export"], function() ns.ShowExport() end)
         export:SetPoint("LEFT", 14, 0)
         panel.export = export
         local hint = W.Text(foot, 10.5, C.dim)
         hint:SetPoint("RIGHT", -14, 0)
         hint:SetJustifyH("RIGHT")
-        hint:SetText("Paste it on |cffcdb894halsudsworth.com|r")
+        hint:SetText(L["Paste it on |cffcdb894halsudsworth.com|r"])
 
         -- each tab's table (Records: its trays and cards)
         for _, tab in ipairs(TABS) do
@@ -1133,10 +1135,10 @@ ns.RegisterPage({
             end
         end
 
-        newSession = W.OakButton(panel, "Start new session", function() ns.StartSession() end)
+        newSession = W.OakButton(panel, L["Start new session"], function() ns.StartSession() end)
         newSession:SetPoint("TOPLEFT", strip, "BOTTOMLEFT", 14, -7)
 
-        uncaught = W.OakCheck(panel, "Show fish I haven't caught yet",
+        uncaught = W.OakCheck(panel, L["Show fish I haven't caught yet"],
             function() return ReelDB.settings.statsUncaught end,
             function(v) ReelDB.settings.statsUncaught = v; Refresh() end)
         uncaught:SetPoint("TOPLEFT", strip, "BOTTOMLEFT", 14, -11)
@@ -1175,8 +1177,8 @@ end)
 -- at the right end of the bar's foot. With a pole only.
 ns.RegisterBarSegment({
     key = "zoneFish",
-    label = "Fish in this zone",
-    name = "Zone fish",
+    label = L["Fish in this zone"],
+    name = L["Zone fish"],
     group = "session",
     order = 45,
     icon = "Interface\\Icons\\INV_Misc_Spyglass_01",
@@ -1195,6 +1197,6 @@ ns.RegisterBarSegment({
         if total == 0 then return end
         local t = string.format("%d/%d", have, total)
         local value = have == total and ("|cff4fd13a" .. t .. "|r") or t
-        return { value = value, tip = "Zone fish " .. t, pips = { have, total } }
+        return { value = value, tip = string.format(L["Zone fish %s"], t), pips = { have, total } }
     end,
 })

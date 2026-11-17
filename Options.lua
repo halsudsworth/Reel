@@ -7,6 +7,7 @@
 --   ns.OpenOptions([name])   opens R.E.E.L. in Options, or one of its pages by name
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 local C = W.C
 
@@ -15,6 +16,7 @@ local CANVAS_W, CANVAS_H = 665, 600
 local PAD, GAP, HEAD = 16, 20, 54
 
 local PAGES = {}
+-- Page names are keys (ns.PageNamed, ns.OpenOptions); they are shown through L[def.name].
 for _, name in ipairs({ "Bar", "Casting", "Clean View", "General", "Immersion", "Sound" }) do
     PAGES[#PAGES + 1] = { name = name, columns = { { page = name } } }
 end
@@ -122,7 +124,7 @@ local function OpenKeyBindings()
     if Settings and Settings.KEYBINDINGS_CATEGORY_ID then
         Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID, ADDONS)
     else
-        ns.Print("This client has no Key Bindings page to open.")
+        ns.Print(L["This client has no Key Bindings page to open."])
     end
 end
 
@@ -137,7 +139,7 @@ local function BuildLanding(frame)
     plate:SetPoint("TOPLEFT", PAD, -14)
 
     -- Presets
-    Heading(frame, "Presets", -58)
+    Heading(frame, L["Presets"], -58)
     frame.presets = {}
     for i, preset in ipairs(ns.PRESETS) do
         local y = -76 - (i - 1) * 26
@@ -151,7 +153,7 @@ local function BuildLanding(frame)
     presetNote:SetPoint("TOPLEFT", PAD, -156)
 
     -- Key bindings: name on the left, its key in a cap on the right, two columns
-    Heading(frame, "Key bindings", -178)
+    Heading(frame, L["Key bindings"], -178)
     frame.caps = {}
     local colW = (CANVAS_W - 2 * PAD - 30) / 2
     for i, command in ipairs(BINDINGS) do
@@ -174,21 +176,21 @@ local function BuildLanding(frame)
         rule:SetSize(colW, 1)
         frame.caps[i] = cap
     end
-    local openKeys = W.Button(frame, "Open Key Bindings", 150, OpenKeyBindings)
+    local openKeys = W.Button(frame, L["Open Key Bindings"], 150, OpenKeyBindings)
     openKeys:SetPoint("TOPLEFT", PAD + 2, -280)
     frame.openKeys = openKeys
 
     -- Your journal: the R.E.E.L. window's Export, here too
-    Heading(frame, "Your journal", -314)
-    local export = W.OakButton(frame, "Export", function() ns.ShowExport() end)
+    Heading(frame, L["Your journal"], -314)
+    local export = W.OakButton(frame, L["Export"], function() ns.ShowExport() end)
     export:SetPoint("TOPLEFT", PAD, -334)
     frame.export = export
     local hint = W.Text(frame, 10.5, C.dim)
     hint:SetPoint("LEFT", export, "RIGHT", 12, 0)
-    hint:SetText("Paste it on |cffcdb894halsudsworth.com|r")
+    hint:SetText(L["Paste it on |cffcdb894halsudsworth.com|r"])
 
     -- About
-    Heading(frame, "About", -368)
+    Heading(frame, L["About"], -368)
     local about = W.Note(frame, ns.AboutLine(), CANVAS_W - 2 * PAD)
     about:SetPoint("TOPLEFT", PAD, -386)
     frame.about = about
@@ -196,13 +198,13 @@ local function BuildLanding(frame)
     -- The pages, as a row of links
     local label = W.Text(frame, 10.5, C.dim)
     label:SetPoint("TOPLEFT", PAD, -428)
-    label:SetText("Pages:")
+    label:SetText(L["Pages:"])
     local anchor, anchorPoint, gap = label, "RIGHT", 8
     for _, def in ipairs(PAGES) do
         local link = CreateFrame("Button", nil, frame)
         local fs = W.Text(link, 11, C.ink2)
         fs:SetPoint("LEFT")
-        fs:SetText(def.name)
+        fs:SetText(L[def.name])
         link:SetSize(math.ceil(fs:GetStringWidth()) + 2, 16)
         link:SetPoint("LEFT", anchor, anchorPoint, gap, 0)
         link:SetScript("OnEnter", function() fs:SetTextColor(W.Hex(C.amber2)) end)
@@ -224,7 +226,7 @@ local function RefreshCaps()
             cap.text:SetText(GetBindingText and GetBindingText(key) or key)
             cap.text:SetTextColor(W.Hex(C.ink))
         else
-            cap.text:SetText("Not bound")
+            cap.text:SetText(L["Not bound"])
             cap.text:SetTextColor(W.Hex(C.dim))
         end
         cap:SetWidth(math.max(22, math.ceil(cap.text:GetStringWidth()) + 12))
@@ -240,7 +242,7 @@ local function Register()
     rootFrame:SetScript("OnShow", RefreshCaps)
     root = Settings.RegisterCanvasLayoutCategory(rootFrame, "R.E.E.L.")
     for _, def in ipairs(PAGES) do
-        def.frame = PageFrame(def.name)
+        def.frame = PageFrame(L[def.name])
         def.frame:SetScript("OnShow", function()
             if not def.refresh then BuildPage(def) end
             for _, refresh in ipairs(def.refresh) do if refresh then refresh() end end
@@ -254,7 +256,7 @@ local function Register()
             shownCount = math.max(0, shownCount - 1)
             ns.UpdateBar()
         end)
-        def.category = Settings.RegisterCanvasLayoutSubcategory(root, def.frame, def.name)
+        def.category = Settings.RegisterCanvasLayoutSubcategory(root, def.frame, L[def.name])
     end
     BuildLanding(rootFrame)
     Settings.RegisterAddOnCategory(root)
@@ -266,7 +268,7 @@ ns.OptionsLanding = function() return rootFrame end -- for the load test
 function ns.OpenOptions(name)
     Register()
     if not root then
-        ns.Print("This client has no Options > AddOns to open.")
+        ns.Print(L["This client has no Options > AddOns to open."])
         return
     end
     local category = root

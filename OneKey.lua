@@ -10,16 +10,17 @@
 -- bobber in and cast again at once, never applying a lure.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
     oneKeyLure = true, -- the Fish key applies a lure first when the pole has none
 })
 
-_G["BINDING_NAME_CLICK ReelFishButton:LeftButton"] = "Fish (lure, cast, reel in)"
-_G["BINDING_NAME_CLICK ReelRecastButton:LeftButton"] = "Quick recast (no lure)"
-_G["BINDING_NAME_CLICK ReelLureKeyButton:LeftButton"] = "Apply lure"
-BINDING_NAME_REEL_TOGGLE_WINDOW = "Toggle the R.E.E.L. window"
+_G["BINDING_NAME_CLICK ReelFishButton:LeftButton"] = L["Fish (lure, cast, reel in)"]
+_G["BINDING_NAME_CLICK ReelRecastButton:LeftButton"] = L["Quick recast (no lure)"]
+_G["BINDING_NAME_CLICK ReelLureKeyButton:LeftButton"] = L["Apply lure"]
+BINDING_NAME_REEL_TOGGLE_WINDOW = L["Toggle the R.E.E.L. window"]
 
 function ReelToggleWindow()
     ns.ToggleWindow()
@@ -94,14 +95,14 @@ end)
 -- reel in at once. A bite takes seconds, so wait for the key to come up.
 -- Reeling in uses the game's soft interact, which is gamepad-only (SoftTargetInteract 1)
 -- until the player turns on Enable Interact Key; the client won't let an addon change it.
-local INTERACT_PATH = "Options > Gameplay > Controls"
+local INTERACT_PATH = L["Options > Gameplay > Controls"]
 local warnedInteract = false
 local function CheckInteractKey()
     if warnedInteract or not GetBindingKey(FISH_BINDING) then return end
     local value = tonumber((C_CVar and C_CVar.GetCVar or GetCVar)("SoftTargetInteract"))
     if value and value < 2 then
         warnedInteract = true
-        ns.Print("To reel in with the Fish key, turn on Enable Interact Key in " .. INTERACT_PATH .. ".")
+        ns.Print(string.format(L["To reel in with the Fish key, turn on Enable Interact Key in %s."], INTERACT_PATH))
     end
 end
 
@@ -129,13 +130,13 @@ end)
 
 function ns.BuildOneKeyOptions(panel, anchor)
     local s = ReelDB.settings
-    local header = W.Label(panel, "One key", "GameFontNormal")
+    local header = W.Label(panel, L["One key"], "GameFontNormal")
     header:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -16)
-    local lure = W.Checkbox(panel, "Apply a lure first when the pole has none",
+    local lure = W.Checkbox(panel, L["Apply a lure first when the pole has none"],
         function() return s.oneKeyLure end,
         function(v) s.oneKeyLure = v; UpdateMacro() end)
     lure:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
-    local note = W.Note(panel, "Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in " .. INTERACT_PATH .. "). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too.", ns.CONTENT_WIDTH - 4)
+    local note = W.Note(panel, string.format(L["Bind the key under Options > Keybindings > AddOns > Fish. It applies a lure, casts, and while the bobber is out it reels in (it uses the game's interact action, so turn on Enable Interact Key in %s). Quick recast pulls the bobber in and casts again at once, without a lure. Apply lure and Toggle window can be bound there too."], INTERACT_PATH), ns.CONTENT_WIDTH - 4)
     note:SetPoint("TOPLEFT", lure, "BOTTOMLEFT", 0, -2)
     return lure
 end

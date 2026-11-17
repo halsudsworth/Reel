@@ -12,6 +12,7 @@
 
 # Framework
 Core.lua
+Locale.lua
 Widgets.lua
 Window.lua
 Minimap.lua

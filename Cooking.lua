@@ -3,6 +3,7 @@
 -- where to get it. Recipe data is in FishData.lua.
 
 local _, ns = ...
+local L = ns.L
 
 ns.RegisterDefaults({
     cookingTips = true,
@@ -74,9 +75,9 @@ local function Where(recipe)
             if not pick or rank < pickRank then pick, pickRank = vendor, rank end
         end
     end
-    if not pick then return "Vendor" end
+    if not pick then return L["Vendor"] end
     local text = pick[1] .. ", " .. pick[2]
-    if count > 1 then text = text .. string.format(" (+%d more)", count - 1) end
+    if count > 1 then text = text .. string.format(L[" (+%d more)"], count - 1) end
     return text
 end
 
@@ -87,10 +88,10 @@ local function AddLines(tooltip, id)
     tooltip:AddLine(" ")
     for _, recipe in ipairs(recipes) do
         if Known(recipe.spell) then
-            tooltip:AddLine(GOLD .. "Cooking:|r " .. recipe.name .. " " .. GREEN .. "(known)|r")
+            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. recipe.name .. " " .. GREEN .. L["(known)"] .. "|r")
         else
-            tooltip:AddLine(GOLD .. "Cooking:|r " .. recipe.name .. GREY .. " (skill " .. recipe.cooking .. ")|r")
-            tooltip:AddLine("   Recipe: " .. Where(recipe), 1, 1, 1)
+            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. recipe.name .. GREY .. string.format(L[" (skill %s)"], recipe.cooking) .. "|r")
+            tooltip:AddLine("   " .. string.format(L["Recipe: %s"], Where(recipe)), 1, 1, 1)
         end
     end
     tooltip:Show()

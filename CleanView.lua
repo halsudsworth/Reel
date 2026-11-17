@@ -9,6 +9,7 @@
 -- behind everything else and follow the fade.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
@@ -183,7 +184,7 @@ local function BuildExitButton()
     local s = ReelDB.settings
     local b = CreateFrame("Button", "ReelCleanExitButton", UIParent, "UIPanelButtonTemplate")
     b:SetSize(90, 22)
-    b:SetText("Show UI")
+    b:SetText(L["Show UI"])
     b:SetFrameStrata("HIGH")
     b:SetIgnoreParentAlpha(true)
     b:SetMovable(true)
@@ -210,8 +211,8 @@ local function BuildExitButton()
     end)
     b:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Leave clean view")
-        GameTooltip:AddLine("Drag to move.", 1, 1, 1)
+        GameTooltip:SetText(L["Leave clean view"])
+        GameTooltip:AddLine(L["Drag to move."], 1, 1, 1)
         GameTooltip:Show()
     end)
     b:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -228,7 +229,7 @@ function ReelToggleCleanView()
 end
 
 BINDING_HEADER_REEL = "R.E.E.L."
-BINDING_NAME_REEL_TOGGLE_CLEAN_VIEW = "Toggle clean view"
+BINDING_NAME_REEL_TOGGLE_CLEAN_VIEW = L["Toggle clean view"]
 
 -- Enter ----------------------------------------------------------------------
 
@@ -322,7 +323,7 @@ ns.RegisterPage({
             UpdateExitButton()
         end)
 
-        local enable = W.Checkbox(panel, "Enable clean view",
+        local enable = W.Checkbox(panel, L["Enable clean view"],
             function() return s.cleanView end,
             function(v)
                 s.cleanView = v
@@ -334,16 +335,16 @@ ns.RegisterPage({
         enable:SetPoint("TOPLEFT")
         controls[#controls + 1] = enable
 
-        local note = W.Note(panel, "Fades out your interface while you fish. Entering combat always brings it back instantly.", ns.CONTENT_WIDTH - 30)
+        local note = W.Note(panel, L["Fades out your interface while you fish. Entering combat always brings it back instantly."], ns.CONTENT_WIDTH - 30)
         note:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", 26, 0)
 
-        local start = W.Dropdown(panel, "Start on", 150, {
-            { value = "cast", text = "My first cast" },
-            { value = "pole", text = "Equipping my pole" },
+        local start = W.Dropdown(panel, L["Start on"], 150, {
+            { value = "cast", text = L["My first cast"] },
+            { value = "pole", text = L["Equipping my pole"] },
         }, function() return s.cleanStart end, function(v) s.cleanStart = v end)
         start:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", 70, -34)
 
-        local fade = W.Slider(panel, "Fade time", 0, 3, 0.5, "s",
+        local fade = W.Slider(panel, L["Fade time"], 0, 3, 0.5, "s",
             function() return s.cleanFade end,
             function(v) s.cleanFade = v end)
         fade:SetPoint("TOPLEFT", start, "BOTTOMLEFT", 0, -14)
@@ -369,29 +370,29 @@ ns.RegisterPage({
         end
 
         anchor = enable
-        Header("Bring my UI back when", -100)
-        local combat = W.Label(panel, "I enter combat (always on)", "GameFontDisable")
+        Header(L["Bring my UI back when"], -100)
+        local combat = W.Label(panel, L["I enter combat (always on)"], "GameFontDisable")
         combat:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 30, -6)
         local spacer = CreateFrame("Frame", nil, panel)
         spacer:SetSize(1, 1)
         spacer:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -16)
         anchor = spacer
-        Box("I unequip my pole", "cleanExitPole")
-        Box("I stop fishing for a bit (General > Done fishing after)", "cleanExitIdle")
-        Box("I start moving", "cleanExitMove")
+        Box(L["I unequip my pole"], "cleanExitPole")
+        Box(L["I stop fishing for a bit (General > Done fishing after)"], "cleanExitIdle")
+        Box(L["I start moving"], "cleanExitMove")
 
-        local keyNote = W.Note(panel, "The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > Reel > Toggle clean view also works.", ns.CONTENT_WIDTH - 4)
+        local keyNote = W.Note(panel, L["The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > Reel > Toggle clean view also works."], ns.CONTENT_WIDTH - 4)
         keyNote:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -2)
         anchor = keyNote
 
-        Header("Keep visible in clean view", -10)
-        Box("R.E.E.L. bar", "keepBar")
-        Box("Event tracker", "keepTracker")
-        Box("Loot window", "keepLoot")
-        Box("Chat", "keepChat")
-        Box("Minimap", "keepMinimap")
-        Box("Show UI button", "cleanExitButton")
-        Box("Show chat for 5s when someone whispers me", "cleanWhisper")
+        Header(L["Keep visible in clean view"], -10)
+        Box(L["R.E.E.L. bar"], "keepBar")
+        Box(L["Event tracker"], "keepTracker")
+        Box(L["Loot window"], "keepLoot")
+        Box(L["Chat"], "keepChat")
+        Box(L["Minimap"], "keepMinimap")
+        Box(L["Show UI button"], "cleanExitButton")
+        Box(L["Show chat for 5s when someone whispers me"], "cleanWhisper")
 
         return Refresh
     end,

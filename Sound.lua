@@ -3,6 +3,7 @@
 -- (voices, emotes, pets...) are muted so the splash stands out.
 
 local _, ns = ...
+local L = ns.L
 local W = ns.W
 
 ns.RegisterDefaults({
@@ -16,13 +17,13 @@ ns.RegisterDefaults({
 -- "Quiet while fishing": setting key, label, CVar turned off, default.
 -- All of these CVars were confirmed on the client with /reel debug.
 local QUIET = {
-    { key = "quietDialog", label = "NPC and character voices", cvar = "Sound_EnableDialog", default = true },
-    { key = "quietEmotes", label = "Emote sounds", cvar = "Sound_EnableEmoteSounds", default = true },
-    { key = "quietPets", label = "Pet sounds", cvar = "Sound_EnablePetSounds", default = true },
-    { key = "quietErrors", label = "Error speech (\"I can't do that yet\")", cvar = "Sound_EnableErrorSpeech", default = true },
-    { key = "quietArmorOthers", label = "Other players' armor rustle", cvar = "Sound_EnableArmorFoleySoundForOthers", default = true },
-    { key = "quietArmorSelf", label = "My own armor rustle", cvar = "Sound_EnableArmorFoleySoundForSelf", default = false },
-    { key = "quietReverb", label = "Reverb", cvar = "Sound_EnableReverb", default = false },
+    { key = "quietDialog", label = L["NPC and character voices"], cvar = "Sound_EnableDialog", default = true },
+    { key = "quietEmotes", label = L["Emote sounds"], cvar = "Sound_EnableEmoteSounds", default = true },
+    { key = "quietPets", label = L["Pet sounds"], cvar = "Sound_EnablePetSounds", default = true },
+    { key = "quietErrors", label = L["Error speech (\"I can't do that yet\")"], cvar = "Sound_EnableErrorSpeech", default = true },
+    { key = "quietArmorOthers", label = L["Other players' armor rustle"], cvar = "Sound_EnableArmorFoleySoundForOthers", default = true },
+    { key = "quietArmorSelf", label = L["My own armor rustle"], cvar = "Sound_EnableArmorFoleySoundForSelf", default = false },
+    { key = "quietReverb", label = L["Reverb"], cvar = "Sound_EnableReverb", default = false },
 }
 
 for _, q in ipairs(QUIET) do
@@ -77,35 +78,35 @@ ns.RegisterPage({
             Refresh()
         end
 
-        boost = W.Checkbox(panel, "Splash booster",
+        boost = W.Checkbox(panel, L["Splash booster"],
             function() return s.boost end,
             function(v) s.boost = v; Changed() end)
         boost:SetPoint("TOPLEFT")
 
-        local note = W.Note(panel, "While fishing: music and ambience off, sound effects up.", ns.CONTENT_WIDTH - 30)
+        local note = W.Note(panel, L["While fishing: music and ambience off, sound effects up."], ns.CONTENT_WIDTH - 30)
         note:SetPoint("TOPLEFT", boost, "BOTTOMLEFT", 26, 0)
 
-        bgSound = W.Checkbox(panel, "Play sound when tabbed out",
+        bgSound = W.Checkbox(panel, L["Play sound when tabbed out"],
             function() return s.bgSound end,
             function(v) s.bgSound = v; Changed() end)
         bgSound:SetPoint("TOPLEFT", boost, "BOTTOMLEFT", 0, -24)
 
-        setMaster = W.Checkbox(panel, "Set master volume",
+        setMaster = W.Checkbox(panel, L["Set master volume"],
             function() return s.setMaster end,
             function(v) s.setMaster = v; Changed() end)
         setMaster:SetPoint("TOPLEFT", bgSound, "BOTTOMLEFT", 0, -4)
 
-        master = W.Slider(panel, "Master", 0, 100, 5, "%",
+        master = W.Slider(panel, L["Master"], 0, 100, 5, "%",
             function() return s.master end,
             function(v) s.master = v; Changed() end)
         master:SetPoint("TOPLEFT", setMaster, "BOTTOMLEFT", 80, -14)
 
-        sfx = W.Slider(panel, "Effects", 0, 100, 5, "%",
+        sfx = W.Slider(panel, L["Effects"], 0, 100, 5, "%",
             function() return s.sfx end,
             function(v) s.sfx = v; Changed() end)
         sfx:SetPoint("TOPLEFT", master, "BOTTOMLEFT", 0, -22)
 
-        local header = W.Label(panel, "Quiet while fishing", "GameFontNormal")
+        local header = W.Label(panel, L["Quiet while fishing"], "GameFontNormal")
         header:SetPoint("TOPLEFT", setMaster, "BOTTOMLEFT", 0, -82)
         local anchor = header
         for i, q in ipairs(QUIET) do

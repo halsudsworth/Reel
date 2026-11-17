@@ -8,6 +8,7 @@
 -- /reel derby shows the counter outside contest hours, for testing.
 
 local _, ns = ...
+local L = ns.L
 
 local FISH = 19807 -- Speckled Tastyfish (by ID, so non-English clients count too)
 local GOAL = 40
@@ -28,7 +29,7 @@ end
 
 function ns.ToggleDerbyTest()
     testMode = not testMode
-    ns.Print("Derby counter test mode " .. (testMode and "on" or "off") .. ".")
+    ns.Print(string.format(L["Derby counter test mode %s."], testMode and L["on"] or L["off"]))
     ns.UpdateBar()
 end
 
@@ -122,7 +123,7 @@ end
 ns.RegisterBarSegment({
     key = "derby",
     label = "Tastyfish",
-    hint = "Sundays", -- dim, beside it on the Bar page
+    hint = L["Sundays"], -- dim, beside it on the Bar page
     name = "Tastyfish",
     group = "status",
     order = 5,
@@ -132,7 +133,7 @@ ns.RegisterBarSegment({
         local count = GetItemCountCompat(FISH)
         local t = string.format("%d/%d", count, GOAL)
         if count >= GOAL then
-            return { value = "|cff4fd13a" .. t .. "|r", tip = "Tastyfish " .. t .. " - turn in to Riggle Bassbait" }, true
+            return { value = "|cff4fd13a" .. t .. "|r", tip = string.format(L["Tastyfish %s - turn in to Riggle Bassbait"], t) }, true
         end
         return { value = t, tip = "Tastyfish " .. t }, true
     end,

@@ -14,6 +14,7 @@
 --       REEL_DATA_CHANGED  catch data changed
 
 local _, ns = ...
+-- Locale.lua loads after this file, so strings here look up ns.L when they run, not at load.
 
 local FISHING_SPELL_ID = 7620 -- base Fishing spell; ranks share the localized name
 
@@ -89,7 +90,7 @@ function ns.Now()
     if GetServerTime then return GetServerTime() end
     if not warnedClock then
         warnedClock = true
-        ns.Print("This client has no server clock, so catches are timed by your computer's clock. If it's set wrong, so are they.")
+        ns.Print(ns.L["This client has no server clock, so catches are timed by your computer's clock. If it's set wrong, so are they."])
     end
     return time()
 end
@@ -98,9 +99,9 @@ end
 function ns.FormatTime(seconds)
     seconds = math.max(0, math.floor(seconds))
     if seconds >= 86400 then
-        return string.format("%dd %dh", math.floor(seconds / 86400), math.floor(seconds % 86400 / 3600))
+        return string.format(ns.L["%dd %dh"], math.floor(seconds / 86400), math.floor(seconds % 86400 / 3600))
     elseif seconds >= 3600 then
-        return string.format("%dh %dm", math.floor(seconds / 3600), math.floor(seconds % 3600 / 60))
+        return string.format(ns.L["%dh %dm"], math.floor(seconds / 3600), math.floor(seconds % 3600 / 60))
     end
     return string.format("%d:%02d", math.floor(seconds / 60), seconds % 60)
 end
@@ -384,7 +385,7 @@ ns.On("PLAYER_LOGIN", function()
     fishingName = SpellName(FISHING_SPELL_ID)
     ns.fishingName = fishingName
     if not fishingName then
-        ns.Print("Couldn't look up the Fishing spell (ID " .. FISHING_SPELL_ID .. "). Casts won't be detected.")
+        ns.Print(string.format(ns.L["Couldn't look up the Fishing spell (ID %s). Casts won't be detected."], FISHING_SPELL_ID))
     end
     ns.Fire("REEL_READY")
 end)
@@ -415,10 +416,10 @@ end
 function ns.PrintWhere()
     local zone = GetZoneText() or "?"
     local sub = GetSubZoneText()
-    if not sub or sub == "" then sub = "(none, logged as " .. zone .. ")" end
+    if not sub or sub == "" then sub = string.format(ns.L["(none, logged as %s)"], zone) end
     local x, y = ns.MapPosition()
     local pos = x and string.format("  %.1f, %.1f", x, y) or ""
-    ns.Print("Zone: " .. zone .. "  Subzone: " .. sub .. pos)
+    ns.Print(string.format(ns.L["Zone: %s  Subzone: %s%s"], zone, sub, pos))
 end
 
 -- Slash command -------------------------------------------------------------
@@ -455,7 +456,7 @@ ns.On("PLAYER_LOGIN", function()
     for k, v in pairs(_G) do
         if type(k) == "string" and k:find("^SLASH_") and k ~= "SLASH_REEL1"
             and type(v) == "string" and v:lower() == "/reel" then
-            ns.Print("Another addon also uses /reel. Type /reelfish to open R.E.E.L.")
+            ns.Print(ns.L["Another addon also uses /reel. Type /reelfish to open R.E.E.L."])
             return
         end
     end

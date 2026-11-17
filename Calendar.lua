@@ -24,6 +24,7 @@
 --   start, ["end"], zone, fish, target, by = "the calendar" }.
 
 local _, ns = ...
+local L = ns.L
 
 local Calendar = {}
 ns.Calendar = Calendar
@@ -246,16 +247,16 @@ local function Challenge(kind, start, finish, format, r)
     local ev
     if format == "most" then
         local fish = Pick(r, D.wide)
-        ev = { name = "Most " .. D.fishNames[fish], fish = { fish }, scoring = "most" }
+        ev = { name = string.format(L["Most %s"], D.fishNames[fish]), fish = { fish }, scoring = "most" }
     else
         local p = Pick(r, D.pairs)
         local zone, fish = p[1], p[2]
         local fname, zname = D.fishNames[fish], D.maps[zone]
         if format == "race" then
             local target = kind == "daily" and 20 or 60
-            ev = { name = "Race to " .. target .. " " .. fname .. ", " .. zname, zone = { zone }, fish = { fish }, target = target, scoring = "race" }
+            ev = { name = string.format(L["Race to %d %s, %s"], target, fname, zname), zone = { zone }, fish = { fish }, target = target, scoring = "race" }
         else
-            ev = { name = "Best 30 minutes: " .. fname .. " in " .. zname, zone = { zone }, fish = { fish }, scoring = "best30" }
+            ev = { name = string.format(L["Best 30 minutes: %s in %s"], fname, zname), zone = { zone }, fish = { fish }, scoring = "best30" }
         end
     end
     ev.id, ev.kind, ev.start, ev["end"], ev.by = kind .. "-" .. start, kind, start, finish, "the calendar"

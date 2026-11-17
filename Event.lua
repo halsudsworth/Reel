@@ -152,8 +152,12 @@ local function Decode(str)
     if type(ev.start) ~= "string" or type(ev["end"]) ~= "string" or type(ev.window) ~= "table" then
         return nil, "That event string is damaged. Copy it again."
     end
-    ev.zone, ev.fish, ev.sub = LocalZones(AsList(ev.zone)), AsList(ev.fish), AsList(ev.sub)
-    for _, n in ipairs(ev.needs or {}) do n.zone, n.fish, n.sub, n.notSub = LocalZones(AsList(n.zone)), AsList(n.fish), AsList(n.sub), AsList(n.notSub) end
+    -- Spots: area IDs in subId/notSubId (sub/notSub keep English names for older versions).
+    ev.zone, ev.fish, ev.sub = LocalZones(AsList(ev.zone)), AsList(ev.fish), AsList(ev.subId or ev.sub)
+    for _, n in ipairs(ev.needs or {}) do
+        n.zone, n.fish = LocalZones(AsList(n.zone)), AsList(n.fish)
+        n.sub, n.notSub = AsList(n.subId or n.sub), AsList(n.notSubId or n.notSub)
+    end
     return ev
 end
 

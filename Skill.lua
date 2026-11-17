@@ -14,11 +14,17 @@ local GEAR_SLOTS = 19
 local gearBonus, gearChecked = 0, 0
 
 -- "Fishing +5" on a tooltip line, in any language: the line names Fishing in the client's own
--- word (the Fishing spell's name) and has a "+N" after it.
-local function GearLineBonus(text)
+-- word (the Fishing spell's name) and has a "+N" after it ("Anlegen: Angeln +5."). A lure on the
+-- pole (slot 16) is a bonus with its time left in brackets, which reads the same in every
+-- language: "Fishing Lure +75 (7 min)", "Angelköder +75 (7 Min.)" (German client, 2026-11-17).
+local function GearLineBonus(text, slot)
     if type(text) ~= "string" then return end
     local amount = text:match("[Ff]ishing[^%d%+]*%+(%d+)")
     if amount then return tonumber(amount) end
+    if slot == 16 then
+        amount = text:match("%+%s*(%d+)%s*%(%d+")
+        if amount then return tonumber(amount) end
+    end
     local word = ns.FishingWord()
     local lower = text:lower()
     local at = lower:find(word, 1, true)
@@ -36,7 +42,7 @@ local function GearBonus()
     for slot = 1, GEAR_SLOTS do
         local info = C_TooltipInfo.GetInventoryItem("player", slot)
         for _, line in ipairs(info and info.lines or {}) do
-            local amount = GearLineBonus(line.leftText)
+            local amount = GearLineBonus(line.leftText, slot)
             if amount then gearBonus = gearBonus + amount end
         end
     end

@@ -225,7 +225,15 @@ end
 
 -- Matching catches ---------------------------------------------------------------------
 
-local function SubKey(s) return s and s:lower():gsub("^the ", "") or nil end
+-- A subzone in an event is an area ID (C_Map.GetAreaInfo gives its name in the client's
+-- language, which is how catches record it) or, in older events, an English name.
+local function SubKey(s)
+    if type(s) == "number" then
+        local ok, name = pcall(C_Map.GetAreaInfo, s)
+        s = ok and type(name) == "string" and name ~= "" and name or nil
+    end
+    return s and (s:lower():gsub("^the ", "")) or nil
+end
 
 local function InList(list, v)
     for _, x in ipairs(list) do if x == v then return true end end

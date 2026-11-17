@@ -86,7 +86,7 @@ ns.RegisterBarSegment({
             return { value = "|cff8a7a63" .. t .. "|r", tip = PLACE_SPELLS[placed] .. " ready in " .. t, missing = true, reserve = "88:88",
                 icon = CampIcon(CAMP_ITEMS[placed] or RACK) }, true
         end
-        if ns.PoleEquipped() then
+        if ns.PoleOrPreview() then
             -- With "No camp buff" turned off, no camp means no row at all.
             if s.campMissing then
                 return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No camp buff", missing = true, reserve = "88:88", icon = CampIcon(RACK) }, true
@@ -94,6 +94,6 @@ ns.RegisterBarSegment({
         end
     end,
     options = {
-        { key = "campMissing", label = "Show \"No camp buff\" when missing" },
+        { key = "campMissing", label = "Show \"None\" when missing" },
     },
 })

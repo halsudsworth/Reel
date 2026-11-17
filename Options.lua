@@ -1,11 +1,8 @@
 -- R.E.E.L.'s settings in the game's Options > AddOns (Settings canvas categories): R.E.E.L. with
--- four pages, as the mockup groups them (site/art/ui/mockup/index.html, screens 8 to 11):
---   At the water   Casting (with One key) | Bar
---   Clean View     Clean View | Immersion
---   Sound
---   General
--- Each page hosts the settings pages registered with ns.RegisterPage (no place), built the first
--- time it's shown. Inside Blizzard's frame the page keeps only Hal's type and amber.
+-- one page per settings page, alphabetically: Bar, Casting (with One key), Clean View, General,
+-- Immersion, Sound. Each page is one column at the canvas width, scrolling as a whole when it's
+-- long, built the first time it's shown. Inside Blizzard's frame the page keeps only Hal's type
+-- and amber.
 --
 --   ns.OpenOptions([name])   opens R.E.E.L. in Options, or one of its pages by name
 
@@ -17,12 +14,10 @@ local C = W.C
 local CANVAS_W, CANVAS_H = 665, 600
 local PAD, GAP, HEAD = 16, 20, 54
 
-local PAGES = {
-    { name = "At the water", columns = { { page = "Casting", title = "Casting" }, { page = "Bar", title = "Bar" } } },
-    { name = "Clean View", columns = { { page = "Clean View" }, { page = "Immersion", title = "Immersion" } } },
-    { name = "Sound", columns = { { page = "Sound" } } },
-    { name = "General", columns = { { page = "General" } } },
-}
+local PAGES = {}
+for _, name in ipairs({ "Bar", "Casting", "Clean View", "General", "Immersion", "Sound" }) do
+    PAGES[#PAGES + 1] = { name = name, columns = { { page = name } } }
+end
 
 local root, rootFrame
 local shownCount = 0 -- R.E.E.L. pages open in Options (the unlocked bar stays up meanwhile)
@@ -104,21 +99,146 @@ local function PageFrame(name)
     return frame
 end
 
-local function Register()
-    if root or not (Settings and Settings.RegisterCanvasLayoutCategory) then return end
-    -- R.E.E.L.'s own entry: the nameplate and its four pages
-    rootFrame = CreateFrame("Frame")
-    rootFrame:Hide()
-    local plate = rootFrame:CreateTexture(nil, "ARTWORK")
+-- R.E.E.L.'s key bindings (Bindings.xml), named by their BINDING_NAME strings, in two columns.
+local BINDINGS = {
+    "CLICK ReelFishButton:LeftButton", "REEL_TOGGLE_WINDOW",
+    "CLICK ReelRecastButton:LeftButton", "REEL_TOGGLE_CLEAN_VIEW",
+    "CLICK ReelLureKeyButton:LeftButton", "CLICK ReelFoodKeyButton:LeftButton",
+}
+
+-- A heading on the landing page.
+local function Heading(parent, text, y)
+    local h = W.Text(parent, 13, C.amber2)
+    h:SetPoint("TOPLEFT", PAD, y)
+    h:SetText(text)
+    return h
+end
+
+-- Opens the game's Key Bindings at the AddOns section, where R.E.E.L.'s bindings are
+-- (Bindings.xml puts them in category ADDONS under the R.E.E.L. header). Blizzard's own code
+-- opens a section the same way (Blizzard_RPE_TurnStrafe: Settings.OpenToCategory with the
+-- section's name to scroll to).
+local function OpenKeyBindings()
+    if Settings and Settings.KEYBINDINGS_CATEGORY_ID then
+        Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID, ADDONS)
+    else
+        ns.Print("This client has no Key Bindings page to open.")
+    end
+end
+
+-- The landing page (site/art/ui/mockup/options-home.html): the nameplate, the presets, the key
+-- bindings with their keys, the journal's export, the About line and the six pages as links.
+-- Everything sits at a fixed place and fits the canvas.
+local function BuildLanding(frame)
+    local plate = frame:CreateTexture(nil, "ARTWORK")
     plate:SetTexture(W.TEX .. "nameplate")
     plate:SetTexCoord(0, 1, 0, 62 / 64)
-    plate:SetSize(201, 49)
-    plate:SetPoint("TOPLEFT", PAD, -16)
-    local line = W.Text(rootFrame, 12, C.ink2)
-    line:SetPoint("TOPLEFT", plate, "BOTTOMLEFT", 0, -14)
-    line:SetText("R.E.E.L.'s settings are on four pages:")
+    plate:SetSize(134, 33)
+    plate:SetPoint("TOPLEFT", PAD, -14)
+
+    -- Presets
+    Heading(frame, "Presets", -58)
+    frame.presets = {}
+    for i, preset in ipairs(ns.PRESETS) do
+        local y = -76 - (i - 1) * 26
+        local b = W.Button(frame, preset.name, 124, function() ns.ApplyPreset(preset) end)
+        b:SetPoint("TOPLEFT", PAD + 2, y)
+        local n = W.Note(frame, preset.note, CANVAS_W - 2 * PAD - 140)
+        n:SetPoint("LEFT", b, "RIGHT", 10, 0)
+        frame.presets[i] = b
+    end
+    local presetNote = W.Note(frame, ns.PRESET_NOTE, CANVAS_W - 2 * PAD)
+    presetNote:SetPoint("TOPLEFT", PAD, -156)
+
+    -- Key bindings: name on the left, its key in a cap on the right, two columns
+    Heading(frame, "Key bindings", -178)
+    frame.caps = {}
+    local colW = (CANVAS_W - 2 * PAD - 30) / 2
+    for i, command in ipairs(BINDINGS) do
+        local col, row = (i - 1) % 2, math.floor((i - 1) / 2)
+        local x, y = PAD + col * (colW + 30), -198 - row * 26
+        local name = W.Text(frame, 11.5, C.ink)
+        name:SetPoint("TOPLEFT", x, y - 4)
+        name:SetText(_G["BINDING_NAME_" .. command] or command)
+        local cap = CreateFrame("Frame", nil, frame)
+        cap:SetHeight(16)
+        cap:SetPoint("TOPRIGHT", frame, "TOPLEFT", x + colW, y - 2)
+        local bg = W.Solid(cap, "BACKGROUND", C.pitch)
+        bg:SetAllPoints()
+        W.Outline(cap, "BORDER", C.amber, 0.25)
+        cap.text = W.Text(cap, 10, C.ink)
+        cap.text:SetPoint("CENTER")
+        cap.command = command
+        local rule = W.Solid(frame, "ARTWORK", C.amber, 0.08)
+        rule:SetPoint("TOPLEFT", x, y - 23)
+        rule:SetSize(colW, 1)
+        frame.caps[i] = cap
+    end
+    local openKeys = W.Button(frame, "Open Key Bindings", 150, OpenKeyBindings)
+    openKeys:SetPoint("TOPLEFT", PAD + 2, -280)
+    frame.openKeys = openKeys
+
+    -- Your journal: the R.E.E.L. window's Export, here too
+    Heading(frame, "Your journal", -314)
+    local export = W.OakButton(frame, "Export", function() ns.ShowExport() end)
+    export:SetPoint("TOPLEFT", PAD, -334)
+    frame.export = export
+    local hint = W.Text(frame, 10.5, C.dim)
+    hint:SetPoint("LEFT", export, "RIGHT", 12, 0)
+    hint:SetText("Paste it on |cffcdb894halsudsworth.com|r")
+
+    -- About
+    Heading(frame, "About", -368)
+    local about = W.Note(frame, ns.AboutLine(), CANVAS_W - 2 * PAD)
+    about:SetPoint("TOPLEFT", PAD, -386)
+    frame.about = about
+
+    -- The pages, as a row of links
+    local label = W.Text(frame, 10.5, C.dim)
+    label:SetPoint("TOPLEFT", PAD, -428)
+    label:SetText("Pages:")
+    local anchor, anchorPoint, gap = label, "RIGHT", 8
+    for _, def in ipairs(PAGES) do
+        local link = CreateFrame("Button", nil, frame)
+        local fs = W.Text(link, 11, C.ink2)
+        fs:SetPoint("LEFT")
+        fs:SetText(def.name)
+        link:SetSize(math.ceil(fs:GetStringWidth()) + 2, 16)
+        link:SetPoint("LEFT", anchor, anchorPoint, gap, 0)
+        link:SetScript("OnEnter", function() fs:SetTextColor(W.Hex(C.amber2)) end)
+        link:SetScript("OnLeave", function() fs:SetTextColor(W.Hex(C.ink2)) end)
+        link:SetScript("OnClick", function() ns.OpenOptions(def.name) end)
+        link.text = fs
+        def.link = link
+        anchor, anchorPoint, gap = link, "RIGHT", 12
+    end
+    frame.contentBottom = 444 -- px from the canvas top: the pages row's foot
+end
+
+-- The key caps show the live bindings: on show, and whenever bindings change.
+local function RefreshCaps()
+    if not (rootFrame and rootFrame.caps) then return end
+    for _, cap in ipairs(rootFrame.caps) do
+        local key = GetBindingKey(cap.command)
+        if key then
+            cap.text:SetText(GetBindingText and GetBindingText(key) or key)
+            cap.text:SetTextColor(W.Hex(C.ink))
+        else
+            cap.text:SetText("Not bound")
+            cap.text:SetTextColor(W.Hex(C.dim))
+        end
+        cap:SetWidth(math.max(22, math.ceil(cap.text:GetStringWidth()) + 12))
+    end
+end
+ns.On("UPDATE_BINDINGS", RefreshCaps)
+
+local function Register()
+    if root or not (Settings and Settings.RegisterCanvasLayoutCategory) then return end
+    -- R.E.E.L.'s own entry: the landing page
+    rootFrame = CreateFrame("Frame")
+    rootFrame:Hide()
+    rootFrame:SetScript("OnShow", RefreshCaps)
     root = Settings.RegisterCanvasLayoutCategory(rootFrame, "R.E.E.L.")
-    local anchor = line
     for _, def in ipairs(PAGES) do
         def.frame = PageFrame(def.name)
         def.frame:SetScript("OnShow", function()
@@ -135,13 +255,12 @@ local function Register()
             ns.UpdateBar()
         end)
         def.category = Settings.RegisterCanvasLayoutSubcategory(root, def.frame, def.name)
-        local b = W.OakButton(rootFrame, def.name, function() ns.OpenOptions(def.name) end)
-        b:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, anchor == line and -10 or -6)
-        anchor = b
-        def.button = b
     end
+    BuildLanding(rootFrame)
     Settings.RegisterAddOnCategory(root)
 end
+
+ns.OptionsLanding = function() return rootFrame end -- for the load test
 
 -- Opens R.E.E.L. in Options, or one of its pages by name.
 function ns.OpenOptions(name)

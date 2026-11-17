@@ -1169,7 +1169,7 @@ end)
 -- at the right end of the bar's foot. With a pole only.
 ns.RegisterBarSegment({
     key = "zoneFish",
-    label = "Fish caught in this zone",
+    label = "Fish in this zone",
     name = "Zone fish",
     group = "session",
     order = 45,

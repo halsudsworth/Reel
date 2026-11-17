@@ -1,5 +1,5 @@
--- General page: presets, settings shared by every feature, the minimap button
--- and catch data reset.
+-- General page: settings shared by every feature, the minimap button and catch data reset.
+-- The presets and the About line are defined here and shown on the landing page in Options.
 
 local _, ns = ...
 local W = ns.W
@@ -30,6 +30,18 @@ local function ApplyPreset(preset)
     ns.Print("Preset: " .. preset.name)
 end
 
+-- For the landing page in Options, which holds the preset buttons.
+ns.PRESETS = PRESETS
+ns.ApplyPreset = ApplyPreset
+ns.PRESET_NOTE = "A preset only changes the Clean View and Immersion toggles. Sound, bar and lure settings stay as they are."
+
+-- The About line, also on the landing page.
+function ns.AboutLine()
+    local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+    local version = getMeta and getMeta("Reel", "Version") or "?"
+    return string.format("R.E.E.L. %s by Hal Sudsworth. Source and bug reports: github.com/halsudsworth/Reel. For a bug, type /reel debug, then /reload, and paste the debug block from WTF\\Account\\<account>\\SavedVariables\\Reel.lua into the issue.", version)
+end
+
 StaticPopupDialogs.REEL_RESET = {
     text = "Clear R.E.E.L.'s catch data for every character on this account? Journals, records, derby coins and Riggle's winners all go. This can't be undone.",
     button1 = YES,
@@ -53,25 +65,13 @@ ns.RegisterPage({
     build = function(panel)
         local s = ReelDB.settings
 
-        local header = W.Label(panel, "Presets", "GameFontNormal")
-        header:SetPoint("TOPLEFT")
-        local anchor = header
-        for i, preset in ipairs(PRESETS) do
-            local b = W.Button(panel, preset.name, 120, function() ApplyPreset(preset) end)
-            b:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, i == 1 and -6 or -4)
-            local n = W.Note(panel, preset.note, ns.CONTENT_WIDTH - 140)
-            n:SetPoint("LEFT", b, "RIGHT", 10, 0)
-            anchor = b
-        end
-        local presetNote = W.Note(panel, "A preset only changes the Clean View and Immersion toggles. Sound, bar and lure settings stay as they are.", ns.CONTENT_WIDTH - 4)
-        presetNote:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -4, -8)
-
+        -- (Presets and About are on R.E.E.L.'s landing page in Options: Options.lua.)
         local delay = W.Slider(panel, "Done fishing after", 5, 60, 5, "s",
             function() return s.restoreDelay end,
             function(v) s.restoreDelay = v end)
         -- The slider's label sits to its left; leave room for all of it.
         local labelRoom = math.ceil(delay.label:GetStringWidth()) + 8
-        delay:SetPoint("TOPLEFT", presetNote, "BOTTOMLEFT", labelRoom, -24)
+        delay:SetPoint("TOPLEFT", panel, "TOPLEFT", labelRoom, -8)
 
         local note = W.Note(panel, "How long after your last bobber is gone before R.E.E.L. counts you as done fishing. Your sound settings go back, the bar hides, and clean view can end.", ns.CONTENT_WIDTH - 4)
         note:SetPoint("TOPLEFT", delay, "BOTTOMLEFT", -labelRoom, -24)
@@ -88,12 +88,6 @@ ns.RegisterPage({
 
         local reset = W.Button(panel, "Reset catch data...", 150, ns.ConfirmReset)
         reset:SetPoint("TOPLEFT", cooking, "BOTTOMLEFT", 4, -16)
-
-        -- About
-        local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-        local version = getMeta and getMeta("Reel", "Version") or "?"
-        local about = W.Note(panel, string.format("R.E.E.L. %s by Hal Sudsworth. Source and bug reports: github.com/halsudsworth/Reel. For a bug, type /reel debug, then /reload, and paste the debug block from WTF\\Account\\<account>\\SavedVariables\\Reel.lua into the issue.", version), ns.CONTENT_WIDTH - 4)
-        about:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 0, 4)
 
         return function()
             delay.Refresh()

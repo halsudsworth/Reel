@@ -260,12 +260,30 @@ local function ShowTip(item)
     local info = item.info
     if not info then return end
     GameTooltip:SetOwner(item.frame, "ANCHOR_BOTTOM")
-    if item.seg.group == "skill" and ns.BarCatchShowing() then
+    if layout and layout.rows[1] and layout.rows[1].item == item and ns.BarCatchShowing() then
         GameTooltip:SetText("|c" .. catch.color .. catch.name .. "|r  |cffffd27a" .. catch.nth .. "|r")
     else
         GameTooltip:SetText(info.tip or info.value or item.seg.name or "")
     end
     GameTooltip:Show()
+end
+
+-- Dragging the bar, from the bar or any row on it. Nothing is laid out again while it moves:
+-- a relayout hides and reshows the rows, and hiding the frame a drag started on ends the drag.
+local moving = false
+
+local function StartDrag()
+    if ReelDB.settings.barLocked or moving then return end
+    moving = true
+    bar:StartMoving()
+end
+
+local function StopDrag()
+    if not moving then return end
+    moving = false
+    bar:StopMovingOrSizing()
+    SavePosition()
+    ns.UpdateBar()
 end
 
 local function Item(seg)
@@ -277,8 +295,8 @@ local function Item(seg)
     f:SetFrameLevel(inner:GetFrameLevel() + 1)
     f:EnableMouse(true)
     f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", function() if not ReelDB.settings.barLocked then bar:StartMoving() end end)
-    f:SetScript("OnDragStop", function() bar:StopMovingOrSizing(); SavePosition() end)
+    f:SetScript("OnDragStart", StartDrag)
+    f:SetScript("OnDragStop", StopDrag)
     f:SetScript("OnEnter", function() ShowTip(item) end)
     f:SetScript("OnLeave", function() GameTooltip:Hide() end)
     item.frame = f
@@ -442,8 +460,9 @@ local function LayoutVertical(rows, L)
             vx = vx + 28
         end
         r.valueX, r.valueY = vx, textY
-        if r.seg.group == "skill" then
-            -- the wash covers the whole row across the bar, 2px above and below it
+        if i == 1 then
+            -- the catch row (Fishing, else the first row): the wash covers the whole row across
+            -- the bar, 2px above and below it
             r.washY, r.washH = y + 2, h + 4
         end
         At(r.item.value, r.valueX, r.valueY)
@@ -502,8 +521,8 @@ local function LayoutHorizontal(rows, L)
         -- beside an icon, the value is centred on the icon
         r.valueX, r.valueY = vx, HasIcon(r.info) and vy - (20 - th) / 2 or vy
         At(r.item.value, r.valueX, r.valueY)
-        if r.seg.group == "skill" then
-            -- the wash covers the Fishing cell (its padding too), 3px above and below it, from
+        if r == rows[1] then
+            -- the catch cell (Fishing, else the first cell): the wash covers it (its padding too), 3px above and below it, from
             -- 7px left of the cell's box (the first cell's box starts 2px left of its text)
             r.washX, r.washY, r.washW, r.washH = x - 2 - 7, -PAD_T + 3, 2 + r.cellW + 11, cellH + 6
         end
@@ -770,8 +789,21 @@ local function DrawCatch(L, caught)
         label:SetWidth(0); label:SetJustifyH("LEFT")
         label:ClearAllPoints(); label:SetPoint("TOPLEFT", inner, "TOPLEFT", lureRow.labelX, lureRow.labelY)
     end
-    local skill = L.rows[1] and L.rows[1].seg.group == "skill" and L.rows[1] or nil
+    -- The catch goes in the Fishing row or cell; with Fishing off the bar, in the first one.
+    local skill = L.rows[1]
     if not (caught and skill) then return end
+    -- A stand-in row: its own icon makes way for the fish, and with a button in it (lure, food)
+    -- the fish's text starts after the button.
+    local standIn = skill.seg.group ~= "skill"
+    local afterButton = standIn and ButtonKey(skill.info) and skill.valueX
+    if standIn then
+        local own = { skill.item.icon, skill.item.iconEdgeFrame }
+        for _, p in ipairs(skill.item.pips) do own[#own + 1] = p end
+        for _, p in ipairs(skill.item.mini) do own[#own + 1] = p end
+        for _, region in ipairs(own) do
+            if region:IsShown() then region:Hide(); catchHidden[region] = true end
+        end
+    end
     if lureRow then
         local label = lureRow.item.label
         label:SetText("Caught")
@@ -789,7 +821,7 @@ local function DrawCatch(L, caught)
     local nameX, nameY, nameRight
     if mode == "vertical" then
         -- across the Fishing row, label and value
-        nameX, nameY, nameRight = L.nameLeft, skill.valueY, L.nameRight
+        nameX, nameY, nameRight = afterButton or L.nameLeft, skill.valueY, L.nameRight
         skill.item.label:Hide(); catchHidden[skill.item.label] = true
     elseif mode == "icons" then
         nameX, nameY, nameRight = skill.valueX, skill.valueY, skill.cellRight - 2
@@ -804,7 +836,7 @@ local function DrawCatch(L, caught)
         skill.item.label:Hide(); catchHidden[skill.item.label] = true
         nth = "|cffffd27a" .. catch.nth .. "|r"
         plain = nth
-        nameX, nameY, nameRight = skill.cellX, skill.valueY, skill.cellRight
+        nameX, nameY, nameRight = afterButton or skill.cellX, skill.valueY, skill.cellRight
     end
     -- No lure button on the bar: the fish goes in front of the name (B in
     -- "Catch: where the fish icon goes"), so a catch always has its icon.
@@ -851,9 +883,17 @@ local wasShown, lastSettings = false, nil
 local forFishing = false -- the bar's up for fishing, not only for the window or Options
 local quiet = false      -- combat started with the bar up only for the window: clicks off, fades
 local LURE_ONLY = { key = "lureButtonOnly", name = "Lure", group = "status", order = 20 }
-function ns.UpdateBar()
-    if not bar then return end
-    local s = ReelDB.settings
+-- The bar as the settings preview (up only for the window or Options, unlocked, not fishing):
+-- every checked item shows as if a fishing pole were in hand, so checking a box shows its row.
+-- Lure, Food and Camp show their "None" as plain icons then; the buttons still need a pole.
+local previewing = false
+
+function ns.PoleOrPreview()
+    return previewing or ns.PoleEquipped()
+end
+
+-- The rows the checked items give now, and whether any of them is busy (fishing).
+local function Collect(s)
     local rows = {}
     local active = false
     for _, seg in ipairs(segments) do
@@ -878,6 +918,16 @@ function ns.UpdateBar()
         end
         table.insert(rows, at, { seg = LURE_ONLY, info = { value = "", tip = "Apply lure", button = true }, item = Item(LURE_ONLY) })
     end
+    return rows, active
+end
+
+function ns.UpdateBar()
+    if not bar then return end
+    -- a drag whose stop never came (the button is up) ends here
+    if moving and IsMouseButtonDown and not IsMouseButtonDown("LeftButton") then StopDrag() return end
+    if moving then return end
+    local s = ReelDB.settings
+    local rows, active = Collect(s)
     local caught = ns.BarCatchShowing()
     if caught then active = true end
 
@@ -885,7 +935,13 @@ function ns.UpdateBar()
     if hasButton and ns.PoleEquipped() then active = true end
     local wanted = s.bar and (#rows > 0 or caught)
     forFishing = wanted and (active or ns.RecentlyFishing()) and true or false
-    local shown = forFishing or (wanted and not s.barLocked and (ns.WindowShown() or ns.OptionsShown())) or false
+    local preview = s.bar and not s.barLocked and (ns.WindowShown() or ns.OptionsShown()) and not forFishing
+    if preview then
+        previewing = true
+        rows = Collect(s)
+        previewing = false
+    end
+    local shown = forFishing or (preview and (#rows > 0 or caught)) or false
 
     if not InCombatLockdown() then
         if quiet then -- combat is over: the bar takes clicks again
@@ -940,7 +996,7 @@ function ns.UpdateBar()
             At(item.icon, r.buttonX, r.buttonY, r.buttonSize, r.buttonSize)
             item.icon:Show()
         end
-        if r.seg.group == "skill" then
+        if r == layout.rows[1] then
             if info.countdown then FillCountdown(r) else Wash(r, nil) end
         end
         local total = info.pips and math.min(info.pips[2] or 0, 20) or 0
@@ -954,7 +1010,8 @@ function ns.UpdateBar()
     end
     DrawCatch(layout, caught)
     -- During a catch the row or cell runs the catch timer; Icons sweeps the skill icon (the fish).
-    local skill = layout.rows[1] and layout.rows[1].seg.group == "skill" and layout.rows[1]
+    -- With Fishing off the bar, the first row or cell stands in.
+    local skill = layout.rows[1]
     if skill and caught then Wash(skill, (catch.ends - GetTime()) / CATCH_SECONDS) end
     if icons and skill then
         local c = skill.info.countdown
@@ -992,11 +1049,8 @@ local function BuildBar()
     bar:SetMovable(true)
     bar:SetClampedToScreen(true)
     bar:RegisterForDrag("LeftButton")
-    bar:SetScript("OnDragStart", bar.StartMoving)
-    bar:SetScript("OnDragStop", function()
-        bar:StopMovingOrSizing()
-        SavePosition()
-    end)
+    bar:SetScript("OnDragStart", StartDrag)
+    bar:SetScript("OnDragStop", StopDrag)
     ns.OakPlate(bar)
 
     -- The dark inner panel with its amber hairline.
@@ -1104,31 +1158,30 @@ ns.On("UNIT_SPELLCAST_CHANNEL_STOP", function(unit) if unit == "player" then C_T
 ns.RegisterPage({
     name = "Bar",
     order = 90,
-    scrolls = true, -- the list can outgrow its column, so the page scrolls itself
+    scrolls = true, -- one scroller for the page, a fallback should the table outgrow it
     build = function(page)
         local s = ReelDB.settings
         local controls = {}
 
-        -- One checkbox per bar item, so the list can outgrow the window: the page scrolls.
+        -- The page fits the canvas as it is; the scroller only matters if the table grows past it.
         local scroll = CreateFrame("ScrollFrame", nil, page, "UIPanelScrollFrameTemplate")
         scroll:SetPoint("TOPLEFT")
         scroll:SetPoint("BOTTOMRIGHT", -24, 0)
         local panel = CreateFrame("Frame", nil, scroll)
-        panel:SetSize(ns.CONTENT_WIDTH - 24, 1)
+        local width = ns.CONTENT_WIDTH - 24
+        panel:SetSize(width, 1)
         scroll:SetScrollChild(panel)
 
+        -- Top: Show and Lock on one line, Layout and Size on the next.
         local shown = W.Checkbox(panel, "Show fishing bar",
             function() return s.bar end,
             function(v) s.bar = v; ns.UpdateBar() end)
-        shown:SetPoint("TOPLEFT")
-
+        shown:SetPoint("TOPLEFT", 0, 0)
         local locked = W.Checkbox(panel, "Lock bar position",
             function() return s.barLocked end,
             function(v) s.barLocked = v; ns.UpdateBar() end)
-        locked:SetPoint("TOPLEFT", shown, "BOTTOMLEFT", 0, -4)
-
-        local note = W.Note(panel, "While unlocked, the bar stays visible with this page or the R.E.E.L. window open so you can drag it into place.", ns.CONTENT_WIDTH - 54)
-        note:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 26, 0)
+        locked:SetPoint("TOPLEFT", 150, 0)
+        W.Tip(locked, "While unlocked, the bar stays visible with this page or the R.E.E.L. window open so you can drag it into place.")
 
         local layouts = {
             { value = "vertical", text = "Vertical" },
@@ -1136,10 +1189,9 @@ ns.RegisterPage({
             { value = "icons", text = "Icons (horizontal)" },
         }
         if ns.ICONS_COLUMN then layouts[#layouts + 1] = { value = "iconsColumn", text = "Icons (vertical)" } end
-        local layout = W.Dropdown(panel, "Layout", 120, layouts, function() return LayoutMode(s) end,
+        local layout = W.Dropdown(panel, "Layout", 130, layouts, function() return LayoutMode(s) end,
            function(v) s.barLayout = v; ns.UpdateBar() end)
-        layout:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 60, -40)
-
+        layout:SetPoint("TOPLEFT", 52, -34)
         local scale = W.Slider(panel, "Size", 70, 150, 5, "%",
             function() return s.barScale end,
             function(v)
@@ -1147,77 +1199,86 @@ ns.RegisterPage({
                 -- The bar holds a secure button, so it can't be rescaled in combat.
                 ns.WhenOutOfCombat(function() if ns.bar then ns.bar:SetScale(s.barScale / 100) end end)
             end)
-        scale:SetPoint("TOPLEFT", layout, "BOTTOMLEFT", 0, -14)
-
-        local header = W.Label(panel, "Show on bar", "GameFontNormal")
-        header:SetPoint("TOPLEFT", locked, "BOTTOMLEFT", 0, -112)
-
+        scale:SetPoint("TOPLEFT", 250, -37)
         controls[1], controls[2], controls[3], controls[4] = shown, locked, layout, scale
-        local subOptions = {} -- { checkbox, segment }
+
+        -- "On the bar": a row per bar item in the bar's order, built from the registered items:
+        -- its box, its icon, its name, then its options (or a dim hint) in the same line.
+        local ROW_H, NAME_X, OPT_X, USE_X = 36, 58, 190, 440
+        local header = W.Text(panel, 13, W.C.amber2)
+        header:SetPoint("TOPLEFT", 0, -78)
+        header:SetText("On the bar")
+        local y = -98
+        local rule = Solid(panel, "ARTWORK", 0, C.rule, 0.15)
+        rule:SetPoint("TOPLEFT", 0, y); rule:SetSize(width, 1)
+        local subOptions = {} -- { control, segment, option }
+        local icons = {}
         local Refresh
-
-        -- Each row anchors to the previous one; sub-options are indented.
-        local anchor, indent = header, 0
-        local function Row(cb, x, first)
-            cb:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", x - indent, first and -6 or -2)
-            anchor, indent = cb, x
-            controls[#controls + 1] = cb
-        end
-
-        local lureButton = W.Checkbox(panel, "Apply-lure button",
-            function() return s.lureButton end,
-            function(v) s.lureButton = v; ns.UpdateLureButton(); ns.UpdateBar(); Refresh() end)
-        Row(lureButton, 0, true)
-        local lureChoice = W.Dropdown(panel, "Use", 190, ns.LureOptions(),
-            function() return s.lureChoice end,
-            function(v) s.lureChoice = v; ns.UpdateLureButton(); ns.UpdateBar() end)
-        Row(lureChoice, 60)
-        local lureNote = W.Note(panel, "A picked lure falls back to your best one when you run out.", ns.CONTENT_WIDTH - 24 - 60)
-        lureNote:SetPoint("TOPLEFT", lureChoice, "BOTTOMLEFT", 0, -2)
-        anchor = lureNote -- the next row goes under the note
-
         for _, seg in ipairs(segments) do
+            local mid = y - ROW_H / 2
             local cb = W.Checkbox(panel, seg.label,
                 function() return not Hidden(s, seg) end,
                 function(v)
                     if seg.defaultOff then s.barHidden[seg.key] = not v else s.barHidden[seg.key] = (not v) or nil end
                     ns.UpdateBar(); Refresh()
                 end)
-            Row(cb, 0)
+            cb:SetPoint("LEFT", panel, "TOPLEFT", 0, mid)
+            local icon = panel:CreateTexture(nil, "ARTWORK")
+            icon:SetSize(20, 20)
+            icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            icon:SetPoint("LEFT", panel, "TOPLEFT", 30, mid)
+            icons[#icons + 1] = { icon, seg }
+            cb.label:ClearAllPoints()
+            cb.label:SetPoint("LEFT", panel, "TOPLEFT", NAME_X, mid)
+            cb.label:SetWidth(OPT_X - NAME_X - 6)
+            controls[#controls + 1] = cb
+            if seg.hint then
+                local hint = W.Label(panel, seg.hint, "GameFontDisableSmall")
+                hint:SetPoint("LEFT", panel, "TOPLEFT", OPT_X, mid)
+            end
+            local x = OPT_X
             for _, option in ipairs(seg.options or {}) do
                 local sub
                 if option.choices then
-                    -- a "Use" menu, like the lure's
-                    sub = W.Dropdown(panel, option.label, 190, option.choices(),
+                    -- a "Use" menu, its "falls back" note as the tooltip
+                    sub = W.Dropdown(panel, option.label, 150, option.choices(),
                         function() return s[option.key] end,
                         function(v) s[option.key] = v; if option.changed then option.changed() end; ns.UpdateBar() end)
-                    Row(sub, 60)
-                    if option.note then
-                        local n = W.Note(panel, option.note, ns.CONTENT_WIDTH - 24 - 60)
-                        n:SetPoint("TOPLEFT", sub, "BOTTOMLEFT", 0, -2)
-                        anchor = n
-                    end
+                    sub:SetPoint("LEFT", panel, "TOPLEFT", USE_X, mid)
                 else
                     sub = W.Checkbox(panel, option.label,
                         function() return s[option.key] end,
-                        function(v) s[option.key] = v; ns.UpdateBar() end)
-                    Row(sub, 24)
+                        function(v) s[option.key] = v; if option.changed then option.changed() end; ns.UpdateBar(); Refresh() end)
+                    sub:SetPoint("LEFT", panel, "TOPLEFT", x, mid)
                 end
-                subOptions[#subOptions + 1] = { sub, seg }
+                if option.note then W.Tip(sub, option.note) end
+                controls[#controls + 1] = sub
+                subOptions[#subOptions + 1] = { sub, seg, option }
             end
+            y = y - ROW_H
+            local divider = Solid(panel, "ARTWORK", 0, C.rule, 0.075)
+            divider:SetPoint("TOPLEFT", 0, y); divider:SetSize(width, 1)
         end
+        -- The content's height, from the layout itself: the page scrolls only past the canvas.
+        panel:SetHeight(-y + 8)
+        panel.contentHeight = -y + 8
 
         Refresh = function()
             for _, c in ipairs(controls) do c.Refresh() end
-            lureChoice:SetActive(s.lureButton)
-            for _, entry in ipairs(subOptions) do
-                entry[1]:SetActive(not Hidden(s, entry[2]))
+            for _, entry in ipairs(icons) do
+                local icon = entry[2].icon
+                if type(icon) == "function" then
+                    local ok, tex = pcall(icon)
+                    icon = ok and tex or nil
+                end
+                entry[1]:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
             end
-            -- The scroll height is the list's height, measured once the layout has settled.
-            C_Timer.After(0, function()
-                local top, bottom = panel:GetTop(), anchor:GetBottom()
-                if top and bottom then panel:SetHeight(top - bottom + 8) end
-            end)
+            -- a sub-option greys out with its row off (the lure button works without its row)
+            for _, entry in ipairs(subOptions) do
+                local option = entry[3]
+                local active = (option.always or not Hidden(s, entry[2])) and (not option.needs or s[option.needs])
+                entry[1]:SetActive(active and true or false)
+            end
         end
         return Refresh
     end,

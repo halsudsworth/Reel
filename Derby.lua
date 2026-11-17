@@ -121,7 +121,8 @@ end
 
 ns.RegisterBarSegment({
     key = "derby",
-    label = "Tastyfish (Sunday derby only)",
+    label = "Tastyfish",
+    hint = "Sundays", -- dim, beside it on the Bar page
     name = "Tastyfish",
     group = "status",
     order = 5,

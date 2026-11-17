@@ -20,6 +20,18 @@ function W.Label(parent, text, template)
 end
 
 -- Small grey wrapped text, used under a control to explain it.
+-- A tooltip on a control: what used to be a note printed under it.
+function W.Tip(frame, text)
+    frame.tip = text
+    if frame.ownTip then return end -- it shows frame.tip itself
+    frame:HookScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(text, 1, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    frame:HookScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
 function W.Note(parent, text, width)
     local fs = W.Label(parent, text, "GameFontDisableSmall")
     fs:SetWidth(width)
@@ -31,6 +43,7 @@ function W.Checkbox(parent, text, get, set)
     cb:SetSize(24, 24)
     local label = W.Label(cb, text, "GameFontHighlight")
     label:SetPoint("LEFT", cb, "RIGHT", 2, 0)
+    cb.label = label
     cb:SetScript("OnClick", function(self) set(self:GetChecked() and true or false) end)
     cb.Refresh = function() cb:SetChecked(get()) end
     cb.SetActive = function(_, active)
@@ -101,7 +114,7 @@ local function Menu(b, width, options, get, set)
             local item = items[i]
             if not item then
                 item = CreateFrame("Button", nil, menu)
-                item:SetSize(width - 8, 20)
+                item:SetHeight(20)
                 item:SetPoint("TOPLEFT", 4, -4 - (i - 1) * 20)
                 item:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
                 item.text = W.Label(item, "", "GameFontHighlight")
@@ -118,7 +131,21 @@ local function Menu(b, width, options, get, set)
             item:Show()
         end
         for i = #list + 1, #items do items[i]:Hide() end
-        menu:SetSize(width, #list * 20 + 8)
+        -- As wide as the longest entry (in the list's own font) and padding, never narrower than
+        -- the button; from the button's left edge, shifted left if it would run off the screen.
+        local listW = width
+        for i = 1, #list do listW = math.max(listW, math.ceil(items[i].text:GetStringWidth()) + 6 + 12 + 8) end
+        for i = 1, #list do items[i]:SetWidth(listW - 8) end
+        menu:SetSize(listW, #list * 20 + 8)
+        local shift = 0
+        local left, screen = b:GetLeft(), UIParent:GetRight()
+        if left and screen then
+            local k = UIParent:GetEffectiveScale() / menu:GetEffectiveScale()
+            shift = math.min(0, screen * k - 4 - (left + listW))
+        end
+        menu:ClearAllPoints()
+        menu:SetPoint("TOPLEFT", b, "BOTTOMLEFT", shift, -2)
+        menu.width = listW
     end
 
     b:SetScript("OnClick", function()
@@ -128,7 +155,7 @@ local function Menu(b, width, options, get, set)
     b:SetScript("OnHide", function() menu:Hide() end)
     b.Refresh = function()
         for _, option in ipairs(Options()) do
-            if option.value == get() then (b.SetLabel or b.SetText)(b, option.text) end
+            if option.value == get() then b.ShowChoice(b, option.text) end
         end
     end
     return menu
@@ -141,6 +168,36 @@ function W.Dropdown(parent, text, width, options, get, set)
     b:SetSize(width, 22)
     local label = W.Label(b, text, "GameFontHighlight")
     label:SetPoint("RIGHT", b, "LEFT", -8, 0)
+    b.label = label
+    -- The chosen entry on the button, cut with "…" if it doesn't fit; the full name is then in
+    -- the button's tooltip (with any note W.Tip gives it).
+    local measure = b:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    measure:Hide()
+    local room = width - 20
+    b.ShowChoice = function(_, full)
+        measure:SetText(full)
+        local shown = full
+        if measure:GetStringWidth() > room then
+            repeat
+                shown = shown:gsub("[%z\1-\127\194-\244][\128-\191]*$", "")
+                measure:SetText(shown .. "…")
+            until shown == "" or measure:GetStringWidth() <= room
+            shown = shown .. "…"
+            b.cut = full
+        else
+            b.cut = nil
+        end
+        b:SetText(shown)
+    end
+    b.ownTip = true
+    b:HookScript("OnEnter", function(self)
+        if not (self.cut or self.tip) then return end
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(self.cut or self.tip, 1, 1, 1, 1, true)
+        if self.cut and self.tip then GameTooltip:AddLine(self.tip, nil, nil, nil, true) end
+        GameTooltip:Show()
+    end)
+    b:HookScript("OnLeave", function() GameTooltip:Hide() end)
     local menu = Menu(b, width, options, get, set)
     b.SetActive = function(_, active)
         b:SetEnabled(active)
@@ -327,6 +384,7 @@ function W.Picker(parent, width, options, get, set)
     fs:SetPoint("RIGHT", -20, 0)
     b.label = fs
     function b.SetLabel(_, text) fs:SetText(text) end
+    b.ShowChoice = b.SetLabel
     -- the caret: a small amber triangle pointing down
     for i, w in ipairs({ 7, 5, 3, 1 }) do
         local t = W.Solid(b, "ARTWORK", W.C.amber, 1)

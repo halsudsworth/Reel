@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.1
+
+- Settings: the R.E.E.L. page in Options now has the presets, your R.E.E.L. key bindings with the key each is bound to, an Open Key Bindings button, Export, and links to the other pages.
+- Settings are back on six pages, in alphabetical order: Bar, Casting, Clean View, General, Immersion and Sound.
+- The Bar page is a single table of what's on your bar, in the bar's order. Each item's options sit on the same line, and the page fits without scrolling.
+- While a settings page or the R.E.E.L. window is open, the bar shows everything you've checked, even without a fishing pole equipped.
+- The apply-lure button only shows with a fishing pole equipped.
+- Dropdown lists are as wide as their longest entry, so long lure names aren't cut off.
+- Fixed: with Fishing skill off the bar, a catch didn't show at all. It now shows in the bar's first item.
+- Fixed: dragging the bar could drop it partway.
+
 ## 1.4.0
 
 A new look for everything R.E.E.L. shows you: oiled oak, brass nails and lantern light.

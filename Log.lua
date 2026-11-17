@@ -264,7 +264,7 @@ end
 -- the number turns amber while a catch is showing.
 ns.RegisterBarSegment({
     key = "session",
-    label = "Fish caught this session",
+    label = "Fish this session",
     name = "Session",
     group = "session",
     order = 40,
@@ -284,7 +284,7 @@ ns.RegisterBarSegment({
 -- "38 catches an hour" this session. Off until turned on on the Bar page.
 ns.RegisterBarSegment({
     key = "catchRate",
-    label = "Catches per hour this session",
+    label = "Catches per hour",
     name = "Pace",
     group = "session",
     order = 41,

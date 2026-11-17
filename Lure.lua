@@ -92,7 +92,8 @@ local function UpdateButton()
             button.count:SetText(GetItemCountCompat(lure.id))
         end
     end
-    button:SetShown(lure ~= nil)
+    -- no pole, no button: a lure can't go on anything else
+    button:SetShown(lure ~= nil and ns.PoleEquipped())
 end
 
 ns.On("REEL_READY", function() ns.WhenOutOfCombat(function()
@@ -128,6 +129,15 @@ ns.On("PLAYER_REGEN_ENABLED", UpdateButton)
 -- (Icons: it is the row's icon).
 ns.RegisterBarSegment({
     key = "lure", label = "Lure timer", name = "Lure", group = "status", order = 20,
+    -- The button works without the timer (it gets a Lure cell of its own), so it stays clickable
+    -- with the row off; its Use menu needs the button.
+    options = {
+        { key = "lureButton", label = "Apply-lure button", always = true,
+          changed = function() UpdateButton() end },
+        { key = "lureChoice", label = "Use", choices = function() return ns.LureOptions() end, needs = "lureButton",
+          note = "A picked lure falls back to your best one when you run out.",
+          changed = function() UpdateButton() end },
+    },
     icon = function() return buttonLure and GetItemIconCompat(buttonLure.id) or "Interface\\Icons\\INV_Misc_Gem_Variety_02" end,
     text = function(s)
         local left = ns.LureTimeLeft()
@@ -138,8 +148,8 @@ ns.RegisterBarSegment({
             if left <= WARN_SECONDS then t = "|cffff4a3a" .. t .. " !!|r" end
             return { value = t, tip = tip, button = button, reserve = "88:88 !!" }, true
         end
-        if ns.PoleEquipped() then
-            if button then
+        if ns.PoleOrPreview() then
+            if button and ns.PoleEquipped() then
                 return { value = "|cffff4a3aNone|r", short = "|cffff4a3aNone|r", tip = "No lure - click the icon to add one", button = true, reserve = "88:88 !!" }, true
             end
             -- None to put on: the lure's icon greyed with a red "None", the same as Food.

@@ -137,7 +137,7 @@ ns.On("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateBu
 -- With no buff and food in bags, the food button sits in this row.
 ns.RegisterBarSegment({
     key = "buffs",
-    label = "Fishing skill buffs (food)",
+    label = "Food buff",
     name = "Food",
     group = "status",
     order = 25,
@@ -155,7 +155,7 @@ ns.RegisterBarSegment({
             -- the buff's own icon, plain (not a button)
             return { value = first, tip = table.concat(tips, "\n"), reserve = "88:88", icon = icon or FOOD_ICON }, true
         end
-        if ns.PoleEquipped() then
+        if ns.PoleOrPreview() then
             if buttonFood then
                 local tip = "No food: click to eat " .. buttonFood.name
                 if s.foodMissing then
@@ -170,7 +170,7 @@ ns.RegisterBarSegment({
         end
     end,
     options = {
-        { key = "foodMissing", label = "Show \"No food\" when missing" },
+        { key = "foodMissing", label = "Show \"None\" when missing" },
         { key = "foodChoice", label = "Use", choices = function() return ns.FoodOptions() end,
           note = "A picked food falls back to your best one when you run out.",
           changed = function() UpdateButton() end },

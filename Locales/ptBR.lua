@@ -436,3 +436,9 @@ L["any starting zone"] = "qualquer zona inicial"
 
 -- Bar option
 L["Show catches"] = "Mostrar capturas"
+
+-- Where a recipe comes from
+L["Carrie's Cookbook (source unknown)"] = "Livro de receitas da Carrie (origem desconhecida)"
+L["Drops very rarely from mobs"] = "Saque muito raro de inimigos"
+L["Drops very rarely from mobs in Redridge Mountains"] = "Saque muito raro de inimigos nas Montanhas Cristarrubra"
+L["Source unknown"] = "Origem desconhecida"

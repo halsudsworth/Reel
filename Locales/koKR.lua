@@ -436,3 +436,9 @@ L["any starting zone"] = "아무 시작 지역"
 
 -- Bar option
 L["Show catches"] = "낚은 것 표시"
+
+-- Where a recipe comes from
+L["Carrie's Cookbook (source unknown)"] = "캐리의 요리책 (출처 모름)"
+L["Drops very rarely from mobs"] = "적에게서 아주 드물게 획득"
+L["Drops very rarely from mobs in Redridge Mountains"] = "붉은마루 산맥의 적에게서 아주 드물게 획득"
+L["Source unknown"] = "출처 모름"

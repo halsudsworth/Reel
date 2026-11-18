@@ -436,3 +436,9 @@ L["any starting zone"] = "beliebiges Startgebiet"
 
 -- Bar option
 L["Show catches"] = "Fänge zeigen"
+
+-- Where a recipe comes from
+L["Carrie's Cookbook (source unknown)"] = "Carries Kochbuch (Herkunft unbekannt)"
+L["Drops very rarely from mobs"] = "Sehr seltene Beute von Gegnern"
+L["Drops very rarely from mobs in Redridge Mountains"] = "Sehr seltene Beute von Gegnern im Rotkammgebirge"
+L["Source unknown"] = "Herkunft unbekannt"

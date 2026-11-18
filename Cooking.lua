@@ -38,6 +38,45 @@ local VENDOR_FACTION = {
     ["Xen'to"] = "Horde", ["Zansoa"] = "Horde",
 }
 
+-- NPC IDs of the recipe vendors (MapData.lua and site/data/recipe_vendors.json, from Wowhead
+-- Forever), to show each by the client's own name for it. Reagent Bot and Repair Bot are bots
+-- players put down and have no fixed ID; they stay as written.
+local VENDOR_IDS = {
+    ["Apothecary Quinard"] = 17070, ["Aza'bek"] = 248198, ["Carrie Hearthfire"] = 240604,
+    ["Catherine Leland"] = 5494, ["Chief Expeditionary Requisitioner Enkles"] = 17068,
+    ["Derak Nightfall"] = 2397, ["Derek Odds"] = 252083, ["Emrul Riknussun"] = 5160,
+    ["Erika Tate"] = 5483, ["Fimbo Greasemitz"] = 259962, ["Fyldan"] = 4223, ["Gikkix"] = 8137,
+    ["Gloria Femmel"] = 3085, ["Gretta Ganter"] = 8508, ["Gritta Chumwater"] = 260487,
+    ["Harn Longcast"] = 5940, ["Heldan Galesong"] = 4307, ["Kalsey Sanden"] = 256731,
+    ["Kelsey Yance"] = 2664, ["Khara Deepwater"] = 1684, ["Killian Sanatha"] = 5748,
+    ["Kilxx"] = 3497, ["Kriggon Talsone"] = 4305, ["Lindea Rabonne"] = 2383,
+    ["Lizbeth Cromwell"] = 4574, ["Martine Tramblay"] = 3550, ["Micha Yance"] = 2381,
+    ["Miranda Turner"] = 272646, ["Naal Mistrunner"] = 3027, ["Nessa Shadowsong"] = 10118,
+    ["Nyalah Brightfire"] = 257006, ["Nyoma"] = 4265, ["Otho Moji'ko"] = 14738, ["Paige"] = 267000,
+    ["Qujo"] = 270780, ["Ronald Burch"] = 4553, ["Sewa Mistrunner"] = 3029, ["Shankys"] = 3333,
+    ["Sheendra Tallgrass"] = 8145, ["Stuart Fleming"] = 3178, ["Tansy Puddlefizz"] = 5162,
+    ["Tarban Hearthgrain"] = 8307, ["Tharynn Bouden"] = 66, ["Vivianna"] = 7947,
+    ["Wik'Tar"] = 12962, ["Wulan"] = 12033, ["Xen'to"] = 3400, ["Zansoa"] = 5942,
+    ["Zerril Softbreeze"] = 251905,
+}
+
+-- A vendor's name in the client's language: the game names an NPC on a unit tooltip once the
+-- client has seen it, so the English name stands in until then.
+local ENGLISH = GetLocale():find("^en") ~= nil
+local npcNames = {}
+local function VendorName(english)
+    if ENGLISH then return english end
+    local id = VENDOR_IDS[english]
+    if not id then return english end
+    if npcNames[id] then return npcNames[id] end
+    if C_TooltipInfo and C_TooltipInfo.GetHyperlink then
+        local ok, info = pcall(C_TooltipInfo.GetHyperlink, "unit:Creature-0-0-0-0-" .. id .. "-0000000000")
+        local name = ok and info and info.lines and info.lines[1] and info.lines[1].leftText
+        if name and name ~= "" then npcNames[id] = name; return name end
+    end
+    return english
+end
+
 -- Continent of each zone, from Forever's own map tree (C_Map.GetMapInfo
 -- parents, read on launch night). Zephras Isle hangs off the world map on
 -- its own.
@@ -62,7 +101,7 @@ end
 -- your faction. A vendor in the zone you're in first, then one on your
 -- continent, then anywhere. Vendors of the other faction are left out.
 local function Where(recipe)
-    if not recipe.from then return recipe.how end
+    if not recipe.from then return L[recipe.how] end
     local faction = UnitFactionGroup("player")
     local zone = ns.EnglishZone(GetZoneText()) -- the vendor list is in English
     local continent = CONTINENT[zone]
@@ -76,9 +115,17 @@ local function Where(recipe)
         end
     end
     if not pick then return L["Vendor"] end
-    local text = pick[1] .. ", " .. pick[2]
+    local text = VendorName(pick[1]) .. ", " .. ns.LocalZone(pick[2])
     if count > 1 then text = text .. string.format(L[" (+%d more)"], count - 1) end
     return text
+end
+
+-- A recipe's name in the client's language: the recipe spell's own name.
+local function RecipeName(recipe)
+    if ENGLISH then return recipe.name end
+    local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(recipe.spell)
+        or GetSpellInfo and GetSpellInfo(recipe.spell)
+    return name or recipe.name
 end
 
 local function AddLines(tooltip, id)
@@ -88,9 +135,9 @@ local function AddLines(tooltip, id)
     tooltip:AddLine(" ")
     for _, recipe in ipairs(recipes) do
         if Known(recipe.spell) then
-            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. recipe.name .. " " .. GREEN .. L["(known)"] .. "|r")
+            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. RecipeName(recipe) .. " " .. GREEN .. L["(known)"] .. "|r")
         else
-            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. recipe.name .. GREY .. string.format(L[" (skill %s)"], recipe.cooking) .. "|r")
+            tooltip:AddLine(GOLD .. L["Cooking:"] .. "|r " .. RecipeName(recipe) .. GREY .. string.format(L[" (skill %s)"], recipe.cooking) .. "|r")
             tooltip:AddLine("   " .. string.format(L["Recipe: %s"], Where(recipe)), 1, 1, 1)
         end
     end

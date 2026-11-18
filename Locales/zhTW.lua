@@ -436,3 +436,9 @@ L["any starting zone"] = "任意新手區域"
 
 -- Bar option
 L["Show catches"] = "顯示漁獲"
+
+-- Where a recipe comes from
+L["Carrie's Cookbook (source unknown)"] = "卡莉的烹飪書（來源未知）"
+L["Drops very rarely from mobs"] = "怪物極少掉落"
+L["Drops very rarely from mobs in Redridge Mountains"] = "赤脊山的怪物極少掉落"
+L["Source unknown"] = "來源未知"

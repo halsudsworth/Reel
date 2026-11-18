@@ -436,3 +436,9 @@ L["any starting zone"] = "любая стартовая локация"
 
 -- Bar option
 L["Show catches"] = "Показывать улов"
+
+-- Where a recipe comes from
+L["Carrie's Cookbook (source unknown)"] = "Поваренная книга Кэрри (откуда — неизвестно)"
+L["Drops very rarely from mobs"] = "Очень редкая добыча с противников"
+L["Drops very rarely from mobs in Redridge Mountains"] = "Очень редкая добыча с противников в Красногорье"
+L["Source unknown"] = "Откуда — неизвестно"

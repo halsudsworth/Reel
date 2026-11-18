@@ -443,6 +443,12 @@ L["any starting zone"] = "any starting zone"
 -- Skill.lua (bar option)
 L["Show catches"] = "Show catches"
 
+-- Cooking.lua (where a recipe comes from, FishData.lua)
+L["Carrie's Cookbook (source unknown)"] = "Carrie's Cookbook (source unknown)"
+L["Drops very rarely from mobs"] = "Drops very rarely from mobs"
+L["Drops very rarely from mobs in Redridge Mountains"] = "Drops very rarely from mobs in Redridge Mountains"
+L["Source unknown"] = "Source unknown"
+
 -- Options.lua (page names, shown through L[def.name])
 L["This client has no Key Bindings page to open."] = "This client has no Key Bindings page to open."
 L["Presets"] = "Presets"

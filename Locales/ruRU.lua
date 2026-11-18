@@ -433,3 +433,6 @@ L["Azshara"] = "Азшара"
 L["Race to %d %s"] = "Гонка: %d шт. %s"
 L["a starting zone"] = "стартовой локации"
 L["any starting zone"] = "любая стартовая локация"
+
+-- Bar option
+L["Show catches"] = "Показывать улов"

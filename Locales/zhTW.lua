@@ -433,3 +433,6 @@ L["Azshara"] = "艾薩拉"
 L["Race to %d %s"] = "搶先釣到%d條%s"
 L["a starting zone"] = "新手區域"
 L["any starting zone"] = "任意新手區域"
+
+-- Bar option
+L["Show catches"] = "顯示漁獲"

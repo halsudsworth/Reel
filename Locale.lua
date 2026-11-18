@@ -440,6 +440,9 @@ L["Race to %d %s"] = "Race to %d %s"
 L["a starting zone"] = "a starting zone"
 L["any starting zone"] = "any starting zone"
 
+-- Skill.lua (bar option)
+L["Show catches"] = "Show catches"
+
 -- Options.lua (page names, shown through L[def.name])
 L["This client has no Key Bindings page to open."] = "This client has no Key Bindings page to open."
 L["Presets"] = "Presets"

@@ -233,6 +233,7 @@ end
 -- Called by the journal when fishing loot comes in: the first item and how many of it this
 -- character has caught in all (zone and subzone are passed but no longer shown).
 function ns.ShowCatch(itemID, link, count)
+    if ReelDB.settings.showCatch == false then return end
     local name = link and link:match("%[(.-)%]") or string.format(L["item %s"], itemID)
     local color = link and link:match("|c(%x%x%x%x%x%x%x%x)") or "ffffffff"
     local GetIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
@@ -1255,6 +1256,8 @@ ns.RegisterPage({
                         function() return s[option.key] end,
                         function(v) s[option.key] = v; if option.changed then option.changed() end; ns.UpdateBar(); Refresh() end)
                     sub:SetPoint("LEFT", panel, "TOPLEFT", x, mid)
+                    -- the next checkbox in the row sits after this one's label
+                    x = x + 30 + math.ceil(sub.label and sub.label:GetStringWidth() or 120) + 24
                 end
                 if option.note then W.Tip(sub, option.note) end
                 controls[#controls + 1] = sub

@@ -101,6 +101,7 @@ end)
 -- with the skill line under it showing base against cap.
 ns.RegisterDefaults({
     castCountdown = false, -- the skill line counts the cast down while the bobber is out
+    showCatch = true,      -- the skill line shows each catch for a few seconds (Bar.lua)
 })
 
 -- The Fishing channel's start and end in seconds (GetTime's clock), from the client's channel info,
@@ -136,5 +137,6 @@ ns.RegisterBarSegment({
     end,
     options = {
         { key = "castCountdown", label = L["Cast countdown"] },
+        { key = "showCatch", label = L["Show catches"] },
     },
 })

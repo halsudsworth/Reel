@@ -433,3 +433,6 @@ L["Azshara"] = "Azshara"
 L["Race to %d %s"] = "Corsa a %d %s"
 L["a starting zone"] = "una zona iniziale"
 L["any starting zone"] = "qualsiasi zona iniziale"
+
+-- Bar option
+L["Show catches"] = "Mostra le catture"

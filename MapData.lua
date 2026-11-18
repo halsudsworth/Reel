@@ -1,4 +1,4 @@
--- Fishing NPCs for the map pins (not drawn yet; see ROADMAP). Coordinates
+-- Fishing NPCs for the map pins (MapPins.lua). Coordinates
 -- are Wowhead Forever's first pin for each NPC (rounded to 0.2), read on
 -- 2026-10-24. "full set" vendors sell both poles and all four lures.
 -- Faction: "A", "H" or "both". "teaches" is from Wowhead Forever's trainer pages (2026-10-25):

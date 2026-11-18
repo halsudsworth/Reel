@@ -87,13 +87,25 @@ ns.RegisterPage({
             function(v) s.cookingTips = v end)
         cooking:SetPoint("TOPLEFT", minimap, "BOTTOMLEFT", 0, -4)
 
+        local worldPins = W.Checkbox(panel, L["Show fishing trainers and vendors on the world map"],
+            function() return s.mapPinsWorld end,
+            function(v) s.mapPinsWorld = v; ns.RefreshMapPins() end)
+        worldPins:SetPoint("TOPLEFT", cooking, "BOTTOMLEFT", 0, -4)
+
+        local miniPins = W.Checkbox(panel, L["Show fishing trainers and vendors on the minimap"],
+            function() return s.mapPinsMinimap end,
+            function(v) s.mapPinsMinimap = v; ns.RefreshMapPins() end)
+        miniPins:SetPoint("TOPLEFT", worldPins, "BOTTOMLEFT", 0, -4)
+
         local reset = W.Button(panel, L["Reset catch data..."], 150, ns.ConfirmReset)
-        reset:SetPoint("TOPLEFT", cooking, "BOTTOMLEFT", 4, -16)
+        reset:SetPoint("TOPLEFT", miniPins, "BOTTOMLEFT", 4, -16)
 
         return function()
             delay.Refresh()
             minimap.Refresh()
             cooking.Refresh()
+            worldPins.Refresh()
+            miniPins.Refresh()
         end
     end,
 })

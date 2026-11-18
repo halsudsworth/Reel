@@ -434,6 +434,8 @@ SlashCmdList.REEL = function(msg)
         ns.Debug()
     elseif msg == "debug sound" then
         ns.DebugSound()
+    elseif msg == "debug pins" then
+        ns.DebugPins()
     elseif msg == "derby" then
         ns.ToggleDerbyTest()
     elseif msg == "where" then

@@ -63,7 +63,8 @@ end
 function ns.EnglishZone(name)
     if type(name) ~= "string" then return name end
     if not toEnglish then BuildZoneNames() end
-    return toEnglish[name] or name
+    -- then a name from another client language (AreaData.lua), for a journal kept in that language
+    return toEnglish[name] or (ns.ZONE_FOREIGN and ns.ZONE_FOREIGN[name]) or name
 end
 
 -- This client's name for an English zone name, or the name as it is.

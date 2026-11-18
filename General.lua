@@ -77,10 +77,15 @@ ns.RegisterPage({
         local note = W.Note(panel, L["How long after your last bobber is gone before R.E.E.L. counts you as done fishing. Your sound settings go back, the bar hides, and clean view can end."], ns.CONTENT_WIDTH - 4)
         note:SetPoint("TOPLEFT", delay, "BOTTOMLEFT", -labelRoom, -24)
 
+        local size = W.Slider(panel, L["Window size"], 70, 150, 5, "%",
+            function() return s.windowScale end,
+            function(v) ns.SetWindowScale(v) end)
+        size:SetPoint("TOPLEFT", note, "BOTTOMLEFT", W.Room(labelRoom, size), -18)
+
         local minimap = W.Checkbox(panel, L["Show minimap button"],
             function() return s.minimapButton end,
             function(v) s.minimapButton = v; ns.UpdateMinimapButton() end)
-        minimap:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -16)
+        minimap:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -56)
 
         local cooking = W.Checkbox(panel, L["Show cooking recipes on fish tooltips"],
             function() return s.cookingTips end,
@@ -102,6 +107,7 @@ ns.RegisterPage({
 
         return function()
             delay.Refresh()
+            size.Refresh()
             minimap.Refresh()
             cooking.Refresh()
             worldPins.Refresh()

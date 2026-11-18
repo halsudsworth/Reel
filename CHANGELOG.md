@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.6.0
+
+- New: the Journal's Records tab is now two tabs, Collection and Feats, laid out by category like the game's achievements. Collection shows the trophy fish, treasures, bloated fish, pools and wreckage, and the Extravaganza fish, each with its name and where to look. Feats has 23 feats, and each opens to show what's left.
+- New: Window size on the General page, from 70 to 150%. You can also drag the R.E.E.L. window's bottom-right corner.
+- New: Fishing NPCs on the minimap can be turned on and off from the minimap button's menu.
+- New: Show catches option on the Bar page's Fishing skill row.
+- Cooking tips on fish tooltips are in your client's language.
+- Item names in the Journal are in your client's language, even for fish caught while playing in another one. Zones and subzones fished in another language are grouped with the same place.
+- The Journal's tables line up from tab to tab, and white items match the rest of the table's text.
+
 ## 1.5.0
 
 - New: R.E.E.L. in German, French, Spanish (Spain and Latin America), Italian, Brazilian Portuguese, Russian, Korean and Chinese (Simplified and Traditional).

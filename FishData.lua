@@ -136,39 +136,42 @@ ns.FISH_RECIPES = {
     },
 }
 
--- Rare and special fish for the Records tab, in this order.
--- Notable catches for the Records tab, grouped. Everything here arrives through the loot
+-- Notable catches for the Collection tab, grouped. Everything here arrives through the loot
 -- window, so the journal's per-item first-catch record is enough to light
--- one up. Old Ironjaw and Old Crafty aren't on Forever.
+-- one up. Old Ironjaw and Old Crafty aren't on Forever. where: the short where-to-look label
+-- under the item's square; note: the longer line in its tooltip.
+-- Only finds with a confirmed source: the Ravaged Fishing Pole (285094) stays out until someone
+-- knows where it comes from.
 ns.NOTABLE = {
     { group = "Treasures", items = {
-        { id = 8350,  name = "The 1 Ring",                        note = "Open water, anywhere" },
-        { id = 6307,  name = "Message in a Bottle",               note = "Open water, low-level zones" },
-        { id = 6643,  name = "Bloated Brilliant Smallfish",        note = "Has a gem inside" },
-        { id = 6645,  name = "Bloated Mud Snapper",                note = "Has a gem inside" },
-        { id = 6647,  name = "Bloated Bristle Whisker Catfish",    note = "Has a gem inside" },
-        { id = 8366,  name = "Bloated Mithril Head Trout",         note = "Has a gem inside" },
-        { id = 13881, name = "Bloated Redgill",                    note = "Has a gem inside" },
-        { id = 13891, name = "Bloated Whitescale Salmon",          note = "Has a gem inside" },
-        { id = 21243, name = "Bloated Mightfish",                  note = "Azshara" },
-        { id = 285094, name = "Ravaged Fishing Pole",              note = "Source still unknown" },
+        { id = 8350,  name = "The 1 Ring",                        note = "Open water, anywhere", where = "Open water" },
+        { id = 6307,  name = "Message in a Bottle",               note = "Open water, low-level zones", where = "Low-level water" },
+    } },
+    { group = "Bloated fish", items = {
+        { id = 6643,  name = "Bloated Brilliant Smallfish",        note = "Has a gem inside", where = "Smallfish water" },
+        { id = 6645,  name = "Bloated Mud Snapper",                note = "Has a gem inside", where = "Snapper water" },
+        { id = 6647,  name = "Bloated Bristle Whisker Catfish",    note = "Has a gem inside", where = "Catfish water" },
+        { id = 8366,  name = "Bloated Mithril Head Trout",         note = "Has a gem inside", where = "Trout water" },
+        { id = 13881, name = "Bloated Redgill",                    note = "Has a gem inside", where = "Redgill water" },
+        { id = 13891, name = "Bloated Whitescale Salmon",          note = "Has a gem inside", where = "Salmon water" },
+        { id = 21243, name = "Bloated Mightfish",                  note = "Azshara", where = "Azshara" },
     } },
     { group = "Pools and wreckage", items = {
-        { id = 20708, name = "Tightly Sealed Trunk",   note = "Floating Debris pools" },
-        { id = 21113, name = "Watertight Trunk",       note = "Schooner Wreckage pools" },
-        { id = 21150, name = "Iron Bound Trunk",       note = "Waterlogged Wreckage pools" },
-        { id = 21228, name = "Mithril Bound Trunk",    note = "Bloodsail Wreckage pools" },
-        { id = 6351,  name = "Dented Crate",           note = "Near Venture Co. camps" },
-        { id = 6352,  name = "Waterlogged Crate",      note = "Near Venture Co. camps" },
-        { id = 6357,  name = "Sealed Crate",           note = "Near Venture Co. camps" },
-        { id = 13874, name = "Heavy Crate",            note = "Near Venture Co. camps" },
+        { id = 20708, name = "Tightly Sealed Trunk",   note = "Floating Debris pools", where = "Floating Debris" },
+        { id = 21113, name = "Watertight Trunk",       note = "Schooner Wreckage pools", where = "Schooner Wreckage" },
+        { id = 21150, name = "Iron Bound Trunk",       note = "Waterlogged Wreckage pools", where = "Waterlogged Wreckage" },
+        { id = 21228, name = "Mithril Bound Trunk",    note = "Bloodsail Wreckage pools", where = "Bloodsail Wreckage" },
+        { id = 6351,  name = "Dented Crate",           note = "Near Venture Co. camps", where = "Venture Co. camps" },
+        { id = 6352,  name = "Waterlogged Crate",      note = "Near Venture Co. camps", where = "Venture Co. camps" },
+        { id = 6357,  name = "Sealed Crate",           note = "Near Venture Co. camps", where = "Venture Co. camps" },
+        { id = 13874, name = "Heavy Crate",            note = "Near Venture Co. camps", where = "Venture Co. camps" },
     } },
     { group = "Stranglethorn Extravaganza", items = {
-        { id = 19807, name = "Speckled Tastyfish",              note = "Sundays 2-4 PM, Booty Bay coast" },
-        { id = 19805, name = "Keefer's Angelfish",              note = "About 1 in 200 during the contest" },
-        { id = 19803, name = "Brownell's Blue Striped Racer",   note = "About 1 in 200 during the contest" },
-        { id = 19806, name = "Dezian Queenfish",                note = "About 1 in 200 during the contest" },
-        { id = 19808, name = "Rockhide Strongfish",             note = "A fished mace" },
+        { id = 19807, name = "Speckled Tastyfish",              note = "Sundays 2-4 PM, Booty Bay coast", where = "Sundays 2-4 PM" },
+        { id = 19805, name = "Keefer's Angelfish",              note = "About 1 in 200 during the contest", where = "1 in 200, contest" },
+        { id = 19803, name = "Brownell's Blue Striped Racer",   note = "About 1 in 200 during the contest", where = "1 in 200, contest" },
+        { id = 19806, name = "Dezian Queenfish",                note = "About 1 in 200 during the contest", where = "1 in 200, contest" },
+        { id = 19808, name = "Rockhide Strongfish",             note = "A fished mace", where = "Contest, a mace" },
     } },
 }
 
@@ -187,17 +190,6 @@ function ns.ZoneFish()
     end
     return zoneFish
 end
-
-ns.RARE_FISH = {
-    { id = 19805, note = "Booty Bay rare fish quest" },  -- Keefer's Angelfish
-    { id = 19803, note = "Booty Bay rare fish quest" },  -- Brownell's Blue Striped Racer
-    { id = 19806, note = "Booty Bay rare fish quest" },  -- Dezian Queenfish
-    { id = 19808, note = "A fished mace" },              -- Rockhide Strongfish
-    { id = 16967, note = "Nat Pagle quest" },            -- Feralas Ahi
-    { id = 16968, note = "Nat Pagle quest" },            -- Sar'theris Striker
-    { id = 16969, note = "Nat Pagle quest" },            -- Savage Coast Blue Sailfin
-    { id = 16970, note = "Nat Pagle quest" },            -- Misty Reed Mahi Mahi
-}
 
 -- Everything else that comes up on the line. Not fish: kept out of the zone-fish count,
 -- the zone clear and the uncaught list. kind: clam (clams and pearls), crate (crates and chests), trunk (trunks and rum), trophy (trophy fish), material (materials), odd (odd things), gear (only from fishing).

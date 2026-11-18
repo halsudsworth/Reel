@@ -28,6 +28,10 @@ ns.MEDAL_SIZE, ns.MEDAL_X, ns.MEDAL_Y = 60, 15, 9
 ns.BANNER_TITLE_X, ns.BANNER_TITLE_Y = 86, 30
 ns.CONTENT_WIDTH = 300                        -- a settings page's usable width; Options.lua sets it per column
 
+ns.RegisterDefaults({
+    windowScale = 100, -- percent: the whole window grows or shrinks together (General page)
+})
+
 local pages = {}
 local window, main, slot, gear
 local tabs = {}
@@ -69,9 +73,16 @@ local function TitleButton(parent, onClick)
     return b
 end
 
+-- The window's size: one scale for everything in it, so every tab's layout stays as drawn.
+function ns.SetWindowScale(percent)
+    ReelDB.settings.windowScale = percent
+    if window then window:SetScale(percent / 100) end
+end
+
 local function BuildWindow()
     window = CreateFrame("Frame", "ReelFrame", UIParent)
     window:SetSize(WIDTH, HEIGHT)
+    window:SetScale((ReelDB.settings.windowScale or 100) / 100)
     window:SetPoint("CENTER")
     window:SetMovable(true)
     window:SetClampedToScreen(true)
@@ -84,6 +95,33 @@ local function BuildWindow()
     tinsert(UISpecialFrames, "ReelFrame") -- close with Escape
     if ns.RefreshKeep then ns.RefreshKeep() end -- built during clean view: don't inherit the fade
     ns.OakPlate(window)
+
+    -- The size grip in the bottom-right corner: dragging it scales the whole window (70-150%),
+    -- its top-left corner staying put, the same setting as the General page's Window size.
+    local grip = CreateFrame("Button", nil, window)
+    grip:SetSize(16, 16)
+    grip:SetPoint("BOTTOMRIGHT", -3, 3)
+    grip:SetFrameLevel(window:GetFrameLevel() + 20)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    local left, top -- the window's top-left corner in UIParent's units while dragging
+    local function Follow()
+        local x = GetCursorPosition() / UIParent:GetEffectiveScale()
+        local percent = math.floor((x - left) / WIDTH * 100 / 5 + 0.5) * 5
+        percent = math.max(70, math.min(150, percent))
+        local scale = percent / 100
+        window:SetScale(scale)
+        window:ClearAllPoints()
+        window:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left / scale, top / scale)
+        ReelDB.settings.windowScale = percent
+    end
+    grip:SetScript("OnMouseDown", function()
+        local scale = window:GetScale()
+        left, top = window:GetLeft() * scale, window:GetTop() * scale
+        grip:SetScript("OnUpdate", Follow)
+    end)
+    grip:SetScript("OnMouseUp", function() grip:SetScript("OnUpdate", nil) end)
 
     -- the brass nameplate over the top edge
     local sign = CreateFrame("Frame", nil, window)

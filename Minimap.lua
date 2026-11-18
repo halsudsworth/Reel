@@ -38,6 +38,8 @@ local QUICK = {
       set = function(_, v) ns.SetCleanView(v) end },
     { text = L["Splash booster"], get = function(s) return s.boost end,
       set = function(s, v) s.boost = v; ns.ApplySettings() end },
+    { text = L["Fishing NPCs on the minimap"], get = function(s) return s.mapPinsMinimap end,
+      set = function(s, v) s.mapPinsMinimap = v; ns.RefreshMapPins() end },
     { text = L["Events"], run = function() ns.ShowEvents() end },
     { text = L["Export journal"], run = function() ns.ShowExport() end },
     { text = L["Settings"], run = function() ns.OpenOptions() end },
@@ -87,6 +89,13 @@ local function BuildMenu()
         end)
         menu.items[i] = item
     end
+    -- as wide as the longest line, so a translation isn't cut off
+    for _, item in ipairs(menu.items) do
+        for _, r in ipairs({ item:GetRegions() }) do
+            if r.GetStringWidth then width = math.max(width, math.ceil(r:GetStringWidth()) + 34) end
+        end
+    end
+    for _, item in ipairs(menu.items) do item:SetWidth(width - 8) end
     menu:SetSize(width, #QUICK * 20 + 8)
     -- Close a moment after the mouse leaves both the menu and the button.
     local away = 0

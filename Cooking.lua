@@ -79,8 +79,9 @@ end
 
 -- Continent of each zone, from Forever's own map tree (C_Map.GetMapInfo
 -- parents, read on launch night). Zephras Isle hangs off the world map on
--- its own.
+-- its own. Stats.lua's Both sides of the sea feat reads it too.
 local CONTINENT = {}
+ns.CONTINENT = CONTINENT
 for continent, zones in pairs({
     Kalimdor = { "Durotar", "Mulgore", "The Barrens", "Teldrassil", "Darkshore", "Ashenvale",
         "Thousand Needles", "Stonetalon Mountains", "Desolace", "Feralas", "Dustwallow Marsh",

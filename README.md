@@ -4,7 +4,7 @@
 
 Cast, and the interface fades out. Names, nameplates, combat text and tooltips go with it. Graphics go up. What's left is Forever's water, your bobber and one small bar with exactly what you need. We removed everything. Except your fishing line, you'll want that.
 
-While you fish, R.E.E.L. writes it all down. Every catch goes in your journal with where and when you caught it, the rare ones light up in Records, and each zone shows the fish you're still missing. If you want to see how you stack up, you can paste it on halsudsworth.com.
+While you fish, R.E.E.L. writes it all down. Every catch goes in your journal with where and when you caught it, the rare ones fill in your Collection, and each zone shows the fish you're still missing. If you want to see how you stack up, you can paste it on halsudsworth.com.
 
 For World of Warcraft: Forever only.
 
@@ -29,8 +29,9 @@ In English, German, French, Spanish, Italian, Portuguese, Russian, Korean and Ch
 
 ## The journal
 
-- **Every catch:** logged per character with the time, zone, subzone, spot on the map, your skill and level, and everything that came up on the line, not just fish. Fish, zones, sessions and records.
-- **Records:** the 1 Ring, the bloated fish, the wreckage trunks, the Stranglethorn rares and what's new in Forever. Feats for fishing ten zones, a hundred catches in one evening, and every fish in a zone.
+- **Every catch:** logged per character with the time, zone, subzone, spot on the map, your skill and level, and everything that came up on the line, not just fish. Fish, zones, sessions, collection and feats.
+- **Collection:** trophy fish, treasures like the 1 Ring, the bloated fish, the wreckage trunks and the Stranglethorn Extravaganza fish, each with where to look.
+- **Feats:** 23 of them, from fishing ten zones and a hundred catches in one evening to every fish in a zone, each showing what's left to do.
 - **Derby:** a Speckled Tastyfish counter during the Extravaganza, and your Master Angler wins kept.
 
 ## Leaderboards and events

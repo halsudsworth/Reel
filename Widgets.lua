@@ -221,8 +221,11 @@ end
 
 function W.Button(parent, text, width, onClick)
     local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    b:SetSize(width, 22)
     b:SetText(text)
+    -- at least `width`, wider when a translation needs it
+    local fs = b:GetFontString()
+    local need = fs and math.ceil(fs:GetStringWidth()) + 24 or 0
+    b:SetSize(math.max(width, need), 22)
     b:SetScript("OnClick", onClick)
     return b
 end
@@ -231,7 +234,9 @@ end
 -- panels, lantern amber, Friz Quadrata for titles and tabs ----------------------------------
 
 W.TEX = "Interface\\AddOns\\Reel\\Textures\\"
-W.FRIZ = "Fonts\\FRIZQT__.TTF"
+-- The client's own Friz Quadrata: the Russian client has a Cyrillic version and the Korean and
+-- Chinese clients use their own fonts, so the path comes from the game's font, not a fixed file.
+W.FRIZ = GameFontNormal and GameFontNormal.GetFont and GameFontNormal:GetFont() or "Fonts\\FRIZQT__.TTF"
 W.C = {
     ink = "efe3cc", ink2 = "cdb894", dim = "8a7a63", amber = "f2b24a", amber2 = "ffd27a",
     char = "120d09", pitch = "0b0805", bar = "0d0906", foot = "0e0a07", card = "0f0b08",

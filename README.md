@@ -8,6 +8,8 @@ While you fish, R.E.E.L. writes it all down. Every catch goes in your journal wi
 
 For World of Warcraft: Forever only.
 
+In English, German, French, Spanish, Italian, Portuguese, Russian, Korean and Chinese.
+
 ## Clean View and immersion
 
 - **Clean View:** the whole UI fades while you fish. Keep the bar, loot window, chat or minimap if you want them. It comes back when you walk off, unequip your pole, hit Escape or click Show UI, and instantly if anything attacks you.
@@ -21,6 +23,8 @@ For World of Warcraft: Forever only.
 - **Lures:** one-click button for your best lure or the one you choose. Timer on the bar, red before it runs out.
 - **Buffs:** food and camp timers, "No food" and "No lure" reminders, Luremaster bonus fish counted.
 - **One key:** bind Fish once. It puts on a lure, casts, and reels in when the bobber goes.
+- **Controller:** One key works on a controller too.
+- **Map pins:** fishing trainers, pole and lure vendors, Nat Pagle and the Extravaganza on the world map and minimap.
 - **Cooking:** recipes on fish tooltips, with the vendor and zone to buy them.
 
 ## The journal

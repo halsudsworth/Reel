@@ -88,9 +88,10 @@ local function SetReeling(on)
     reeling = on
     ClearOverrideBindings(fishButton)
     if on then
+        -- Each key on its own: a list with a gap in it ({ key1, nil, pad }) would stop ipairs early.
         local key1, key2 = GetBindingKey(FISH_BINDING)
-        for _, key in ipairs({ key1, key2, PadKey() }) do
-            if key then SetOverrideBinding(fishButton, true, key, "INTERACTTARGET") end
+        for _, key in pairs({ key1, key2, PadKey() }) do
+            SetOverrideBinding(fishButton, true, key, "INTERACTTARGET")
         end
     end
 end
@@ -130,7 +131,7 @@ end)
 local INTERACT_PATH = L["Options > Gameplay > Controls"]
 local warnedInteract = false
 local function CheckInteractKey()
-    if warnedInteract or not GetBindingKey(FISH_BINDING) then return end
+    if warnedInteract or not (GetBindingKey(FISH_BINDING) or PadKey()) then return end
     local value = tonumber((C_CVar and C_CVar.GetCVar or GetCVar)("SoftTargetInteract"))
     if value and value < 2 then
         warnedInteract = true

@@ -348,6 +348,7 @@ ns.RegisterPage({
             function() return s.cleanFade end,
             function(v) s.cleanFade = v end)
         fade:SetPoint("TOPLEFT", start, "BOTTOMLEFT", 0, -14)
+        start:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", W.Room(70, start, fade), -34)
         controls[#controls + 1] = start
         controls[#controls + 1] = fade
         dependent[#dependent + 1] = start

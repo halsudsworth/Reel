@@ -122,9 +122,9 @@ end
 
 ns.RegisterBarSegment({
     key = "derby",
-    label = "Tastyfish",
+    label = L["Tastyfish"],
     hint = L["Sundays"], -- dim, beside it on the Bar page
-    name = "Tastyfish",
+    name = L["Tastyfish"],
     group = "status",
     order = 5,
     icon = function() return (C_Item and C_Item.GetItemIconByID or GetItemIcon)(FISH) end,

@@ -105,6 +105,7 @@ ns.RegisterPage({
             function() return s.sfx end,
             function(v) s.sfx = v; Changed() end)
         sfx:SetPoint("TOPLEFT", master, "BOTTOMLEFT", 0, -22)
+        master:SetPoint("TOPLEFT", setMaster, "BOTTOMLEFT", W.Room(80, master, sfx), -14)
 
         local header = W.Label(panel, L["Quiet while fishing"], "GameFontNormal")
         header:SetPoint("TOPLEFT", setMaster, "BOTTOMLEFT", 0, -82)

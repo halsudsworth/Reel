@@ -245,6 +245,15 @@ local function InList(list, v)
     return false
 end
 
+-- A catch's zone against an event's zones, in any language: a journal fished partly on an English
+-- client and partly on a German one has both "Stranglethorn Vale" and "Schlingendorntal".
+local function ZoneIn(list, zone)
+    if InList(list, zone) then return true end
+    local english = ns.EnglishZone(zone)
+    for _, x in ipairs(list) do if ns.EnglishZone(x) == english then return true end end
+    return false
+end
+
 local function SubIn(list, sub)
     if not sub then return false end
     local k = SubKey(sub)
@@ -254,7 +263,7 @@ end
 
 -- Row: { time, zone, subzone, x, y, itemID, qty, skill, level }
 local function Matches(zones, fish, c)
-    if zones and not InList(zones, c[2]) then return false end
+    if zones and not ZoneIn(zones, c[2]) then return false end
     if fish then return InList(fish, c[6]) end
     return ns.FISH[c[6]] ~= nil
 end
@@ -297,7 +306,7 @@ local function Progress(ev, offset)
             for _, e in ipairs(inside) do
                 if MatchesNeed(n, e.c, e.min) then
                     if n.distinct then
-                        local k = n.distinct == "zone" and e.c[2] or n.distinct == "sub" and SubKey(e.c[3] or "") or e.c[6]
+                        local k = n.distinct == "zone" and ns.EnglishZone(e.c[2]) or n.distinct == "sub" and SubKey(e.c[3] or "") or e.c[6]
                         if not seen[k] then seen[k] = true; kinds = kinds + 1 end
                     else
                         count = count + (e.c[7] or 1)
@@ -314,7 +323,8 @@ local function Progress(ev, offset)
         local zs, fs, nz, nf = {}, {}, 0, 0
         for _, e in ipairs(inside) do
             if ns.FISH[e.c[6]] then
-                if not zs[e.c[2]] then zs[e.c[2]] = true; nz = nz + 1 end
+                local z = ns.EnglishZone(e.c[2])
+                if not zs[z] then zs[z] = true; nz = nz + 1 end
                 if not fs[e.c[6]] then fs[e.c[6]] = true; nf = nf + 1 end
             end
         end
@@ -561,8 +571,10 @@ local function Parts(d)
 end
 
 -- "November 4", "Fri November 20", "Monday November 9", "Sunday, November 15"
-local function MonthDay(d) local _, m, day = Parts(d); return MONTHS[m] .. " " .. day end
-local function ShortDay(d) local _, _, _, w = Parts(d); return DAYS[w]:sub(1, 3) .. " " .. MonthDay(d) end
+-- "November 17": month and day in the order the language writes them ("17. November").
+local function MonthDay(d) local _, m, day = Parts(d); return string.format(L["%s %d"], MONTHS[m], day) end
+local SHORT_DAYS = { L["Sun"], L["Mon"], L["Tue"], L["Wed"], L["Thu"], L["Fri"], L["Sat"] }
+local function ShortDay(d) local _, _, _, w = Parts(d); return SHORT_DAYS[w] .. " " .. MonthDay(d) end
 local function LongDay(d) local _, _, _, w = Parts(d); return DAYS[w] .. " " .. MonthDay(d) end
 
 local function Span(ev, Day)
@@ -953,6 +965,15 @@ RefreshRows = function()
     if not page.panel or not page.panel:IsVisible() then return end
     Layout()
 end
+
+-- Challenge names carry the client's fish names, which arrive after the first draw on a fresh
+-- login: draw again once they do (one redraw for a burst).
+local namesQueued = false
+ns.On("GET_ITEM_INFO_RECEIVED", function()
+    if namesQueued or not (page.panel and page.panel:IsVisible()) then return end
+    namesQueued = true
+    C_Timer.After(0.3, function() namesQueued = false; RefreshRows() end)
+end)
 
 -- A column that scrolls if it runs past the bottom.
 local function Column(parent, width)

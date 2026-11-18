@@ -53,6 +53,18 @@ function W.Checkbox(parent, text, get, set)
     return cb
 end
 
+-- How far right of its anchor a slider or dropdown must sit so its label (drawn to its left)
+-- fits: at least `min`, more when a translation is longer. Pass several controls stacked in one
+-- column to get the room for the longest label.
+function W.Room(min, ...)
+    local room = min
+    for i = 1, select("#", ...) do
+        local c = select(i, ...)
+        if c and c.label then room = math.max(room, math.ceil(c.label:GetStringWidth()) + 16) end
+    end
+    return room
+end
+
 function W.Slider(parent, text, min, max, step, suffix, get, set)
     local s = CreateFrame("Slider", nil, parent)
     s:SetOrientation("HORIZONTAL")

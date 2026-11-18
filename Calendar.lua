@@ -31,6 +31,106 @@ ns.Calendar = Calendar
 
 local function Data() return ns.CALENDAR_DATA end
 
+-- Other languages -----------------------------------------------------------------------------
+-- Hal's series come with their text in each language (CalendarData's text table). Fish and zone
+-- names, in challenge names and wherever a translation left them in English, are the client's own.
+
+local LOCALE = GetLocale()
+local ENGLISH = LOCALE:find("^en") ~= nil
+local GetItemInfoCompat = C_Item and C_Item.GetItemInfo or GetItemInfo
+
+local function FishName(id)
+    local name
+    if not ENGLISH then
+        name = GetItemInfoCompat(id)
+        if not name and C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) end
+    end
+    return name or Data().fishNames[id]
+end
+
+local function MapName(id)
+    if not ENGLISH and C_Map and C_Map.GetMapInfo then
+        local info = C_Map.GetMapInfo(id)
+        if info and info.name and info.name ~= "" then return info.name end
+    end
+    return Data().maps[id]
+end
+
+local function ReplacePlain(text, find, with)
+    local pattern = find:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0")
+    return (text:gsub(pattern, (with:gsub("%%", "%%%%"))))
+end
+
+-- English fish and zone names inside a text, swapped for the client's (longest first, so
+-- "Raw Greater Sagefish" goes before "Raw Sagefish").
+local englishNames
+local function LocalNames(text)
+    if ENGLISH or type(text) ~= "string" then return text end
+    if not englishNames then
+        englishNames = {}
+        for id, name in pairs(Data().fishNames) do englishNames[#englishNames + 1] = { name, FishName, id } end
+        for id, name in pairs(Data().maps) do englishNames[#englishNames + 1] = { name, MapName, id } end
+        table.sort(englishNames, function(a, b) return #a[1] > #b[1] end)
+    end
+    for _, e in ipairs(englishNames) do
+        if text:find(e[1], 1, true) then
+            local here = e[2](e[3])
+            if here and here ~= e[1] then text = ReplacePlain(text, e[1], here) end
+        end
+    end
+    return text
+end
+
+-- A series' need or part list with its labels in the client's language. A label left in English
+-- that names one subzone becomes the client's name for that area.
+local function LocalLabels(list, labels)
+    if not list then return nil end
+    local out = {}
+    for i, n in ipairs(list) do
+        local c = {}
+        for k, v in pairs(n) do c[k] = v end
+        local label = labels and labels[i] or n.label
+        if label and label == n.label and type(n.sub) == "table" and #n.sub == 1 and type(n.sub[1]) == "number"
+            and C_Map and C_Map.GetAreaInfo then
+            local ok, area = pcall(C_Map.GetAreaInfo, n.sub[1])
+            if ok and type(area) == "string" and area ~= "" then label = area end
+        end
+        c.label = LocalNames(label)
+        out[i] = c
+    end
+    return out
+end
+
+-- Ask the client for every calendar fish at login, so their names are there when the Events tab opens.
+ns.On("PLAYER_LOGIN", function()
+    if ENGLISH or not (C_Item and C_Item.RequestLoadItemDataByID) then return end
+    for id in pairs(Data().fishNames) do C_Item.RequestLoadItemDataByID(id) end
+end)
+
+-- A launch challenge's hand-written English name, rebuilt in the client's language.
+local STARTING = { ["a starting zone"] = true, ["any starting zone"] = true }
+local function LaunchName(t)
+    if ENGLISH then return t.name end
+    local fish = t.fish and t.fish[1] and FishName(t.fish[1])
+    local function Place(tail)
+        if STARTING[tail] then return L[tail] end
+        local names = {}
+        for i, id in ipairs(t.zone or {}) do names[i] = MapName(id) end
+        if #names == 0 then return LocalNames(tail) end
+        if #names == 1 then return names[1] end
+        return string.format(L["%s or %s"], table.concat(names, ", ", 1, #names - 1), names[#names])
+    end
+    if not fish then return LocalNames(t.name) end
+    if t.name:find("^Most ") then return string.format(L["Most %s"], fish) end
+    local tail = t.name:match("^Best 30 minutes: .- in (.+)$")
+    if tail then return string.format(L["Best 30 minutes: %s in %s"], fish, Place(tail)) end
+    local n, rest = t.name:match("^Race to (%d+) .-, (.+)$")
+    if n then return string.format(L["Race to %d %s, %s"], tonumber(n), fish, Place(rest)) end
+    n = t.name:match("^Race to (%d+) ")
+    if n then return string.format(L["Race to %d %s"], tonumber(n), fish) end
+    return LocalNames(t.name)
+end
+
 local floor = math.floor
 
 -- Dates ------------------------------------------------------------------------------
@@ -141,11 +241,16 @@ function Calendar.Editions(from, to)
             local start, finish
             if o.start then start, finish = o.start, o["end"] else start, finish = EditionDates(s.rule, y) end
             if not (finish < from or start > to or start < D.calStart) then
+                local t = not ENGLISH and D.text and D.text[LOCALE] and D.text[LOCALE][s.id] or {}
+                local note
+                if o.note then note = t.years and t.years[y] or o.note else note = t.note or s.note end
                 local ev = {
                     id = s.id .. "-" .. y, series = s.id, year = y, kind = "hal", by = "Hal",
-                    name = s.name, art = s.art, scoring = s.scoring, start = start, ["end"] = finish,
-                    note = o.note or s.note, founding = o.founding or false,
-                    zone = s.zone, fish = s.fish, sub = s.sub, target = s.target, needs = s.needs, parts = s.parts,
+                    name = LocalNames(t.name or s.name), englishName = s.name, art = s.art, scoring = s.scoring,
+                    start = start, ["end"] = finish, note = LocalNames(note), founding = o.founding or false,
+                    zone = s.zone, fish = s.fish, sub = s.sub, target = s.target,
+                    needs = ENGLISH and s.needs or LocalLabels(s.needs, t.needs),
+                    parts = ENGLISH and s.parts or LocalLabels(s.parts, t.parts),
                     order = #out + 1,
                 }
                 out[#out + 1] = ev
@@ -247,11 +352,11 @@ local function Challenge(kind, start, finish, format, r)
     local ev
     if format == "most" then
         local fish = Pick(r, D.wide)
-        ev = { name = string.format(L["Most %s"], D.fishNames[fish]), fish = { fish }, scoring = "most" }
+        ev = { name = string.format(L["Most %s"], FishName(fish)), fish = { fish }, scoring = "most" }
     else
         local p = Pick(r, D.pairs)
         local zone, fish = p[1], p[2]
-        local fname, zname = D.fishNames[fish], D.maps[zone]
+        local fname, zname = FishName(fish), MapName(zone)
         if format == "race" then
             local target = kind == "daily" and 20 or 60
             ev = { name = string.format(L["Race to %d %s, %s"], target, fname, zname), zone = { zone }, fish = { fish }, target = target, scoring = "race" }
@@ -265,7 +370,7 @@ end
 
 local function Launch(t, kind, start, finish)
     return {
-        id = kind .. "-" .. start, kind = kind, name = t.name, scoring = t.scoring, start = start, ["end"] = finish,
+        id = kind .. "-" .. start, kind = kind, name = LaunchName(t), scoring = t.scoring, start = start, ["end"] = finish,
         zone = Copy(t.zone), fish = Copy(t.fish), target = t.target, by = "the calendar",
     }
 end

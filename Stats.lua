@@ -29,18 +29,33 @@ local GREY = "|cff888888"
 
 local panel, current, newSession, uncaught, banner
 
+-- Day and month names from the string table (date() gives English ones), short forms cut to
+-- three letters.
+local DAY_KEYS = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+local MONTH_KEYS = { "January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December" }
+local function ShortMonth(m) return ns.FirstLetters(L[MONTH_KEYS[m]], 3) end
+
+-- "Nov 8", in the order the language writes a date ("8. Nov").
 local function ShortDate(t)
     if not t then return "-" end
-    return date("%b ", t) .. tonumber(date("%d", t))
+    local d = date("*t", t)
+    return string.format(L["%s %d"], ShortMonth(d.month), d.day)
+end
+
+-- A zone name as saved (any language) in this client's language.
+local function ZoneText(zone)
+    return zone and ns.LocalZone(ns.EnglishZone(zone))
 end
 
 local function When(t, zone)
     if not t then return "-" end
-    return zone and (ShortDate(t) .. "   " .. zone) or ShortDate(t)
+    return zone and (ShortDate(t) .. "   " .. ZoneText(zone)) or ShortDate(t)
 end
 
 local function ClockTime(t)
-    return (date("%I:%M %p", t):gsub("^0", ""))
+    -- the clock format is translated: "7:32 PM" in English, "19:32" in German
+    return (date(L["%I:%M %p"], t):gsub("^0", ""))
 end
 
 -- 12345 copper -> "1g 23s", the two largest coins.
@@ -60,6 +75,54 @@ end
 -- it, for when the client hasn't loaded the item. Nil when the price isn't known yet; the client
 -- hands item info out only once it has loaded it.
 local GetItemInfoCompat = C_Item and C_Item.GetItemInfo or GetItemInfo
+
+-- A saved link in this client's language: the journal keeps each catch's link as it was caught,
+-- so catches from an English session read "[Raw Rockscale Cod]" on a German client. The item's
+-- own link is used once the client has it; until then the saved one.
+local ENGLISH = GetLocale():find("^en") ~= nil
+local function LocalLink(link)
+    if ENGLISH then return link end
+    local id = type(link) == "string" and tonumber(link:match("item:(%d+)"))
+    if not id then return link end
+    local _, current = GetItemInfoCompat(id)
+    if current then return current end
+    if C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) end
+    return link
+end
+-- An item's name in this client's language by its ID, or the English fallback.
+-- Subzones in any language, like zones: the journal keeps the client's subzone name, so they're
+-- grouped by their English name (AreaData.lua's area IDs) and shown in this client's language.
+local subToEnglish = {}
+local function AreaName(id)
+    if not (C_Map and C_Map.GetAreaInfo) then return end
+    local ok, name = pcall(C_Map.GetAreaInfo, id)
+    if ok and type(name) == "string" and name ~= "" then return name end
+end
+local function EnglishSub(zone, sub)
+    local ids = ns.AREA_IDS and ns.AREA_IDS[zone]
+    if not ids or ids[sub] then return sub end
+    local names = subToEnglish[zone]
+    if not names then
+        names = {}
+        for english, id in pairs(ids) do
+            local here = AreaName(id)
+            if here then names[here] = english end
+        end
+        subToEnglish[zone] = names
+    end
+    return names[sub] or sub
+end
+local function SubText(zone, sub)
+    if ENGLISH then return sub end
+    local id = ns.AREA_IDS and ns.AREA_IDS[zone] and ns.AREA_IDS[zone][sub]
+    return id and AreaName(id) or sub
+end
+
+local function LocalName(id, fallback)
+    if ENGLISH then return fallback end
+    local name = GetItemInfoCompat(id)
+    return name or fallback
+end
 local function Price(id, quality)
     local _, _, q, _, _, _, _, _, _, _, vendor = GetItemInfoCompat(id)
     if q ~= nil then quality = q end
@@ -91,7 +154,7 @@ local function ValueCell(id, count, quality)
 end
 
 local function ItemName(link)
-    return link and link:match("%[(.-)%]") or ""
+    return link and LocalLink(link):match("%[(.-)%]") or ""
 end
 
 local function Arrow(open)
@@ -109,7 +172,7 @@ local function Top(items)
     for _, item in pairs(items) do
         if not best or item.count > best.count then best = item end
     end
-    return best and best.link or "-"
+    return best and LocalLink(best.link) or "-"
 end
 
 local charOf = {} -- session -> character name, in the All characters view
@@ -158,9 +221,13 @@ local function View()
     local v = { zones = {}, fish = {}, sessions = {}, records = {} }
     for key, d in pairs(ReelDB.chars) do
         ns.InitData(d) -- an older character's table may lack a field
-        for zone, subs in pairs(d.zones) do
+        for asCaught, subs in pairs(d.zones) do
+            -- One zone whatever language it was caught in: the journal keeps the client's zone
+            -- name, so the same zone fished in English and in German is grouped by its English name.
+            local zone = ns.EnglishZone(asCaught)
             v.zones[zone] = v.zones[zone] or {}
             for sub, e in pairs(subs) do
+                if sub == asCaught then sub = zone else sub = EnglishSub(zone, sub) end -- no subzone: the zone itself
                 local m = v.zones[zone][sub] or { casts = 0, catches = 0, items = {} }
                 m.casts = m.casts + e.casts
                 m.catches = m.catches + e.catches
@@ -199,6 +266,7 @@ local function SessionZone(session)
     for zone, count in pairs(session.zones or {}) do
         if count > most then best, most = zone, count end
     end
+    if best ~= "-" then best = ZoneText(best) end
     if charOf[session] then best = best .. "  " .. GREY .. charOf[session] .. "|r" end
     return best
 end
@@ -229,7 +297,7 @@ end
 -- "8x Raw Rockscale Cod" lines under an open zone or session: icon, count, name.
 local function ItemRows(rows, items, indent)
     for _, item in ipairs(ns.SortedItems(items)) do
-        rows[#rows + 1] = { kind = "full", icon = IconOf(IdOf(item.link)), text = "|cffefe3cc" .. item.count .. "x|r " .. item.link, indent = indent, link = item.link }
+        rows[#rows + 1] = { kind = "full", icon = IconOf(IdOf(item.link)), text = "|cffefe3cc" .. item.count .. "x|r " .. LocalLink(item.link), indent = indent, link = item.link }
     end
 end
 
@@ -544,13 +612,13 @@ function fishTab.Rows(view)
         local id = idOf[f]
         local open = fishSelected == id
         rows[#rows + 1] = {
-            cells = { IconOf(id), f.link, { f.count, most > 0 and f.count / most or 0 }, f.firstZone or "-", ValueCell(id, f.count, f.quality) },
+            cells = { IconOf(id), LocalLink(f.link), { f.count, most > 0 and f.count / most or 0 }, ZoneText(f.firstZone) or "-", ValueCell(id, f.count, f.quality) },
             link = f.link,
             sel = open,
             onClick = function() fishSelected = not open and id or nil; Refresh() end,
         }
         if open then
-            rows[#rows + 1] = { kind = "detail", text = L["First"] .. "  |cffefe3cc" .. ShortDate(f.first) .. "|r          " .. L["Last"] .. "  |cffefe3cc" .. ShortDate(f.last) .. "|r          " .. (f.firstZone or "") }
+            rows[#rows + 1] = { kind = "detail", text = L["First"] .. "  |cffefe3cc" .. ShortDate(f.first) .. "|r          " .. L["Last"] .. "  |cffefe3cc" .. ShortDate(f.last) .. "|r          " .. (ZoneText(f.firstZone) or "") }
         end
     end
 
@@ -636,7 +704,7 @@ function zonesTab.Rows(view)
     for _, z in ipairs(ZoneList(view)) do
         local open = zonesOpen[z.name] and true or false
         rows[#rows + 1] = {
-            cells = { nil, z.name, z.casts, z.catches, TopCell(z.items) },
+            cells = { nil, ZoneText(z.name), z.casts, z.catches, TopCell(z.items) },
             toggle = open, open = open,
             onClick = Toggle(zonesOpen, z.name),
         }
@@ -646,7 +714,7 @@ function zonesTab.Rows(view)
                 local e = sub.entry
                 local subOpen = zonesOpen[key] and true or false
                 rows[#rows + 1] = {
-                    cells = { nil, sub.name, e.casts, e.catches, TopCell(e.items) },
+                    cells = { nil, sub.name == z.name and ZoneText(z.name) or SubText(z.name, sub.name), e.casts, e.catches, TopCell(e.items) },
                     indent = 1, dimSub = true, toggle = subOpen, open = subOpen,
                     onClick = Toggle(zonesOpen, key),
                 }
@@ -668,7 +736,7 @@ local sessionsTab = {
         { title = L["Started"], width = 98 },
         { title = L["Length"], width = 52, align = "RIGHT" },
         { title = L["Zone"] },
-        { title = L["Fish"], width = 34, align = "RIGHT" },
+        { title = L["Fish (sessions column)"], width = 34, align = "RIGHT" },
         { title = L["Bonus"], width = 40, align = "RIGHT" },
         { title = L["Per hr"], width = 42, align = "RIGHT" },
         { title = L["Each"], width = 40, align = "RIGHT" },
@@ -712,11 +780,17 @@ function sessionsTab.Summary(view)
     return string.format(L["%s in %s"], Plural(sessions, L["%d session"], L["%d sessions"]), Plural(#days, L["%d day"], L["%d days"]))
 end
 
+-- "Mon, Nov 17" in the client's language and date order ("Di., 17. Nov.").
+local function DayHeading(t)
+    local d = date("*t", t)
+    return string.format(L["%s, %s %d"], L[DAY_KEYS[d.wday]], ShortMonth(d.month), d.day)
+end
+
 function sessionsTab.Rows(view)
     local rows = {}
     for _, day in ipairs(SessionDays(view)) do
         rows[#rows + 1] = {
-            cells = { nil, date("%a, %b ", day.start) .. tonumber(date("%d", day.start)), "", "", day.fish, day.bonus },
+            cells = { nil, DayHeading(day.start), "", "", day.fish, day.bonus },
             heading = true,
         }
         for _, s in ipairs(day.sessions) do
@@ -863,6 +937,10 @@ local function BuildRecords(frame)
     derby.big = W.Text(derby, 24, C.amber2)
     derby.big:SetPoint("RIGHT", derby, "RIGHT", -12, -8)
     derby.big:SetJustifyH("RIGHT")
+    -- a longer name in another language stops short of the count instead of running under it
+    derby.name:SetPoint("RIGHT", derby.big, "LEFT", -8, 0)
+    derby.name:SetJustifyH("LEFT")
+    derby.name:SetWordWrap(false)
     r.derby = derby
 
     local feats = Card(side, L["Feats"])
@@ -956,14 +1034,14 @@ function recordsTab.Draw(view)
         local f = view.fish[id]
         r.pick.icon:SetTexture(IconOf(id))
         r.pick.icon:SetDesaturated(not f)
-        r.pick.name:SetText(f and f.link or ("|cff8f8577" .. item.name .. "|r"))
-        r.pick.meta:SetText(f and ("|cffffd27a" .. f.count .. "|r  ·  " .. item.note .. (f.firstZone and ("  ·  " .. f.firstZone) or "")) or (L["Not caught yet"] .. "  ·  " .. item.note))
+        r.pick.name:SetText(f and LocalLink(f.link) or ("|cff8f8577" .. LocalName(id, item.name) .. "|r"))
+        r.pick.meta:SetText(f and ("|cffffd27a" .. f.count .. "|r  ·  " .. L[item.note] .. (f.firstZone and ("  ·  " .. ZoneText(f.firstZone)) or "")) or (L["Not caught yet"] .. "  ·  " .. L[item.note]))
     end
 
     -- the derby fish and how many of it
     local tasty = view.fish[19807]
     r.derby.icon:SetTexture(IconOf(19807))
-    r.derby.name:SetText(tasty and tasty.link or "Speckled Tastyfish")
+    r.derby.name:SetText(tasty and LocalLink(tasty.link) or LocalName(19807, "Speckled Tastyfish"))
     r.derby.big:SetText(tasty and tasty.count or 0)
 
     -- feats worked out from the journal
@@ -1026,13 +1104,13 @@ function recordsTab.Draw(view)
     end
     lines[1] = { L["Best session"], best and string.format(L["%s fish"], best.fish) or "-", best and When(best.start, SessionZone(best)) }
     local stack = view.records.stack
-    lines[2] = { L["Biggest stack"], stack and (stack.qty .. "x " .. stack.link) or "-", stack and When(stack.time, stack.zone) }
+    lines[2] = { L["Biggest stack"], stack and (stack.qty .. "x " .. LocalLink(stack.link)) or "-", stack and When(stack.time, stack.zone) }
     local rarest
     for _, f in pairs(view.fish) do
         local q, rq = f.quality or 0, rarest and (rarest.quality or 0)
         if not rarest or q > rq or (q == rq and f.count < rarest.count) then rarest = f end
     end
-    lines[3] = { L["Rarest catch"], rarest and rarest.link or "-", rarest and When(rarest.first, rarest.firstZone) }
+    lines[3] = { L["Rarest catch"], rarest and LocalLink(rarest.link) or "-", rarest and When(rarest.first, rarest.firstZone) }
     lines[4] = { L["Total casts"], casts }
     lines[5] = { L["Total catches"], string.format(L["%d (%s of casts)"], catches, Rate(catches, casts)) }
     local scope = Scope()
@@ -1163,11 +1241,11 @@ ns.RegisterPage({
 
 ns.On("REEL_DATA_CHANGED", Refresh)
 
--- An item's price wasn't loaded when the Fish or Sessions tab was drawn: draw it again once
+-- An item's price or name wasn't loaded when a tab was drawn: draw it again once
 -- the client has it (one redraw for a burst of items).
 local redrawQueued = false
 ns.On("GET_ITEM_INFO_RECEIVED", function()
-    if redrawQueued or not ((current == sessionsTab or current == fishTab) and panel and panel:IsVisible()) then return end
+    if redrawQueued or not (current and panel and panel:IsVisible()) then return end
     redrawQueued = true
     C_Timer.After(0.2, function() redrawQueued = false; Refresh() end)
 end)

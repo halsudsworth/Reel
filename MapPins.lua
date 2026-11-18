@@ -24,7 +24,7 @@ local ROLE_TEXT = {
     trainer = L["Fishing trainer"],
     vendor = L["Fishing supplies"],
     quest = L["Quest"],
-    event = L["Stranglethorn Fishing Extravaganza"],
+    event = L["Stranglethorn Extravaganza"],
 }
 
 -- Pin groups by map ID: { x, y, npcs = {...} }, built once the zone names are known.

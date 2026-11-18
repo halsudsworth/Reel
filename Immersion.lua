@@ -246,7 +246,7 @@ ns.RegisterPage({
         local height = W.Slider(panel, L["Bar height"], 5, 20, 1, "%",
             function() return s.letterboxHeight end,
             function(v) s.letterboxHeight = v; ns.UpdateLetterbox() end)
-        height:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 100, -10)
+        height:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", W.Room(100, height), -10)
         controls[#controls + 1] = height
 
         return Refresh

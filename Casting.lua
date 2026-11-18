@@ -108,7 +108,7 @@ ns.RegisterPage({
         mouseButton = W.Dropdown(panel, L["Mouse button"], 140, MOUSE_BUTTONS,
             function() return s.castMouseButton end,
             function(v) s.castMouseButton = v; lastClick = 0 end)
-        mouseButton:SetPoint("TOPLEFT", doubleClick, "BOTTOMLEFT", 90, -40)
+        mouseButton:SetPoint("TOPLEFT", doubleClick, "BOTTOMLEFT", W.Room(90, mouseButton), -40)
 
         needPole = W.Checkbox(panel, L["Only with a fishing pole equipped"],
             function() return s.needPole end,
@@ -118,7 +118,7 @@ ns.RegisterPage({
         speed = W.Slider(panel, L["Click speed"], 200, 600, 50, "ms",
             function() return s.clickSpeed end,
             function(v) s.clickSpeed = v end)
-        speed:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", 90, -14)
+        speed:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", W.Room(90, speed), -14)
 
         local speedNote = W.Note(panel, L["Longest gap allowed between the two clicks."], ns.CONTENT_WIDTH - 4)
         speedNote:SetPoint("TOPLEFT", needPole, "BOTTOMLEFT", 0, -40)

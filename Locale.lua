@@ -5,9 +5,9 @@
 -- The list below is every key in use, file by file, as the template for a translation; it sets
 -- each one to its own English text, which is what the fallback gives anyway.
 --
--- Other languages set entries per GetLocale() at the bottom of this file, e.g.
---     L["Settings"] = "Einstellungen"
--- keeping every %d/%s placeholder, in the same order. Item, fish and zone names are not
+-- Other languages are in Locales/<locale>.lua, loaded after this file; each sets its entries only
+-- on its own client, e.g. L["Settings"] = "Einstellungen", keeping every %d/%s placeholder.
+-- tools/locale_check.py checks the code against this list and each language against it. Item, fish and zone names are not
 -- here: those come from the game client in its own language.
 --
 -- Core.lua loads before this file, so its strings look up ns.L when they run, not at load.
@@ -258,7 +258,7 @@ L["I enter combat (always on)"] = "I enter combat (always on)"
 L["I unequip my pole"] = "I unequip my pole"
 L["I stop fishing for a bit (General > Done fishing after)"] = "I stop fishing for a bit (General > Done fishing after)"
 L["I start moving"] = "I start moving"
-L["The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > Reel > Toggle clean view also works."] = "The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > Reel > Toggle clean view also works."
+L["The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > Reel > Toggle clean view also works."] = "The button shows while this page is open so you can drag it into place. Escape and /reel always bring the UI back. Key Bindings > R.E.E.L. > Toggle clean view also works."
 L["Keep visible in clean view"] = "Keep visible in clean view"
 L["R.E.E.L. bar"] = "R.E.E.L. bar"
 L["Event tracker"] = "Event tracker"
@@ -348,6 +348,8 @@ L["September"] = "September"
 L["October"] = "October"
 L["November"] = "November"
 L["December"] = "December"
+-- a date: month name, then day of the month; translations reorder with %2$d / %1$s
+L["%s %d"] = "%s %d"
 L["Sunday"] = "Sunday"
 L["Monday"] = "Monday"
 L["Tuesday"] = "Tuesday"
@@ -390,6 +392,54 @@ L["%s (%s, %s ago)"] = "%s (%s, %s ago)"
 L["No guild members with R.E.E.L. heard from yet."] = "No guild members with R.E.E.L. heard from yet."
 L["Guild members with R.E.E.L.: %s"] = "Guild members with R.E.E.L.: %s"
 
+-- General.lua (map pins)
+L["Show fishing trainers and vendors on the world map"] = "Show fishing trainers and vendors on the world map"
+L["Show fishing trainers and vendors on the minimap"] = "Show fishing trainers and vendors on the minimap"
+
+-- MapPins.lua
+L["Fishing trainer"] = "Fishing trainer"
+L["Fishing supplies"] = "Fishing supplies"
+L["Quest"] = "Quest"
+L["Teaches: %s"] = "Teaches: %s"
+L["Sells: %s"] = "Sells: %s"
+
+-- Stats.lua (dates and times)
+L["%I:%M %p"] = "%I:%M %p"
+L["%s, %s %d"] = "%s, %s %d"
+L["Sun"] = "Sun"
+L["Mon"] = "Mon"
+L["Tue"] = "Tue"
+L["Wed"] = "Wed"
+L["Thu"] = "Thu"
+L["Fri"] = "Fri"
+L["Sat"] = "Sat"
+L["Fish (sessions column)"] = "Fish"
+
+-- Derby.lua (bar label)
+L["Tastyfish"] = "Tastyfish"
+
+-- FishData.lua (where a fish or item comes from)
+L["Has a gem inside"] = "Has a gem inside"
+L["Near Venture Co. camps"] = "Near Venture Co. camps"
+L["Nat Pagle quest"] = "Nat Pagle quest"
+L["Booty Bay rare fish quest"] = "Booty Bay rare fish quest"
+L["About 1 in 200 during the contest"] = "About 1 in 200 during the contest"
+L["A fished mace"] = "A fished mace"
+L["Waterlogged Wreckage pools"] = "Waterlogged Wreckage pools"
+L["Sundays 2-4 PM, Booty Bay coast"] = "Sundays 2-4 PM, Booty Bay coast"
+L["Source still unknown"] = "Source still unknown"
+L["Schooner Wreckage pools"] = "Schooner Wreckage pools"
+L["Open water, low-level zones"] = "Open water, low-level zones"
+L["Open water, anywhere"] = "Open water, anywhere"
+L["Floating Debris pools"] = "Floating Debris pools"
+L["Bloodsail Wreckage pools"] = "Bloodsail Wreckage pools"
+L["Azshara"] = "Azshara"
+
+-- Calendar.lua (launch challenges)
+L["Race to %d %s"] = "Race to %d %s"
+L["a starting zone"] = "a starting zone"
+L["any starting zone"] = "any starting zone"
+
 -- Options.lua (page names, shown through L[def.name])
 L["This client has no Key Bindings page to open."] = "This client has no Key Bindings page to open."
 L["Presets"] = "Presets"
@@ -405,7 +455,3 @@ L["General"] = "General"
 L["Immersion"] = "Immersion"
 L["Sound"] = "Sound"
 
--- Translations --------------------------------------------------------------------------------
-
-if GetLocale() == "deDE" then
-end

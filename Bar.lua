@@ -214,7 +214,11 @@ local function High(key, value)
     return high[key]
 end
 
+-- English picks st/nd/rd/th by the last digit; other languages have their own first ("1er") and
+-- one form for every other number ("21e", not "21er"), so only English uses the digit rule.
+local ENGLISH = GetLocale():find("^en") ~= nil
 local function Ordinal(n)
+    if not ENGLISH then return string.format(n == 1 and L["%dst"] or L["%dth"], n) end
     local tens, ones = n % 100, n % 10
     if tens >= 11 and tens <= 13 then return string.format(L["%dth"], n) end
     return string.format(ones == 1 and L["%dst"] or ones == 2 and L["%dnd"] or ones == 3 and L["%drd"] or L["%dth"], n)
@@ -1192,7 +1196,7 @@ ns.RegisterPage({
         if ns.ICONS_COLUMN then layouts[#layouts + 1] = { value = "iconsColumn", text = L["Icons (vertical)"] } end
         local layout = W.Dropdown(panel, L["Layout"], 130, layouts, function() return LayoutMode(s) end,
            function(v) s.barLayout = v; ns.UpdateBar() end)
-        layout:SetPoint("TOPLEFT", 52, -34)
+        layout:SetPoint("TOPLEFT", W.Room(52, layout), -34)
         local scale = W.Slider(panel, L["Size"], 70, 150, 5, "%",
             function() return s.barScale end,
             function(v)

@@ -2,6 +2,7 @@
 
 ## 1.5.0
 
+- New: R.E.E.L. in German, French, Spanish (Spain and Latin America), Italian, Brazilian Portuguese, Russian, Korean and Chinese (Simplified and Traditional). It follows your game client's language.
 - New: Controller button on the Casting page. Pick a gamepad button (A, B, X, Y, the shoulders and triggers, or the d-pad) and it's your Fish key while a fishing pole is equipped: lure, cast, and reel in. Without a pole it does what it normally does, and your keyboard key is unchanged.
 - New: fishing trainers, pole and lure vendors, Nat Pagle and the Extravaganza NPCs on the world map and the minimap, for your faction. Hover a pin for who they are and what they teach or sell. Each map can be turned off on the General page.
 - Fixed: on a German, French or other non-English client, events joined with a code from halsudsworth.com now count your catches in the event's zones.

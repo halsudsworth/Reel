@@ -175,7 +175,7 @@ function ns.BuildOneKeyOptions(panel, anchor)
     local pad = W.Dropdown(panel, L["Controller button"], 130, PAD_BUTTONS,
         function() return s.controllerButton end,
         function(v) s.controllerButton = v; UpdatePad() end)
-    pad:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 120, -10)
+    pad:SetPoint("TOPLEFT", note, "BOTTOMLEFT", W.Room(120, pad), -10)
     local padNote = W.Note(panel, L["The Fish key on a controller, while a fishing pole is equipped. Without a pole the button does what it normally does."], ns.CONTENT_WIDTH - 4)
     padNote:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -38)
     return { Refresh = function() lure.Refresh(); pad.Refresh() end }

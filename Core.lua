@@ -95,6 +95,18 @@ function ns.Now()
     return time()
 end
 
+-- The first n letters of a text, counting letters, not bytes: "Понедельник" -> "Пон", where
+-- s:sub(1, 3) would cut a Cyrillic or Chinese letter in half.
+function ns.FirstLetters(s, n)
+    local out, count = {}, 0
+    for ch in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+        count = count + 1
+        if count > n then break end
+        out[count] = ch
+    end
+    return table.concat(out)
+end
+
 -- 452 -> "7:32", 4380 -> "1h 13m", 529133 -> "6d 2h"
 function ns.FormatTime(seconds)
     seconds = math.max(0, math.floor(seconds))

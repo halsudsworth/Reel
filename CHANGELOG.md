@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.1
+
+- Your journal now keeps loading however long you fish. The game can't load a saved file with more than about 262,000 different values, and until now nearly every catch added one, so a journal of a few hundred thousand catches would have failed to load and been lost. Catch times are now saved as the gaps between catches, and if a journal ever gets near the limit, its oldest catches are packed into compact blocks. Nothing is dropped.
+- The Events window and the event tracker read only the catches from each event's own dates, not your whole journal.
+
 ## 1.8.0
 
 - The export window now sends your last 30 days of catches, and halsudsworth.com adds them to the journal it already has, so the string stays small however long you fish. Choose the last 90 days or Everything when you haven't pasted in a while: the site tells you which if a paste doesn't reach back far enough.

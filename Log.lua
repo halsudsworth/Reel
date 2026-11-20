@@ -13,6 +13,7 @@
 --   records.stack    = { qty, link, time, zone }
 --   catches          = list, oldest first, one row per item per catch:
 --                      { time, zone, subzone, x, y, itemID, qty, skill, level }
+--                      (saved as gaps between times, real times in memory: SaveFormat.lua)
 --   id               = 16 random hex characters, made once; the site knows the
 --                      character's pastes by it
 --

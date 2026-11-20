@@ -282,15 +282,26 @@ end
 
 -- This character's catches inside the event's window, oldest first, with each one's
 -- minute of the day on the server clock.
+-- Catches are kept oldest first, so it reads back from the newest and stops two days before
+-- the event's first date: only the event's own days get read, however long the journal.
 local function Inside(ev, offset)
-    local out = {}
-    for _, c in ipairs(ns.Data().catches) do
-        if InWindow(ev, c[1], offset)
+    local catches = ns.Data().catches
+    local from = DateEpoch(ev.start) - 2 * 86400
+    local to = DateEpoch(ev["end"]) + 3 * 86400
+    local back = {}
+    for i = #catches, 1, -1 do
+        local c = catches[i]
+        if c[1] < from then break end
+        if c[1] < to and InWindow(ev, c[1], offset)
             and (not ev.maxLevel or (c[9] and c[9] <= ev.maxLevel))
             and (not ev.sub or SubIn(ev.sub, c[3])) then
-            local _, min = Clock(c[1], offset)
-            out[#out + 1] = { c = c, min = min }
+            back[#back + 1] = c
         end
+    end
+    local out = {}
+    for i = #back, 1, -1 do
+        local _, min = Clock(back[i][1], offset)
+        out[#out + 1] = { c = back[i], min = min }
     end
     return out
 end

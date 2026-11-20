@@ -12,6 +12,7 @@
 
 # Framework
 Core.lua
+SaveFormat.lua
 Locale.lua
 Locales\deDE.lua
 Locales\frFR.lua

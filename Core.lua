@@ -167,7 +167,12 @@ function ns.WhenOutOfCombat(fn)
     end
 end
 
-eventFrame:SetScript("OnEvent", function(_, event, ...) ns.Fire(event, ...) end)
+-- REEL_SAVE comes after every PLAYER_LOGOUT handler, for SaveFormat.lua to put the saved data in
+-- its saved form as the very last thing.
+eventFrame:SetScript("OnEvent", function(_, event, ...)
+    ns.Fire(event, ...)
+    if event == "PLAYER_LOGOUT" then ns.Fire("REEL_SAVE") end
+end)
 
 -- Fishing mode --------------------------------------------------------------
 -- While fishing, features override CVars and the player's own values are put

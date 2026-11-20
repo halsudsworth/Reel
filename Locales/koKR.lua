@@ -304,6 +304,9 @@ L["Your journal"] = "내 일지"
 L["Ctrl+C to copy, then paste it at halsudsworth.com/paste"] = "Ctrl+C로 복사한 뒤 halsudsworth.com/paste에 붙여넣으세요"
 L["The journal couldn't be exported."] = "일지를 내보내지 못했습니다."
 L["%d catches, %d KB"] = "%d마리, %d KB"
+L["Last 30 days"] = "최근 30일"
+L["Last 90 days"] = "최근 90일"
+L["Too big for one paste. Choose the last 90 days."] = "한 번에 붙여넣기에는 너무 큽니다. 최근 90일을 고르세요."
 
 -- Calendar.lua
 L["Most %s"] = "%s 최다 낚기"

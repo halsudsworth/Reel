@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0
+
+- The export window now sends your last 30 days of catches, and halsudsworth.com adds them to the journal it already has, so the string stays small however long you fish. Choose the last 90 days or Everything when you haven't pasted in a while: the site tells you which if a paste doesn't reach back far enough.
+
 ## 1.7.0
 
 - New: choose what you hear while fishing on the Sound page. Everything leaves your sound alone, The world mutes music, voices, footsteps, other players and the interface but keeps the place and its creatures, Bobber only mutes all of it, and Custom is your own picks from the seven groups. Whispers, invites, ready checks and raid warnings still come through unless you turn that off. Your sound comes back as it was when you stop fishing.

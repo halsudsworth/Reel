@@ -1,4 +1,5 @@
--- /reel export: this character's journal as one string to paste on halsudsworth.com.
+-- /reel export: this character's journal as one string to paste on halsudsworth.com: the catches of
+-- the last 30 days (90 days or everything on request). The site adds them to what it already has.
 -- The string is "!REEL1!" and the base64 of a JSON document; site/FORMAT.md in the
 -- addon's repository is the contract. Times are the server's clock (ns.Now).
 
@@ -6,6 +7,9 @@ local _, ns = ...
 local L = ns.L
 
 local PREFIX = "!REEL1!"
+-- The largest paste halsudsworth.com takes (8 MB, its web server's limit). The game itself copies
+-- out 16 MB whole.
+local PASTE_MAX = 8 * 1024 * 1024 - 1
 
 -- JSON ----------------------------------------------------------------------
 
@@ -115,7 +119,10 @@ end
 
 -- The document --------------------------------------------------------------
 
-function ns.ExportString()
+-- days: only the catches of the last that many days, nil for every catch. The string then also
+-- carries the time of the newest catch it left out ("before"), so the site can tell whether it
+-- already has everything up to there.
+function ns.ExportString(days)
     local data = ns.Data()
     local now = ns.Now()
     local name, secondary = UnitName("player")
@@ -154,9 +161,14 @@ function ns.ExportString()
     end
 
     -- Row: time, zone, x, y, item, qty, skill, level, subzone.
-    local catches = {}
+    local catches, before = {}, nil
+    local cutoff = days and now - days * 86400
     for _, c in ipairs(data.catches) do
-        catches[#catches + 1] = List({ Num(c[1]), Num(Zone(c[2])), Num(c[4]), Num(c[5]), Num(c[6]), Num(c[7]), Num(c[8]), Num(c[9]), Num(Sub(c[3])) })
+        if cutoff and c[1] < cutoff then
+            if not before or c[1] > before then before = c[1] end
+        else
+            catches[#catches + 1] = List({ Num(c[1]), Num(Zone(c[2])), Num(c[4]), Num(c[5]), Num(c[6]), Num(c[7]), Num(c[8]), Num(c[9]), Num(Sub(c[3])) })
+        end
     end
 
     local wins = {}
@@ -182,6 +194,7 @@ function ns.ExportString()
         '"skillMax":' .. Num(maxRank),
         '"level":' .. Num(UnitLevel("player")),
         '"made":' .. Num(now),
+        '"before":' .. Num(before),
         '"tz":' .. Num(LocalOffset(now)),
         '"stz":' .. Num(ServerOffset(now)),
         '"zl":' .. List(zlist),
@@ -201,17 +214,23 @@ function ns.ExportString()
     }
     local ruleset = Ruleset()
     if ruleset then table.insert(fields, 6, '"ruleset":' .. Str(ruleset)) end
-    return PREFIX .. Base64("{" .. table.concat(fields, ",") .. "}"), #data.catches
+    return PREFIX .. Base64("{" .. table.concat(fields, ",") .. "}"), #catches
 end
 
 -- The window ----------------------------------------------------------------
 -- One selected line holding the whole string, so Ctrl+C copies all of it.
 
-local box, text, info
+local box, text, info, span
+local days = 30
+local SPANS = {
+    { value = 30, text = L["Last 30 days"] },
+    { value = 90, text = L["Last 90 days"] },
+    { value = 0, text = L["Everything"] },
+}
 
 local function BuildBox()
     box = CreateFrame("Frame", "ReelExportFrame", UIParent, "BasicFrameTemplateWithInset")
-    box:SetSize(460, 150)
+    box:SetSize(460, 184)
     box:SetPoint("CENTER")
     box:SetFrameStrata("DIALOG")
     box:EnableMouse(true)
@@ -228,9 +247,15 @@ local function BuildBox()
     local how = ns.W.Label(box, L["Ctrl+C to copy, then paste it at halsudsworth.com/paste"], "GameFontHighlight")
     how:SetPoint("TOPLEFT", 16, -36)
 
+    -- How far back: the site adds the catches to what it has, so the last 30 days is enough for
+    -- anyone pasting once a month; it says which to choose when a paste doesn't reach back far enough.
+    span = ns.W.Dropdown(box, L["Catches"], 130, SPANS, function() return days end,
+        function(v) days = v; ns.ShowExport(true) end)
+    span:SetPoint("TOPLEFT", how, "BOTTOMLEFT", ns.W.Room(90, span), -12)
+
     text = CreateFrame("EditBox", nil, box, "InputBoxTemplate")
     text:SetSize(420, 24)
-    text:SetPoint("TOPLEFT", 20, -60)
+    text:SetPoint("TOPLEFT", 20, -94)
     text:SetAutoFocus(true)
     text:SetMaxLetters(0)
     -- Typing in it puts the string back.
@@ -240,11 +265,13 @@ local function BuildBox()
     text:SetScript("OnEscapePressed", function() box:Hide() end)
 
     info = ns.W.Label(box, "", "GameFontDisableSmall")
-    info:SetPoint("TOPLEFT", 16, -94)
+    info:SetPoint("TOPLEFT", 16, -128)
 end
 
-function ns.ShowExport()
-    local ok, value, count = pcall(ns.ExportString)
+-- keep: the time frame chosen in the window; otherwise it opens on 30 days.
+function ns.ShowExport(keep)
+    if not keep then days = 30 end
+    local ok, value, count = pcall(ns.ExportString, days > 0 and days or nil)
     if not ok then
         geterrorhandler()(value)
         ns.Print(L["The journal couldn't be exported."])
@@ -255,6 +282,11 @@ function ns.ShowExport()
     text:SetText(value)
     text:HighlightText()
     text:SetFocus()
-    info:SetText(string.format(L["%d catches, %d KB"], count, math.ceil(#value / 1024)))
+    span.Refresh()
+    if #value > PASTE_MAX then
+        info:SetText("|cffff6060" .. L["Too big for one paste. Choose the last 90 days."] .. "|r")
+    else
+        info:SetText(string.format(L["%d catches, %d KB"], count, math.ceil(#value / 1024)))
+    end
     box:Show()
 end

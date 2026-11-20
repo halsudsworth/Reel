@@ -304,6 +304,9 @@ L["Your journal"] = "Il tuo diario"
 L["Ctrl+C to copy, then paste it at halsudsworth.com/paste"] = "Ctrl+C per copiare, poi incollalo su halsudsworth.com/paste"
 L["The journal couldn't be exported."] = "Impossibile esportare il diario."
 L["%d catches, %d KB"] = "%d catture, %d KB"
+L["Last 30 days"] = "Ultimi 30 giorni"
+L["Last 90 days"] = "Ultimi 90 giorni"
+L["Too big for one paste. Choose the last 90 days."] = "Troppo grande per un solo incolla. Scegli gli ultimi 90 giorni."
 
 -- Calendar.lua
 L["Most %s"] = "Il più possibile: %s"

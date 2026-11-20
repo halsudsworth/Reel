@@ -304,6 +304,9 @@ L["Your journal"] = "你的日誌"
 L["Ctrl+C to copy, then paste it at halsudsworth.com/paste"] = "按 Ctrl+C 複製，然後貼到 halsudsworth.com/paste"
 L["The journal couldn't be exported."] = "日誌無法匯出。"
 L["%d catches, %d KB"] = "%d條漁獲，%d KB"
+L["Last 30 days"] = "最近30天"
+L["Last 90 days"] = "最近90天"
+L["Too big for one paste. Choose the last 90 days."] = "太大，無法一次貼上。請選擇最近90天。"
 
 -- Calendar.lua
 L["Most %s"] = "釣最多%s"

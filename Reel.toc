@@ -37,6 +37,7 @@ Log.lua
 Stats.lua
 Cooking.lua
 Casting.lua
+SoundData.lua
 Sound.lua
 Skill.lua
 Lure.lua

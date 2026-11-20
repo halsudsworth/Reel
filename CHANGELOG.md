@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+- New: choose what you hear while fishing on the Sound page. Everything leaves your sound alone, The world mutes music, voices, footsteps, other players and the interface but keeps the place and its creatures, Bobber only mutes all of it, and Custom is your own picks from the seven groups. Whispers, invites, ready checks and raid warnings still come through unless you turn that off. Your sound comes back as it was when you stop fishing.
+- The Sound page's old "Quiet while fishing" checkboxes are now part of those groups. Everyone starts on The world.
+- Zone fish lists now take in what players catch, from journals pasted on halsudsworth.com. Hillsbrad Foothills adds Raw Sagefish, Oily Blackmouth, Raw Rainbow Fin Albacore and Firefin Snapper, caught on Southshore's coast.
+
 ## 1.6.0
 
 - New: the Journal's Records tab is now two tabs, Collection and Feats, laid out by category like the game's achievements. Collection shows the trophy fish, treasures, bloated fish, pools and wreckage, and the Extravaganza fish, each with its name and where to look. Feats has 23 feats, and each opens to show what's left.

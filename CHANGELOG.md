@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.4
+
+- No more "No player named ... is currently playing." lines in chat when another R.E.E.L. player logs off just as your R.E.E.L. says hello back.
+
 ## 1.8.3
 
 - R.E.E.L. now joins a hidden chat channel, ReelFishers, so copies of R.E.E.L. can find each other for features coming later. Nothing from it shows in your chat.

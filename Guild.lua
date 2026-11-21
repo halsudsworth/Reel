@@ -87,12 +87,32 @@ local function ChannelId()
     return id and id > 0 and id or nil
 end
 
+-- An answer to someone who has just logged off makes the game print "No player named 'X' is
+-- currently playing." (seen in game 2026-11-21). That line is hidden for a name R.E.E.L. whispered
+-- in the last few seconds, and the miss is kept (channelSeen[name].missed).
+local whisperedAt = {} -- name -> GetTime() of our last whisper
+local NOT_FOUND = ERR_CHAT_PLAYER_NOT_FOUND_S or "No player named '%s' is currently playing."
+local NOT_FOUND_PATTERN = "^" .. NOT_FOUND:gsub("[%%%(%)%.%+%-%*%?%[%]%^%$]", "%%%0"):gsub("%%%%s", "(.+)") .. "$"
+local MISS_WINDOW = 10
+
 local function Answer(sender, kind)
     local now = GetTime()
     if repliedAt[sender] and now - repliedAt[sender] <= REPLY_GAP then return end
     repliedAt[sender] = now
-    C_Timer.After(math.random() * REPLY_JITTER, function() Send(kind, "WHISPER", sender) end)
+    C_Timer.After(math.random() * REPLY_JITTER, function()
+        whisperedAt[sender] = GetTime()
+        Send(kind, "WHISPER", sender)
+    end)
 end
+
+local function HideMissedWhisper(_, _, msg)
+    local name = type(msg) == "string" and msg:match(NOT_FOUND_PATTERN)
+    if not (name and whisperedAt[name] and GetTime() - whisperedAt[name] < MISS_WINDOW) then return false end
+    local seen = ReelDB and ReelDB.channelSeen and ReelDB.channelSeen[name]
+    if seen then seen.missed = (seen.missed or 0) + 1 end
+    return true
+end
+if ChatFrame_AddMessageEventFilter then ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", HideMissedWhisper) end
 
 ns.On("CHAT_MSG_ADDON", function(prefix, text, channel, sender)
     if prefix ~= PREFIX or not ReelDB or not sender then return end

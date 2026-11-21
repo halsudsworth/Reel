@@ -891,7 +891,7 @@ local function HideTip() GameTooltip:Hide() end
 
 -- The trophy fish by kind, lightest first, worked out from FishData's "26 Pound Catfish" names.
 -- The kinds' names are in Locale.lua.
-local TROPHY_KINDS = { "Catfish", "Mud Snapper", "Lobster", "Salmon", "Redgill", "Yellowtail" }
+local TROPHY_KINDS = { "Catfish", "Mud Snapper", "Lobster", "Salmon", "Redgill", "Yellowtail", "Mightfish" }
 local trophyKinds -- list of { kind, list = { { id, pounds, name }, ... } }
 local function TrophyKinds()
     if trophyKinds then return trophyKinds end
@@ -1371,9 +1371,13 @@ local function DrawTrophies(u, view, wall)
         end
         Txt(c, string.format(L["%d of %d"], row.have, #row.list), 10, C.dim, 186, y - 23, 38)
         local n = #row.list
+        -- the weights fill the room right of the "0 of 7" (which ends at 224); narrower tags when a
+        -- long row (Lobster's seven) wouldn't fit at this window size
+        local step = math.min(TAG_W + TAG_GAP, math.floor((pw - 228 + TAG_GAP) / n))
         for j, t in ipairs(row.list) do
             local tag = c.Get("tag")
-            tag:SetPoint("TOPLEFT", pw - (n - j + 1) * (TAG_W + TAG_GAP) + TAG_GAP, y - 19)
+            tag:SetWidth(step - TAG_GAP)
+            tag:SetPoint("TOPLEFT", pw - (n - j + 1) * step + TAG_GAP, y - 19)
             SetTag(tag, t, view.fish[t.id] ~= nil, row.top == t)
         end
         y = y - KIND_H

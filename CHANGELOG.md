@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.2
+
+- Ten more trophy fish on the Collection's trophy wall: 47, 53, 59 and 68 Pound Yellowtail, 15, 19 and 21 Pound Lobster, and a new Mightfish row with 70, 85 and 92 Pound Mightfish. One of each now asks for all seven kinds.
+
 ## 1.8.1
 
 - Your journal now keeps loading however long you fish. The game can't load a saved file with more than about 262,000 different values, and until now nearly every catch added one, so a journal of a few hundred thousand catches would have failed to load and been lost. Catch times are now saved as the gaps between catches, and if a journal ever gets near the limit, its oldest catches are packed into compact blocks. Nothing is dropped.

@@ -228,6 +228,10 @@ L["Camp buff"] = "Beneficio de campamento"
 L["Camp"] = "Campamento"
 L["%s ready in %s"] = "%s disponible en %s"
 L["No camp buff"] = "Sin beneficio de campamento"
+L["Bag space"] = "Espacio en bolsas"
+L["Bags"] = "Bolsas"
+L["%d free"] = "%d libres"
+L["Full"] = "Llenas"
 
 -- Derby.lua
 L["Derby counter test mode %s."] = "Modo de prueba del contador del derbi: %s."

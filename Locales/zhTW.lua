@@ -228,6 +228,10 @@ L["Camp buff"] = "營地增益"
 L["Camp"] = "營地"
 L["%s ready in %s"] = "%s還需%s就緒"
 L["No camp buff"] = "無營地增益"
+L["Bag space"] = "背包空間"
+L["Bags"] = "背包"
+L["%d free"] = "剩餘%d"
+L["Full"] = "已滿"
 
 -- Derby.lua
 L["Derby counter test mode %s."] = "大賽計數測試模式%s。"

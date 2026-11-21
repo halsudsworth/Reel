@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.0
+
+- New: Bags on the fishing bar shows how many bag slots you have free while you fish. It turns amber at 5 or fewer and shows a red "Full" when there are none. Only bags that can hold fish count, so quivers, ammo pouches and soul bags are left out. Turn it off with Bag space on the Bar page.
+
 ## 1.8.4
 
 - No more "No player named ... is currently playing." lines in chat when another R.E.E.L. player logs off just as your R.E.E.L. says hello back.

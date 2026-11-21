@@ -46,6 +46,7 @@ OneKey.lua
 Buffs.lua
 Luremaster.lua
 Camp.lua
+Bags.lua
 Derby.lua
 CleanView.lua
 Immersion.lua

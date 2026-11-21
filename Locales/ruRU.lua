@@ -228,6 +228,10 @@ L["Camp buff"] = "Эффект лагеря"
 L["Camp"] = "Лагерь"
 L["%s ready in %s"] = "%s: готово через %s"
 L["No camp buff"] = "Нет эффекта лагеря"
+L["Bag space"] = "Место в сумках"
+L["Bags"] = "Сумки"
+L["%d free"] = "%d свободно"
+L["Full"] = "Полные"
 
 -- Derby.lua
 L["Derby counter test mode %s."] = "Тестовый режим счётчика дерби: %s."

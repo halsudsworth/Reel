@@ -345,6 +345,11 @@ L["Camp buff"] = "Camp buff"
 L["Camp"] = "Camp"
 L["%s ready in %s"] = "%s ready in %s"
 L["No camp buff"] = "No camp buff"
+-- Bags.lua
+L["Bag space"] = "Bag space"
+L["Bags"] = "Bags"
+L["%d free"] = "%d free"
+L["Full"] = "Full"
 
 -- Derby.lua
 L["Derby counter test mode %s."] = "Derby counter test mode %s."

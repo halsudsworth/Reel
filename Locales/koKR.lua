@@ -228,6 +228,10 @@ L["Camp buff"] = "야영 효과"
 L["Camp"] = "야영"
 L["%s ready in %s"] = "%s 준비까지 %s"
 L["No camp buff"] = "야영 효과 없음"
+L["Bag space"] = "가방 공간"
+L["Bags"] = "가방"
+L["%d free"] = "%d칸 남음"
+L["Full"] = "가득 참"
 
 -- Derby.lua
 L["Derby counter test mode %s."] = "낚시 대회 카운터 테스트 모드 %s."

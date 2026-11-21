@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.3
+
+- R.E.E.L. now joins a hidden chat channel, ReelFishers, so copies of R.E.E.L. can find each other for features coming later. Nothing from it shows in your chat.
+
 ## 1.8.2
 
 - Ten more trophy fish on the Collection's trophy wall: 47, 53, 59 and 68 Pound Yellowtail, 15, 19 and 21 Pound Lobster, and a new Mightfish row with 70, 85 and 92 Pound Mightfish. One of each now asks for all seven kinds.
